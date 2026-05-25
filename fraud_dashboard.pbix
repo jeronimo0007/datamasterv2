@@ -1,0 +1,78 @@
+{
+  "version": "1.0",
+  "config": {
+    "datasources": [
+      {
+        "type": "synapse",
+        "server": "synws-fraud-prod.sql.azuresynapse.net",
+        "database": "fraud_detection",
+        "authentication": "OAuth2"
+      }
+    ],
+    "queries": [
+      {
+        "name": "fraud_metrics",
+        "query": "
+SELECT 
+    DATE(timestamp) as transaction_date,
+    COUNT(*) as total_transactions,
+    SUM(CASE WHEN is_fraud = 1 THEN 1 ELSE 0 END) as fraudulent_transactions,
+    AVG(fraud_score) as avg_fraud_score,
+    SUM(CASE WHEN is_fraud = 1 THEN amount ELSE 0 END) as fraudulent_amount,
+    COUNT(DISTINCT user_id) as unique_users
+FROM 
+    fraud_transactions
+WHERE 
+    timestamp >= DATEADD(day, -30, GETDATE())
+GROUP BY 
+    DATE(timestamp)
+ORDER BY 
+    transaction_date DESC
+        "
+      },
+      {
+        "name": "fraud_by_category",
+        "query": "
+SELECT 
+    merchant_category,
+    COUNT(*) as total_transactions,
+    SUM(CASE WHEN is_fraud = 1 THEN 1 ELSE 0 END) as fraudulent_count,
+    AVG(CASE WHEN is_fraud = 1 THEN amount ELSE NULL END) as avg_fraud_amount
+FROM 
+    fraud_transactions
+WHERE 
+    timestamp >= DATEADD(day, -7, GETDATE())
+GROUP BY 
+    merchant_category
+HAVING 
+    COUNT(*) > 100
+ORDER BY 
+    fraudulent_count DESC
+        "
+      }
+    ],
+    "visuals": [
+      {
+        "type": "linechart",
+        "title": "Taxa de Fraude Diária",
+        "xAxis": "transaction_date",
+        "yAxis": ["fraudulent_transactions", "total_transactions"],
+        "secondaryYAxis": "avg_fraud_score"
+      },
+      {
+        "type": "treemap",
+        "title": "Fraudes por Categoria",
+        "category": "merchant_category",
+        "values": ["fraudulent_count", "avg_fraud_amount"]
+      },
+      {
+        "type": "gauge",
+        "title": "Taxa de Fraude Atual",
+        "value": "fraudulent_transactions / total_transactions",
+        "min": 0,
+        "max": 0.05,
+        "thresholds": [0.01, 0.02]
+      }
+    ]
+  }
+}

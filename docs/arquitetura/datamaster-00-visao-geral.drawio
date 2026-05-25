@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-05-25T15:09:29.000Z" agent="DataMaster" version="22.1.0" type="device" pages="1">
+  <diagram id="7497f85c-a30a-479b-8714-6d27d0193e96" name="00-Visao-Geral">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1180" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="2" parent="1"/>
+        <mxCell id="3" value="&lt;b&gt;DataMaster — Arquitetura completa&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Batch (engenharia de dados) separado do Online (tempo real)&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#323130;strokeColor=none;fontColor=#FFFFFF;fontFamily=Segoe UI;fontSize=15;align=center;verticalAlign=middle;" vertex="1" parent="2">
+          <mxGeometry x="0" y="0" width="1600" height="44" as="geometry"/>
+        </mxCell>
+        <mxCell id="4" value="&lt;b&gt;BATCH — Engenharia de dados&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Medalhão Bronze → Prata → Ouro + perfis Mongo&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#B8860B;strokeColor=#B8860B;fontColor=#FFFFFF;fontFamily=Segoe UI;fontSize=16;align=left;spacingLeft=12;verticalAlign=middle;" vertex="1" parent="2">
+          <mxGeometry x="24" y="56" width="1552" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="5" value="" style="rounded=0;fillColor=#FFFBEB;strokeColor=#D4A017;strokeWidth=3;" vertex="1" parent="2">
+          <mxGeometry x="24" y="108" width="1552" height="248" as="geometry"/>
+        </mxCell>
+        <mxCell id="6" value="&lt;b&gt;Medalhão (lake)&lt;/b&gt; — camadas de maturidade do dado" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E1DFDD;strokeColor=#8A8886;fontSize=10;fontFamily=Segoe UI;fontStyle=1;align=center;" vertex="1" parent="5">
+          <mxGeometry x="160" y="30" width="514" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="7" value="&lt;div style=&quot;background:#0078D4;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;1&lt;/div&gt;&lt;br&gt;&lt;b&gt;Fontes&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Core · APIs
+JSON histórico&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F3F2F1;strokeColor=#A19F9D;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="5">
+          <mxGeometry x="28" y="52" width="118" height="78" as="geometry"/>
+        </mxCell>
+        <mxCell id="8" value="&lt;div style=&quot;background:#0078D4;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;2&lt;/div&gt;&lt;br&gt;&lt;b&gt;Bronze&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Bruto · landing
+ADLS · MinIO&lt;/font&gt;" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E1DFDD;strokeColor=#8A8886;strokeWidth=2;whiteSpace=wrap;html=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="5">
+          <mxGeometry x="160" y="52" width="118" height="78" as="geometry"/>
+        </mxCell>
+        <mxCell id="9" value="&lt;div style=&quot;background:#0078D4;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;3&lt;/div&gt;&lt;br&gt;&lt;b&gt;Prata&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Limpeza · DQ
+dedup · enrich&lt;/font&gt;" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E1DFDD;strokeColor=#8A8886;strokeWidth=2;whiteSpace=wrap;html=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="5">
+          <mxGeometry x="292" y="52" width="118" height="78" as="geometry"/>
+        </mxCell>
+        <mxCell id="10" value="&lt;div style=&quot;background:#0078D4;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;4&lt;/div&gt;&lt;br&gt;&lt;b&gt;Ouro&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Features · KPIs
+tabela ML&lt;/font&gt;" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E1DFDD;strokeColor=#8A8886;strokeWidth=2;whiteSpace=wrap;html=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="5">
+          <mxGeometry x="424" y="52" width="118" height="78" as="geometry"/>
+        </mxCell>
+        <mxCell id="11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="5" source="7" target="8">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="5" source="8" target="9">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="5" source="9" target="10">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="14" value="&lt;div style=&quot;background:#0078D4;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;5&lt;/div&gt;&lt;br&gt;&lt;b&gt;Dataprep perfis&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Agrega
+user_id&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#605E5C;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="5">
+          <mxGeometry x="556" y="52" width="118" height="78" as="geometry"/>
+        </mxCell>
+        <mxCell id="15" value="&lt;div style=&quot;background:#0078D4;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;6&lt;/div&gt;&lt;br&gt;&lt;b&gt;MongoDB&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;user_profiles
+(serving)&lt;/font&gt;" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E1DFDD;strokeColor=#8A8886;strokeWidth=2;whiteSpace=wrap;html=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="5">
+          <mxGeometry x="688" y="52" width="118" height="78" as="geometry"/>
+        </mxCell>
+        <mxCell id="16" value="derivado" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="5" source="10" target="14">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="17" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="5" source="14" target="15">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="18" value="atalho demo" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 6;" edge="1" parent="5" source="7" target="14">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="19" value="&lt;b&gt;Bronze&lt;/b&gt; = como veio · &lt;b&gt;Prata&lt;/b&gt; = confiável · &lt;b&gt;Ouro&lt;/b&gt; = pronto para negócio/ML  ·  Perfis Mongo também via &lt;code&gt;batch_dataprep_mongo.py&lt;/code&gt; (atalho a partir do JSON)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D4A017;strokeWidth=1;fontFamily=Segoe UI;fontSize=10;align=left;spacingLeft=6;" vertex="1" parent="5">
+          <mxGeometry x="28" y="144" width="1448" height="36" as="geometry"/>
+        </mxCell>
+        <mxCell id="20" value="&lt;b&gt;Azure:&lt;/b&gt; ADLS bronze/silver/gold  ·  &lt;b&gt;AWS:&lt;/b&gt; S3 prefixos  ·  &lt;b&gt;Local:&lt;/b&gt; data/lake/ · MinIO · Spark · batch_dataprep_mongo.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#D4A017;fontFamily=Segoe UI;fontSize=10;align=center;" vertex="1" parent="5">
+          <mxGeometry x="20" y="200" width="1512" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="21" value="&lt;b&gt;↓ MongoDB user_profiles&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;A API online consulta o perfil preparado no batch&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#107C10;strokeWidth=3;fontFamily=Segoe UI;fontSize=12;align=center;" vertex="1" parent="2">
+          <mxGeometry x="24" y="368" width="1552" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="22" value="&lt;b&gt;ONLINE — Tempo real&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:11px&quot;&gt;Cada transação · decisão em menos de 2 segundos&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#0078D4;strokeColor=#0078D4;fontColor=#FFFFFF;fontFamily=Segoe UI;fontSize=16;align=left;spacingLeft=12;verticalAlign=middle;" vertex="1" parent="2">
+          <mxGeometry x="24" y="438" width="1552" height="48" as="geometry"/>
+        </mxCell>
+        <mxCell id="23" value="" style="rounded=0;fillColor=#F0F7FC;strokeColor=#5EA0EF;strokeWidth=3;" vertex="1" parent="2">
+          <mxGeometry x="24" y="490" width="1552" height="270" as="geometry"/>
+        </mxCell>
+        <mxCell id="24" value="&lt;b&gt;← Batch&lt;/b&gt;&lt;br&gt;MongoDB" style="rounded=1;fillColor=#FFFBEB;strokeColor=#D4A017;strokeWidth=2;dashed=1;dashPattern=6 4;fontFamily=Segoe UI;fontSize=10;align=center;" vertex="1" parent="23">
+          <mxGeometry x="24" y="12" width="92" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="25" value="&lt;div style=&quot;background:#0078D4;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;1&lt;/div&gt;&lt;br&gt;&lt;b&gt;Canal&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Console :3333
+Dashboard · Swagger&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F3F2F1;strokeColor=#A19F9D;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="23">
+          <mxGeometry x="36" y="44" width="150" height="82" as="geometry"/>
+        </mxCell>
+        <mxCell id="26" value="&lt;div style=&quot;background:#0078D4;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;2&lt;/div&gt;&lt;br&gt;&lt;b&gt;API Java&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;POST /analyze
+:8080&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#605E5C;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="23">
+          <mxGeometry x="208" y="44" width="150" height="82" as="geometry"/>
+        </mxCell>
+        <mxCell id="27" value="&lt;div style=&quot;background:#0078D4;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;3&lt;/div&gt;&lt;br&gt;&lt;b&gt;Decisão&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Score + perfil
+MongoDB&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#605E5C;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="23">
+          <mxGeometry x="380" y="44" width="150" height="82" as="geometry"/>
+        </mxCell>
+        <mxCell id="28" value="&lt;div style=&quot;background:#0078D4;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;4&lt;/div&gt;&lt;br&gt;&lt;b&gt;Painel&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Streamlit
+:8501&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#605E5C;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="23">
+          <mxGeometry x="552" y="44" width="150" height="82" as="geometry"/>
+        </mxCell>
+        <mxCell id="29" value="&lt;div style=&quot;background:#0078D4;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;5&lt;/div&gt;&lt;br&gt;&lt;b&gt;Analista&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Liberar · Chat
+DeepSeek&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#605E5C;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="23">
+          <mxGeometry x="724" y="44" width="150" height="82" as="geometry"/>
+        </mxCell>
+        <mxCell id="30" value="POST /analyze" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="23" source="25" target="26">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="31" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="23" source="26" target="27">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="32" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="23" source="27" target="28">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="33" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="23" source="28" target="29">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="34" value="&lt;b&gt;Kafka :9092&lt;/b&gt; (opcional)&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Só para demo de streaming / Event Hubs — &lt;b&gt;não&lt;/b&gt; é o caminho do console nem do painel nesta stack&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3F2F1;strokeColor=#A19F9D;strokeWidth=1;dashed=1;dashPattern=6 4;fontSize=11;fontFamily=Segoe UI;align=left;spacingLeft=8;" vertex="1" parent="23">
+          <mxGeometry x="36" y="144" width="520" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="35" value="consulta perfil" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 6;" edge="1" parent="23" source="24" target="26">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="36" value="&lt;b&gt;Demo real:&lt;/b&gt; Console/Dashboard chamam a API direto  ·  Kafka = narrativa Azure (opcional)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#5EA0EF;fontFamily=Segoe UI;fontSize=10;align=center;" vertex="1" parent="23">
+          <mxGeometry x="20" y="195" width="1512" height="28" as="geometry"/>
+        </mxCell>
+        <mxCell id="37" value="Apresentação: use esta aba · Detalhes: abas 01-Batch e 02-Online · Mapa: aba 03" style="rounded=0;fillColor=#F3F2F1;strokeColor=none;fontFamily=Segoe UI;fontSize=11;align=center;fontColor=#666;" vertex="1" parent="2">
+          <mxGeometry x="24" y="1132" width="1552" height="32" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+</mxfile>

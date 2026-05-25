@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Gerador de Dados — DataMaster</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div>
+        <h1>Gerador de transações</h1>
+        <p class="subtitle">Gerencia <code>generate_data.py</code> e o loop de demo</p>
+      </div>
+      <div class="api-pill" id="apiStatus">API: verificando…</div>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <h2>Gerar JSON</h2>
+        <form id="formGenerate" class="form">
+          <label>
+            Quantidade
+            <input type="number" id="num" min="1" max="100000" value="100" />
+          </label>
+          <label>
+            Taxa de fraude no JSON (0–1)
+            <input type="number" id="fraudRate" min="0" max="1" step="0.01" value="0.05" />
+          </label>
+          <label>
+            Arquivo de saída
+            <input type="text" id="output" value="data/transactions.json" />
+          </label>
+          <button type="submit" class="btn primary">Gerar arquivo</button>
+        </form>
+      </section>
+
+      <section class="card">
+        <h2>Arquivo atual</h2>
+        <p class="hint">Estatísticas do JSON (rótulo <code>is_fraud</code> do simulador).</p>
+        <div id="fileStats" class="stats">Nenhum arquivo carregado ainda.</div>
+        <button type="button" class="btn" id="btnRefreshStats">Atualizar estatísticas</button>
+      </section>
+
+      <section class="card">
+        <h2>Enviar para API Java</h2>
+        <form id="formBatch" class="form">
+          <label>
+            URL da API
+            <input type="url" id="apiUrl" value="http://localhost:8080" />
+          </label>
+          <label>
+            Linhas do JSON no <code>/batch</code>
+            <input type="number" id="batchSlice" min="1" max="500" value="20" />
+          </label>
+          <button type="submit" class="btn primary">Enviar lote</button>
+        </form>
+      </section>
+
+      <section class="card card-wide">
+        <h2>Demo em loop (<code>demo_loop.sh</code>)</h2>
+        <form id="formLoop" class="form form-inline">
+          <label>
+            Intervalo (s)
+            <input type="number" id="intervalSec" min="5" value="60" />
+          </label>
+          <label>
+            Máx. ciclos (0 = ∞)
+            <input type="number" id="maxCycles" min="0" value="5" />
+          </label>
+          <label>
+            GENERATE_N
+            <input type="number" id="generateN" min="1" max="10000" value="80" />
+          </label>
+          <label>
+            BATCH_SLICE
+            <input type="number" id="batchSliceLoop" min="1" max="500" value="20" />
+          </label>
+        </form>
+        <div class="actions">
+          <button type="button" class="btn primary" id="btnLoopStart">Iniciar loop</button>
+          <button type="button" class="btn danger" id="btnLoopStop">Parar loop</button>
+        </div>
+        <pre id="loopLogs" class="logs">Logs do loop aparecem aqui…</pre>
+      </section>
+    </main>
+
+    <div id="toast" class="toast hidden"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

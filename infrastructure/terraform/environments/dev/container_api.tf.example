@@ -1,0 +1,111 @@
+# Exemplo opcional: Azure Container Registry + Container Apps para a API (FastAPI / Dockerfile.api)
+# Uso: copie para container_api.tf na mesma pasta e rode terraform plan / apply.
+#
+# Requer Terraform provider azurerm ~> 3.67 (Container App estável).
+# Imagem inicial: público quickstart; após primeiro docker push para o ACR, atualize
+# o bloco `image` abaixo ou faça az containerapp update (GitHub Actions).
+
+locals {
+  # Nome do ACR: 5–50 caracteres, só [a-z0-9], único globalmente — personalize o sufixo se der conflito.
+  acr_name = substr(replace("${var.project_name}acr01", "-", ""), 0, 50)
+}
+
+resource "azurerm_log_analytics_workspace" "api" {
+  name                = "${var.project_name}-api-logs"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+
+  tags = azurerm_resource_group.main.tags
+}
+
+resource "azurerm_container_app_environment" "api" {
+  name                       = "${var.project_name}-cae"
+  location                   = azurerm_resource_group.main.location
+  resource_group_name        = azurerm_resource_group.main.name
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.api.id
+
+  tags = azurerm_resource_group.main.tags
+}
+
+resource "azurerm_container_registry" "api" {
+  name                = substr(local.acr_name, 0, 50)
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  sku                 = "Basic"
+  admin_enabled       = true
+
+  tags = azurerm_resource_group.main.tags
+}
+
+resource "azurerm_container_app" "api" {
+  name                         = "${var.project_name}-api"
+  container_app_environment_id = azurerm_container_app_environment.api.id
+  resource_group_name          = azurerm_resource_group.main.name
+  revision_mode                = "Single"
+
+  secret {
+    name  = "registry-password"
+    value = azurerm_container_registry.api.admin_password
+  }
+
+  registry {
+    server               = azurerm_container_registry.api.login_server
+    username             = azurerm_container_registry.api.admin_username
+    password_secret_name = "registry-password"
+  }
+
+  template {
+    min_replicas = 0
+    max_replicas = 3
+
+    container {
+      name   = "api"
+      # Imagem placeholder (porta 8080). Após push da sua API, o CI troca a revisão ou altere para:
+      # image = "${azurerm_container_registry.api.login_server}/fraud-api:latest"
+      # e defina target_port = 8000 no ingress.
+      image  = "mcr.microsoft.com/k8se/quickstart:latest"
+      cpu    = 0.5
+      memory = "1Gi"
+
+      env {
+        name  = "PYTHONUNBUFFERED"
+        value = "1"
+      }
+    }
+  }
+
+  ingress {
+    external_enabled = true
+    target_port      = 8080
+    transport        = "auto"
+
+    traffic_weight {
+      latest_revision = true
+      percentage      = 100
+    }
+  }
+
+  tags = azurerm_resource_group.main.tags
+
+  lifecycle {
+    ignore_changes = [
+      # Após CI trocar a imagem, não reverte para quickstart no próximo apply:
+      template[0].container[0].image,
+    ]
+  }
+}
+
+output "container_registry_login_server" {
+  value = azurerm_container_registry.api.login_server
+}
+
+output "container_app_fqdn" {
+  value       = try(azurerm_container_app.api.latest_revision_fqdn, "")
+  description = "FQDN da última revisão; teste https://<valor>/health após publicar fraud-api"
+}
+
+output "container_app_name" {
+  value = azurerm_container_app.api.name
+}

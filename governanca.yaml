@@ -1,0 +1,21 @@
+# Configuração de regras DQ
+data_quality_rules:
+  - column: amount
+    rules:
+      - type: not_null
+        severity: error
+      - type: range
+        min: 0
+        max: 1000000
+        severity: warning
+  
+  - column: transaction_id
+    rules:
+      - type: uniqueness
+        severity: error
+  
+  - column: email
+    rules:
+      - type: regex
+        pattern: "^[^@]+@[^@]+\.[^@]+$"
+        severity: warning

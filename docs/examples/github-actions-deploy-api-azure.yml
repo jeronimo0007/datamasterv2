@@ -1,0 +1,83 @@
+# Copie para: .github/workflows/deploy-api-azure.yml
+# Pré-requisitos: ACR + Container App criados (Terraform container_api.tf ou portal).
+# Secrets (OIDC recomendado): AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID
+# Opcional: ajuste nomes em env:.
+
+name: Deploy API → Azure (ACR + Container Apps)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "Dockerfile.api"
+      - "requirements-demo.txt"
+      - "src/**"
+      - "config/**"
+      - "models/**"
+      - "scripts/**"
+      - "governanca.yaml"
+  workflow_dispatch: {}
+
+env:
+  AZURE_RESOURCE_GROUP: rg-fraud-detection-dev
+  CONTAINER_APP_NAME: fraud-detection-api
+  ACR_NAME: frauddetectionacr01
+  IMAGE_NAME: fraud-api
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Login no ACR
+        run: az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build e push da imagem
+        id: build
+        run: |
+          TAG="${{ github.sha }}"
+          REG="${{ env.ACR_NAME }}.azurecr.io"
+          FULL="$REG/${{ env.IMAGE_NAME }}:${TAG}"
+          docker build -f Dockerfile.api -t "$FULL" -t "$REG/${{ env.IMAGE_NAME }}:latest" .
+          docker push "$FULL"
+          docker push "$REG/${{ env.IMAGE_NAME }}:latest"
+          echo "image_uri=$REG/${{ env.IMAGE_NAME }}:latest" >> "$GITHUB_OUTPUT"
+
+      - name: Atualizar Container App (nova imagem)
+        run: |
+          az containerapp update \
+            --name "${{ env.CONTAINER_APP_NAME }}" \
+            --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --image "${{ steps.build.outputs.image_uri }}"
+
+      # A API FastAPI (Dockerfile.api) expõe a porta 8000; o placeholder quickstart usa 8080.
+      - name: Ingress na porta 8000 (Uvicorn / FastAPI)
+        run: |
+          az containerapp ingress update \
+            --name "${{ env.CONTAINER_APP_NAME }}" \
+            --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --target-port 8000
+
+      - name: Mostrar URL pública
+        run: |
+          FQDN=$(az containerapp show \
+            --name "${{ env.CONTAINER_APP_NAME }}" \
+            --resource-group "${{ env.AZURE_RESOURCE_GROUP }}" \
+            --query "properties.configuration.ingress.fqdn" -o tsv)
+          echo "API: https://${FQDN}"
+          echo "Health: https://${FQDN}/health"
+          echo "Docs: https://${FQDN}/docs"

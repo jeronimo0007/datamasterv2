@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DataMaster — Início</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #060a12;
+      --bg-elevated: rgba(15, 23, 42, 0.65);
+      --border: rgba(148, 163, 184, 0.12);
+      --accent: #22d3ee;
+      --accent-2: #a78bfa;
+      --gold: #fcd34d;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --ok: #34d399;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      min-height: 100vh;
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(34, 211, 238, 0.15), transparent),
+        radial-gradient(ellipse 60% 40% at 90% 20%, rgba(167, 139, 250, 0.12), transparent),
+        radial-gradient(ellipse 50% 30% at 50% 100%, rgba(252, 211, 77, 0.06), transparent);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.25);
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      margin-bottom: 1.25rem;
+    }
+    h1 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(2.4rem, 6vw, 3.5rem);
+      font-weight: 400;
+      line-height: 1.15;
+      margin-bottom: 0.75rem;
+    }
+    h1 em { font-style: italic; color: var(--accent); }
+    .lead {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 36rem;
+      margin: 0 auto;
+    }
+    section { margin-bottom: 2.75rem; }
+    section h2 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    section h2 i { color: var(--accent); }
+    .steps {
+      display: grid;
+      gap: 0.75rem;
+    }
+    .step {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 1rem;
+      align-items: start;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.1rem 1.25rem;
+      backdrop-filter: blur(12px);
+    }
+    .step-num {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: var(--bg);
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .step strong { display: block; margin-bottom: 0.35rem; }
+    .step p { color: var(--muted); font-size: 0.92rem; margin: 0; }
+    pre {
+      margin-top: 0.65rem;
+      padding: 0.75rem 1rem;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 10px;
+      font-size: 0.8rem;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      color: #e2e8f0;
+    }
+    pre code { font-family: ui-monospace, "Cascadia Code", monospace; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+    a.card {
+      text-decoration: none;
+      color: inherit;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      backdrop-filter: blur(12px);
+    }
+    a.card:hover {
+      border-color: rgba(34, 211, 238, 0.45);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+    .card-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 0.25rem;
+    }
+    .card-icon.api { background: rgba(34, 211, 238, 0.15); color: var(--accent); }
+    .card-icon.dash { background: rgba(167, 139, 250, 0.15); color: var(--accent-2); }
+    .card-icon.data { background: rgba(252, 211, 77, 0.12); color: var(--gold); }
+    .card-icon.spark { background: rgba(251, 113, 133, 0.12); color: #fb7185; }
+    .card-icon.obs { background: rgba(52, 211, 153, 0.12); color: var(--ok); }
+    .card-icon.extra { background: rgba(148, 163, 184, 0.12); color: var(--muted); }
+    a.card h3 { font-size: 1.05rem; font-weight: 600; }
+    a.card .url {
+      font-size: 0.78rem;
+      color: var(--accent);
+      font-family: ui-monospace, monospace;
+      word-break: break-all;
+    }
+    a.card p.desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      flex: 1;
+    }
+    .card .arrow {
+      align-self: flex-end;
+      color: var(--muted);
+      font-size: 1.1rem;
+      transition: transform 0.2s, color 0.2s;
+    }
+    a.card:hover .arrow { color: var(--accent); transform: translateX(4px); }
+    .extras {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .extras a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.55rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: border-color 0.2s;
+    }
+    .extras a:hover { border-color: rgba(34, 211, 238, 0.4); color: var(--accent); }
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    footer code {
+      background: rgba(0,0,0,0.3);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+    .creds-box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2.75rem;
+      backdrop-filter: blur(12px);
+    }
+    .creds-box h2 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .creds-box h2 i { color: var(--gold); }
+    .creds-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    .creds-table th, .creds-table td {
+      text-align: left;
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .creds-table th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .creds-table tr:last-child td { border-bottom: none; }
+    .creds-table code {
+      font-family: ui-monospace, monospace;
+      font-size: 0.82rem;
+      color: var(--accent);
+    }
+    .creds-none { color: var(--muted); font-size: 0.85rem; }
+    a.card .login {
+      font-size: 0.78rem;
+      color: var(--gold);
+      font-family: ui-monospace, monospace;
+      margin-top: 0.15rem;
+    }
+    .batch-panel {
+      background: var(--bg-elevated);
+      border: 1px solid rgba(167, 139, 250, 0.35);
+      border-radius: var(--radius);
+      padding: 1.35rem 1.5rem;
+      margin-bottom: 2.75rem;
+      backdrop-filter: blur(12px);
+    }
+    .batch-panel h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .batch-panel h2 i { color: var(--accent-2); }
+    .batch-panel .sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; }
+    .batch-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+    .btn-batch {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.65rem 1.2rem;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #6366f1, #22d3ee);
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-batch:disabled { opacity: 0.55; cursor: wait; }
+    .batch-status {
+      margin-top: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      background: rgba(0,0,0,0.25);
+      font-size: 0.85rem;
+      font-family: ui-monospace, monospace;
+      min-height: 3rem;
+      white-space: pre-wrap;
+      color: var(--muted);
+    }
+    .batch-status.ok { color: var(--ok); border: 1px solid rgba(52, 211, 153, 0.35); }
+    .batch-status.err { color: #fb7185; border: 1px solid rgba(251, 113, 133, 0.35); }
+    .batch-status.run { color: var(--accent); border: 1px solid rgba(34, 211, 238, 0.35); }
+    .batch-log {
+      margin-top: 0.5rem;
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    @media (max-width: 600px) {
+      .wrap { padding: 1.5rem 1rem 3rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="badge"><i class="bi bi-shield-check"></i> Detecção de fraudes bancárias</div>
+      <h1>Bem-vindo ao <em>DataMaster</em></h1>
+      <p class="lead">
+        Hub local da demo: API Java, dashboard, gerador de dados, Spark e observabilidade.
+        Use esta página como ponto de partida na apresentação.
+      </p>
+    </header>
+
+    <div class="creds-box">
+      <h2><i class="bi bi-key"></i> Credenciais (demo local)</h2>
+      <table class="creds-table">
+        <thead>
+          <tr><th>Serviço</th><th>URL</th><th>Usuário</th><th>Senha / token</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>MinIO Console</td><td><code>:9001</code></td><td><code>minioadmin</code></td><td><code>minioadmin</code></td></tr>
+          <tr><td>Grafana</td><td><code>:3000</code></td><td><code>admin</code></td><td><code>admin</code></td></tr>
+          <tr><td>Jupyter</td><td><code>:8888</code></td><td>—</td><td><code>datamaster</code> (token)</td></tr>
+          <tr><td>MongoDB</td><td><code>:27017</code></td><td><code>admin</code></td><td><code>admin123</code></td></tr>
+          <tr><td>PostgreSQL</td><td><code>:5432</code></td><td><code>admin</code></td><td><code>admin123</code></td></tr>
+        </tbody>
+      </table>
+      <p class="creds-none" style="margin-top: 0.75rem;">API (:8080), Dashboard (:8501), Console (:3333), Spark UI (:18080) e Prometheus (:9090) não exigem login nesta demo.</p>
+    </div>
+
+    <section>
+      <h2><i class="bi bi-play-circle"></i> Como iniciar</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <div>
+            <strong>Abra o Docker Desktop</strong>
+            <p>Aguarde o daemon ficar pronto (<code>docker ps</code> sem erro).</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <div>
+            <strong>Fluxo completo (sempre)</strong>
+            <p>JSON → MongoDB <code>user_profiles</code> → lake Bronze/Silver/Gold:</p>
+            <pre><code>cd datamaster
+bash scripts/run_demo.sh</code></pre>
+            <p>Ou use o botão abaixo no portal (mesmo fluxo via console :3333).</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <div>
+            <strong>Só subir containers (sem dados)</strong>
+            <pre><code>docker compose up -d --build</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">4</span>
+          <div>
+            <strong>Postgres + Grafana (se volume antigo)</strong>
+            <pre><code>bash scripts/seed_postgres.sh
+docker compose up -d grafana</code></pre>
+            <p>Postgres: <code>transactions</code>, <code>fraud_alerts</code> · Grafana: pasta <strong>DataMaster</strong>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">5</span>
+          <div>
+            <strong>Explore pelos links abaixo</strong>
+            <p>Ordem na banca: fluxo completo → API <code>/analyze</code> → Dashboard → Grafana.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="batch-panel" id="batch-panel">
+      <h2><i class="bi bi-database-gear"></i> Fluxo completo (Mongo + Spark)</h2>
+      <p class="sub">Gera histórico, perfis em <code>user_profiles</code> e pipeline Medallion em <code>data/lake/</code>. A API usa o Mongo no <code>/analyze</code>.</p>
+      <div class="batch-actions">
+        <button type="button" class="btn-batch" id="btn-batch-prep" disabled>
+          <i class="bi bi-play-fill"></i> Executar fluxo completo
+        </button>
+        <span id="batch-profiles" style="color:var(--muted);font-size:0.88rem;">Perfis MongoDB: —</span>
+      </div>
+      <div class="batch-status" id="batch-status" role="status">Aguardando console (:3333) e API (:8080)…</div>
+      <div class="batch-log" id="batch-log" hidden></div>
+    </div>
+
+    <section>
+      <h2><i class="bi bi-grid-3x3-gap"></i> Aplicações</h2>
+      <div class="grid">
+        <a class="card" href="http://localhost:8080/swagger-ui.html" target="_blank" rel="noopener">
+          <div class="card-icon api"><i class="bi bi-braces"></i></div>
+          <h3>API Java</h3>
+          <span class="url">localhost:8080</span>
+          <p class="desc">Swagger — análise de fraude, batch, alertas, health e métricas.</p>
+          <span class="arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="card" href="http://localhost:8501" target="_blank" rel="noopener">
+          <div class="card-icon dash"><i class="bi bi-graph-up-arrow"></i></div>
+          <h3>Dashboard</h3>
+          <span class="url">localhost:8501</span>
+          <p class="desc">Streamlit — fraudes, liberar, opinião IA, chat DeepSeek e aba <strong>LGPD / mascaramento</strong>.</p>
+          <span class="arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="card" href="http://localhost:3333" target="_blank" rel="noopener">
+          <div class="card-icon data"><i class="bi bi-database-add"></i></div>
+          <h3>Console de dados</h3>
+          <span class="url">localhost:3333</span>
+          <p class="desc">Gerar JSON, enviar lote à API e rodar o loop de demonstração.</p>
+          <span class="arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="card" href="http://localhost:18080" target="_blank" rel="noopener">
+          <div class="card-icon spark"><i class="bi bi-lightning-charge"></i></div>
+          <h3>Spark UI</h3>
+          <span class="url">localhost:18080</span>
+          <p class="desc">Cluster master/workers — jobs do pipeline batch.</p>
+          <span class="arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="card" href="http://localhost:8888/?token=datamaster" target="_blank" rel="noopener">
+          <div class="card-icon spark"><i class="bi bi-journal-code"></i></div>
+          <h3>Jupyter</h3>
+          <span class="url">localhost:8888</span>
+          <span class="login">token: datamaster</span>
+          <p class="desc">Notebooks PySpark — sem senha, só o token na URL.</p>
+          <span class="arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="card" href="http://localhost:8080/health" target="_blank" rel="noopener">
+          <div class="card-icon api"><i class="bi bi-heart-pulse"></i></div>
+          <h3>Health API</h3>
+          <span class="url">/health</span>
+          <p class="desc">Confirme que a API está no ar antes da demo.</p>
+          <span class="arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2><i class="bi bi-bar-chart-line"></i> Observabilidade &amp; infra</h2>
+      <div class="grid">
+        <a class="card" href="http://localhost:9090" target="_blank" rel="noopener">
+          <div class="card-icon obs"><i class="bi bi-speedometer2"></i></div>
+          <h3>Prometheus</h3>
+          <span class="url">localhost:9090</span>
+          <p class="desc">Métricas da API e do próprio Prometheus.</p>
+          <span class="arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="card" href="http://localhost:3000" target="_blank" rel="noopener">
+          <div class="card-icon obs"><i class="bi bi-pie-chart"></i></div>
+          <h3>Grafana</h3>
+          <span class="url">localhost:3000</span>
+          <span class="login">admin / admin</span>
+          <p class="desc">Datasource Prometheus já configurado — dashboard <strong>DataMaster — API Fraude</strong> (pasta DataMaster).</p>
+          <span class="arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="card" href="http://localhost:9001" target="_blank" rel="noopener">
+          <div class="card-icon extra"><i class="bi bi-hdd-stack"></i></div>
+          <h3>MinIO Console</h3>
+          <span class="url">localhost:9001</span>
+          <span class="login">minioadmin / minioadmin</span>
+          <p class="desc">Console S3-compatível (object storage).</p>
+          <span class="arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+      </div>
+    </section>
+
+    <section>
+      <h2><i class="bi bi-diagram-3"></i> Diagramas de arquitetura (draw.io)</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num"><i class="bi bi-box-arrow-up-right"></i></span>
+          <div>
+            <strong>Abrir no diagrams.net</strong>
+            <p>
+              <a href="https://app.diagrams.net" target="_blank" rel="noopener" style="color:var(--accent);">app.diagrams.net</a>
+              → <strong>File → Open from Device</strong> → pasta <code>docs/arquitetura/</code> do projeto.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num">4b</span>
+          <div>
+            <strong>Ordem na banca (espelha o slide 4b)</strong>
+            <p>
+              Mermaid no projetor → depois zoom técnico:
+              <code>datamaster-04-docker-compose.drawio</code> (Docker) ou
+              <code>datamaster-02-online.drawio</code> (demo API) · encerramento:
+              <code>datamaster-azure-aws-local.drawio</code>.
+            </p>
+            <p style="color:var(--muted);font-size:0.88rem;margin-top:0.35rem;">
+              Índice completo: <code>docs/arquitetura/README.md</code> · regenerar:
+              <code>python3 scripts/generate_architecture_drawio.py</code>
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><i class="bi bi-easel"></i> Material da banca</h2>
+      <div class="extras">
+        <a href="banca.html"><i class="bi bi-collection-play"></i> Slides no projetor (banca.html)</a>
+        <a href="roteiro.html"><i class="bi bi-mic"></i> Cola verbal — o que falar (roteiro.html)</a>
+      </div>
+      <p style="color:var(--muted);font-size:0.88rem;margin-top:0.75rem;">
+        Scoring demo: Java <code>1.0.0-java-balanced</code> · fraude se score ≥ <strong>0,74</strong> (~5–15% em lote típico).
+      </p>
+    </section>
+
+    <section>
+      <h2><i class="bi bi-terminal"></i> Comandos úteis</h2>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num"><i class="bi bi-box"></i></span>
+          <div>
+            <strong>Fluxo completo (terminal)</strong>
+            <pre><code>bash scripts/run_demo.sh
+curl -s http://localhost:8080/api/v1/batch/profile-stats</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num"><i class="bi bi-box"></i></span>
+          <div>
+            <strong>Só Spark (se JSON já existe)</strong>
+            <pre><code>docker compose --profile spark-run run --rm spark-job</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <span class="step-num"><i class="bi bi-stop"></i></span>
+          <div>
+            <strong>Parar tudo</strong>
+            <pre><code>docker compose down</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  <script>
+(function () {
+  var CONSOLE = "http://localhost:3333";
+  var API = "http://localhost:8080";
+  var btn = document.getElementById("btn-batch-prep");
+  var statusEl = document.getElementById("batch-status");
+  var logEl = document.getElementById("batch-log");
+  var profilesEl = document.getElementById("batch-profiles");
+  var pollTimer = null;
+
+  function setStatus(cls, text) {
+    statusEl.className = "batch-status " + (cls || "");
+    statusEl.textContent = text;
+  }
+
+  async function refreshProfiles() {
+    try {
+      var r = await fetch(API + "/api/v1/batch/profile-stats");
+      if (!r.ok) return;
+      var j = await r.json();
+      var n = j.mongodb_profiles_loaded || 0;
+      profilesEl.textContent = "Perfis MongoDB: " + n + (j.batch_ready ? " ✓" : " (rode o batch)");
+      profilesEl.style.color = n > 0 ? "var(--ok)" : "";
+    } catch (e) {
+      profilesEl.textContent = "Perfis MongoDB: API offline";
+    }
+  }
+
+  async function pollBatchStatus() {
+    try {
+      var r = await fetch(CONSOLE + "/api/batch-prep/status?apiUrl=" + encodeURIComponent(API));
+      var j = await r.json();
+      if (j.running) {
+        setStatus("run", "Batch em execução…");
+        btn.disabled = true;
+        if (j.logs && j.logs.length) {
+          logEl.hidden = false;
+          logEl.textContent = j.logs.map(function (x) { return x.line; }).join("\n");
+        }
+        pollTimer = setTimeout(pollBatchStatus, 2000);
+        return;
+      }
+      btn.disabled = false;
+      if (j.ok === true) {
+        var n = (j.stats && j.stats.mongo && j.stats.mongo.mongodb_profiles_loaded) || "?";
+        var lake = (j.stats && j.stats.lake_layers) || "?";
+        setStatus("ok", "Concluído — " + n + " perfis MongoDB, lake " + lake + "/3.");
+      } else if (j.ok === false) {
+        setStatus("err", "Erro: " + (j.error || "falha no batch"));
+      }
+      if (j.logs && j.logs.length) {
+        logEl.hidden = false;
+        logEl.textContent = j.logs.map(function (x) { return x.line; }).join("\n");
+      }
+      refreshProfiles();
+    } catch (e) {
+      setStatus("err", "Console indisponível em " + CONSOLE + " — suba: docker compose up -d data-console api mongodb");
+      btn.disabled = true;
+    }
+  }
+
+  async function checkConsole() {
+    try {
+      var r = await fetch(CONSOLE + "/api/health?apiUrl=" + encodeURIComponent(API));
+      var j = await r.json();
+      if (j.ok) {
+        btn.disabled = false;
+        setStatus("", "Pronto. Clique para MongoDB + Spark Medallion (fluxo completo).");
+      } else {
+        setStatus("err", "API não responde em /health — verifique o container api.");
+        btn.disabled = true;
+      }
+    } catch (e) {
+      setStatus("err", "Console :3333 offline. Rode: docker compose up -d --build");
+      btn.disabled = true;
+    }
+    refreshProfiles();
+  }
+
+  btn.addEventListener("click", async function () {
+    btn.disabled = true;
+    setStatus("run", "Iniciando fluxo completo (Mongo + Spark)…");
+    logEl.hidden = false;
+    logEl.textContent = "";
+    try {
+      var r = await fetch(CONSOLE + "/api/batch-prep/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ num: 800, fraudRate: 0.08, apiUrl: API }),
+      });
+      var j = await r.json();
+      if (!r.ok) throw new Error(j.error || r.statusText);
+      pollBatchStatus();
+    } catch (e) {
+      setStatus("err", e.message);
+      btn.disabled = false;
+    }
+  });
+
+  checkConsole();
+  setInterval(refreshProfiles, 2000);
+})();
+  </script>
+
+    <footer>
+      Documentação: <code>docs/QUICK_START.md</code> · Portal: <code>http://localhost:8880</code>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Banca — Detecção de Fraudes Bancárias</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700;1,9..40,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #070b14;
+      --bg-card: rgba(15, 23, 42, 0.72);
+      --accent: #22d3ee;
+      --accent-2: #fcd34d;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --danger: #fb7185;
+      --ok: #34d399;
+      --progress-h: 4px;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-deep);
+      color: var(--text);
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: clamp(15px, 1.5vw, 18px);
+    }
+    .deck {
+      height: 100vh;
+      position: relative;
+    }
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: clamp(1.25rem, 4vw, 3.5rem);
+      padding-bottom: 5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.45s ease;
+    }
+    .slide.is-active {
+      display: flex;
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 1;
+    }
+    .slide__inner {
+      width: min(1040px, 100%);
+      max-height: calc(100vh - 6rem);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent) transparent;
+    }
+    .slide--cover {
+      text-align: center;
+      background:
+        linear-gradient(135deg, rgba(7, 11, 20, 0.92) 0%, rgba(15, 23, 42, 0.88) 45%, rgba(8, 47, 73, 0.85) 100%),
+        url("https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=1920&q=80") center/cover no-repeat;
+    }
+    .slide--accent {
+      background:
+        linear-gradient(160deg, #0c1222 0%, #1e1b4b 40%, #0f172a 100%),
+        radial-gradient(ellipse 80% 50% at 20% 40%, rgba(34, 211, 238, 0.12), transparent),
+        radial-gradient(ellipse 60% 40% at 90% 80%, rgba(252, 211, 77, 0.08), transparent);
+    }
+    .slide--problem {
+      background:
+        linear-gradient(120deg, rgba(7, 11, 20, 0.95), rgba(30, 27, 75, 0.9)),
+        url("https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1920&q=75") 80% center/cover no-repeat;
+    }
+    .eyebrow {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+    h1.slide-title {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(2.2rem, 5.5vw, 3.8rem);
+      font-weight: 400;
+      line-height: 1.1;
+      margin: 0 0 1rem;
+      text-wrap: balance;
+    }
+    h1.slide-title em {
+      font-style: italic;
+      color: var(--accent-2);
+    }
+    h2.slide-heading {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(1.75rem, 3.8vw, 2.75rem);
+      font-weight: 400;
+      margin: 0 0 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.5rem 1rem;
+    }
+    .badge-time {
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(34, 211, 238, 0.2);
+      color: var(--accent);
+      border: 1px solid rgba(34, 211, 238, 0.35);
+    }
+    .lead {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 38ch;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+    .card-panel {
+      background: var(--bg-card);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 1rem;
+      padding: 1.25rem 1.5rem;
+      backdrop-filter: blur(12px);
+    }
+    ul.clean {
+      margin: 0;
+      padding-left: 1.1rem;
+      line-height: 1.65;
+    }
+    ul.clean li { margin-bottom: 0.45rem; }
+    ul.clean strong { color: var(--accent-2); }
+    .grid-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.85rem;
+      margin-top: 1rem;
+    }
+    .stat {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat b {
+      display: block;
+      font-size: 1.35rem;
+      color: var(--accent);
+    }
+    .stat span { font-size: 0.8rem; color: var(--muted); }
+    table.data {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+    table.data th, table.data td {
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      padding: 0.55rem 0.65rem;
+      text-align: left;
+    }
+    table.data th {
+      background: rgba(34, 211, 238, 0.12);
+      color: var(--accent);
+      font-weight: 600;
+    }
+    pre.code {
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 0.65rem;
+      padding: 1rem;
+      font-size: 0.72rem;
+      overflow-x: auto;
+      line-height: 1.45;
+      margin: 0.75rem 0 0;
+    }
+    pre.code code { color: #e2e8f0; }
+    .quote {
+      margin-top: 1rem;
+      padding: 1rem 1.25rem;
+      border-left: 3px solid var(--accent-2);
+      font-style: italic;
+      color: var(--muted);
+      background: rgba(252, 211, 77, 0.06);
+      border-radius: 0 0.5rem 0.5rem 0;
+    }
+    .diagram {
+      font-family: ui-monospace, monospace;
+      font-size: clamp(0.65rem, 1.5vw, 0.78rem);
+      line-height: 1.45;
+      white-space: pre-wrap;
+      color: var(--muted);
+    }
+    .logo-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .logo-row i { color: var(--accent); font-size: 1.25rem; }
+    .progress-top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--progress-h);
+      background: rgba(255,255,255,0.06);
+      z-index: 100;
+    }
+    .progress-top__fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 0.35s ease;
+    }
+    .toolbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.65rem 1.25rem;
+      background: rgba(7, 11, 20, 0.88);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(148, 163, 184, 0.15);
+    }
+    .toolbar .btns {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .toolbar button {
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .toolbar button:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--accent);
+    }
+    .toolbar button.primary {
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.25), rgba(52, 211, 153, 0.2));
+      border-color: rgba(34, 211, 238, 0.5);
+      color: #fff;
+    }
+    .counter {
+      font-size: 0.8rem;
+      color: var(--muted);
+      min-width: 6ch;
+      text-align: center;
+    }
+    .topic-num {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: "DM Sans", sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--ok);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.35rem;
+    }
+    .topic-num .mark { font-size: 1rem; }
+    .sub-list {
+      margin: 0.4rem 0 0 1.15rem;
+      padding: 0;
+      font-size: 0.86rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .sub-list li { margin-bottom: 0.35rem; }
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.75rem;
+    }
+    .pill {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.25rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(52, 211, 153, 0.15);
+      color: var(--ok);
+      border: 1px solid rgba(52, 211, 153, 0.35);
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+    .agenda-8 {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      counter-reset: ag;
+    }
+    .agenda-8 li {
+      counter-increment: ag;
+      padding: 0.65rem 0.85rem;
+      margin-bottom: 0.45rem;
+      background: rgba(255,255,255,0.04);
+      border-radius: 0.65rem;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+    }
+    .agenda-8 li::before {
+      content: counter(ag) ".";
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 1.75rem;
+    }
+    .agenda-8 .ok { color: var(--ok); margin-left: auto; font-size: 0.95rem; }
+    .demo-box {
+      margin-top: 0.85rem;
+      padding: 0.85rem 1rem;
+      border-radius: 0.65rem;
+      border: 1px dashed rgba(34, 211, 238, 0.5);
+      background: rgba(34, 211, 238, 0.07);
+    }
+    .demo-box .demo-label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      margin-bottom: 0.45rem;
+    }
+    .demo-box p, .demo-box li { font-size: 0.84rem; color: var(--text); line-height: 1.5; margin: 0.25rem 0; }
+    .demo-box ul { margin: 0.35rem 0 0; padding-left: 1.1rem; }
+    .demo-box code { font-size: 0.78rem; }
+    .stack-note {
+      margin-top: 0.75rem;
+      padding: 0.65rem 0.9rem;
+      border-radius: 0.5rem;
+      background: rgba(252, 211, 77, 0.08);
+      border: 1px solid rgba(252, 211, 77, 0.25);
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .stack-note strong { color: var(--accent-2); }
+    .mermaid-wrap {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      border-radius: 0.5rem;
+      padding: 0.75rem 0.5rem 1rem;
+      margin-top: 0.75rem;
+    }
+    .mermaid-wrap .mermaid {
+      display: flex;
+      justify-content: center;
+      min-height: 120px;
+    }
+    .mermaid-wrap svg { max-width: 100%; height: auto !important; }
+    .presenter-block {
+      margin-top: 0.85rem;
+    }
+    .presenter-block:first-of-type { margin-top: 0; }
+    .presenter-block > .presenter-kicker {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      font-weight: 700;
+      margin: 0 0 0.35rem;
+    }
+    .presenter-block ul { margin: 0; padding-left: 1.05rem; font-size: 0.84rem; line-height: 1.5; }
+    .presenter-block ul li { margin: 0.2rem 0; }
+    /* Fluxo pipeline — slide capa (pág. 1) */
+    .closing-flow {
+      width: min(920px, 100%);
+      margin: 0.5rem auto 0;
+      padding: 0.6rem 0.75rem 0.85rem;
+      border-radius: 1rem;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(34, 211, 238, 0.22);
+      box-shadow:
+        0 0 40px rgba(34, 211, 238, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(10px);
+    }
+    .closing-flow__cap {
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 0.35rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    .closing-flow svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: min(200px, 28vh);
+    }
+    .closing-flow .node-box {
+      fill: rgba(30, 41, 59, 0.95);
+      stroke: rgba(34, 211, 238, 0.45);
+      stroke-width: 1.5;
+    }
+    .closing-flow .node-label {
+      fill: #f1f5f9;
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      text-anchor: middle;
+    }
+    .closing-flow .node-hint {
+      fill: #94a3b8;
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 7.5px;
+      text-anchor: middle;
+    }
+    .closing-flow .edge-base {
+      fill: none;
+      stroke: rgba(100, 116, 139, 0.45);
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+    .closing-flow .edge-energy {
+      fill: none;
+      stroke: url(#closingFlowGrad);
+      stroke-width: 3;
+      stroke-linecap: round;
+      opacity: 0.92;
+    }
+    .closing-flow .edge-observe {
+      fill: none;
+      stroke: rgba(252, 211, 77, 0.35);
+      stroke-width: 1.25;
+      stroke-dasharray: 5 7;
+    }
+    .closing-flow .particle {
+      fill: #22d3ee;
+      filter: url(#closingFlowParticleGlow);
+    }
+    .closing-flow .particle--slow {
+      fill: #fcd34d;
+      opacity: 0.9;
+    }
+    /* Roteiro: 8 tópicos em movimento — slide 2 */
+    .agenda-topics-viz {
+      width: min(920px, 100%);
+      margin: 0.35rem auto 0.65rem;
+      padding: 0.5rem 0.75rem 0.65rem;
+      border-radius: 1rem;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+      backdrop-filter: blur(10px);
+    }
+    .agenda-topics-viz__cap {
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0 0 0.3rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    .agenda-topics-viz svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: min(260px, 32vh);
+    }
+    .agenda-topics-viz .ag-node {
+      fill: rgba(30, 41, 59, 0.96);
+      stroke: rgba(34, 211, 238, 0.4);
+      stroke-width: 1.35;
+    }
+    .agenda-topics-viz .ag-node--hot {
+      stroke: rgba(252, 211, 77, 0.85);
+      stroke-width: 2;
+    }
+    .agenda-topics-viz .ag-num {
+      fill: var(--accent-2);
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .agenda-topics-viz .ag-label {
+      fill: #f1f5f9;
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .agenda-topics-viz .ag-edge {
+      fill: none;
+      stroke: rgba(100, 116, 139, 0.45);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .agenda-topics-viz .ag-edge-energy {
+      fill: none;
+      stroke: url(#agendaFlowGrad);
+      stroke-width: 2.75;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      opacity: 0.92;
+    }
+    .agenda-topics-viz .ag-particle {
+      fill: #22d3ee;
+      filter: url(#agendaParticleGlow);
+    }
+    .agenda-topics-viz .ag-particle--2 {
+      fill: #fcd34d;
+      opacity: 0.88;
+    }
+    /* Agradecimento — tema dados (slide final) */
+    .thanks-viz {
+      width: min(520px, 100%);
+      margin: 1rem auto 0;
+      padding: 1.25rem 1rem 1.5rem;
+      border-radius: 1.25rem;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(252, 211, 77, 0.25);
+      box-shadow:
+        0 0 48px rgba(34, 211, 238, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    .thanks-viz svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: min(220px, 32vh);
+    }
+    .thanks-viz__tagline {
+      margin: 0.85rem 0 0;
+      font-size: clamp(0.8rem, 2.2vw, 0.95rem);
+      color: var(--muted);
+      line-height: 1.45;
+      font-weight: 500;
+    }
+    .thanks-viz .db-body { fill: rgba(30, 41, 59, 0.95); stroke: url(#thanksGrad); stroke-width: 1.6; }
+    .thanks-viz .db-top { fill: rgba(52, 211, 153, 0.12); stroke: rgba(34, 211, 238, 0.55); stroke-width: 1.2; }
+    .thanks-viz .bit-col { fill: var(--accent); font-family: ui-monospace, monospace; font-size: 11px; opacity: 0.85; }
+    .thanks-viz .pulse-ring { fill: none; stroke: rgba(34, 211, 238, 0.45); stroke-width: 1.2; }
+    .thanks-viz .orbit-dot { fill: #fcd34d; filter: url(#thanksGlow); }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+</head>
+<body>
+  <div class="progress-top" aria-hidden="true"><div class="progress-top__fill" id="progress-fill"></div></div>
+
+  <div class="deck" id="deck">
+    <!-- 0 Apresentador -->
+    <section class="slide slide--accent is-active" data-slide="0" aria-label="Apresentador">
+      <div class="slide__inner">
+        <p class="eyebrow">Quem apresenta</p>
+        <h1 class="slide-title" style="font-size:clamp(1.9rem,4.5vw,3rem);">Jerônimo Alves Cardoso</h1>
+        <div class="card-panel" style="max-width:46rem;text-align:left;margin-top:0.65rem;">
+          <div class="presenter-block">
+            <p class="presenter-kicker">Cargo</p>
+            <ul class="clean">
+              <li><strong>Engenheiro Expert</strong> na <strong>área de riscos</strong>, atuando nos <strong>motores de crédito</strong>, integrante da <strong>área do Alexandre Sona</strong> — núcleo de <strong>risco</strong>, <strong>engenharia de crédito</strong> e <strong>decisão motorizada</strong> (política, plataforma e operação dos motores).</li>
+            </ul>
+          </div>
+          <div class="presenter-block">
+            <p class="presenter-kicker">Formação</p>
+            <ul class="clean">
+              <li>Graduação em <strong>Sistemas de Informação</strong>.</li>
+              <li>Pós-graduações em <strong>Arquitetura de Software</strong>, <strong>Ciências de Dados</strong> e <strong>Segurança Cibernética</strong>.</li>
+              <li>Programa <strong>MIT</strong> pela <strong>PUCRS</strong> em <strong>IA para negócios</strong>.</li>
+              <li>Pós em <strong>IA para TI</strong> com foco em <strong>MCP</strong> <em>(em andamento)</em>.</li>
+            </ul>
+          </div>
+          <div class="presenter-block">
+            <p class="presenter-kicker">Trajetória</p>
+            <ul class="clean">
+              <li><strong>4 anos</strong> na <strong>First</strong>; cerca de <strong>20 anos</strong> em TI, com atuação principal no <strong>setor financeiro</strong>.</li>
+            </ul>
+          </div>
+          <div class="presenter-block">
+            <p class="presenter-kicker">O que atuei</p>
+            <ul class="clean">
+              <li><strong>Legado:</strong> migrações motivadas por <strong>obsolescência</strong> e <strong>vulnerabilidades</strong>; descomissionamento de ambientes críticos.</li>
+              <li><strong>Java 8 → 17:</strong> modernização em carteira ampla — <strong>consignado</strong>, <strong>microcrédito</strong>, <strong>CP</strong>, <strong>consórcio</strong>, <strong>imobiliário</strong> e demais produtos da stack.</li>
+              <li><strong>Arquitetura:</strong> <strong>saída de mainframe</strong> e exposição via <strong>APIs</strong> e integrações de canal.</li>
+              <li><strong>Projetos:</strong> <strong>Gravity</strong>, <strong>CNPJ alfanumérico</strong>, <strong>IRO</strong>, <strong>HIPE</strong>.</li>
+              <li><strong>Eficiência:</strong> participação em iniciativas de <strong>redução de custos</strong> e ganho operacional.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1 Capa -->
+    <section class="slide slide--cover" data-slide="1" aria-label="Capa">
+      <div class="slide__inner">
+        <div class="logo-row"><i class="bi bi-bank2"></i> Plataforma de dados · Azure / AWS · Banca</div>
+        <p class="eyebrow">Apresentação</p>
+        <h1 class="slide-title">Sistema de detecção de <em>fraudes bancárias</em></h1>
+        <p class="lead">Pipeline completo na narrativa Azure (+ equivalentes AWS); <strong style="color:var(--accent-2);">demonstração ao vivo</strong> com <strong>API Java Spring</strong> (:8080), <strong>Streamlit</strong>, <strong>Docker Compose</strong> espelhando o mesmo desenho — provisionado na Azure via <code>infrastructure/terraform/apresentacao</code>.</p>
+        <div class="closing-flow" id="closing-flow" aria-label="Pipeline completo em movimento — da fonte ao alerta">
+          <p class="closing-flow__cap">Visão do fluxo · do dado bruto ao alerta</p>
+          <svg viewBox="0 0 920 210" xmlns="http://www.w3.org/2000/svg" role="img">
+            <defs>
+              <linearGradient id="closingFlowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.15"/>
+                <stop offset="40%" stop-color="#22d3ee" stop-opacity="1"/>
+                <stop offset="60%" stop-color="#fcd34d" stop-opacity="1"/>
+                <stop offset="100%" stop-color="#22d3ee" stop-opacity="0.15"/>
+              </linearGradient>
+              <filter id="closingFlowParticleGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <path id="closing-flow-path" class="edge-base" d="M 116 100 L 802 100" fill="none"/>
+            <path id="closing-flow-energy" class="edge-energy" d="M 116 100 L 802 100" fill="none" pathLength="100"/>
+            <path class="edge-observe" d="M 400 118 L 400 158 L 460 168" fill="none"/>
+            <path class="edge-observe" d="M 636 118 L 636 162 L 460 168" fill="none"/>
+            <rect class="node-box" x="355" y="172" width="210" height="32" rx="8"/>
+            <text class="node-hint" x="460" y="192">Monitor · métricas e trilhas (CloudWatch / OTel)</text>
+            <rect class="node-box" x="14" y="76" width="102" height="48" rx="10"/>
+            <text class="node-label" x="65" y="98">Fontes</text>
+            <text class="node-hint" x="65" y="112">APIs · batch · simulador</text>
+            <rect class="node-box" x="126" y="76" width="120" height="48" rx="10"/>
+            <text class="node-label" x="186" y="98">Event Hubs</text>
+            <text class="node-hint" x="186" y="112">Kinesis · MSK</text>
+            <rect class="node-box" x="246" y="76" width="130" height="48" rx="10"/>
+            <text class="node-label" x="311" y="98">Databricks</text>
+            <text class="node-hint" x="311" y="112">EMR · Glue Spark</text>
+            <rect class="node-box" x="376" y="76" width="110" height="48" rx="10"/>
+            <text class="node-label" x="431" y="98">Data Lake</text>
+            <text class="node-hint" x="431" y="112">ADLS · S3 · Medallion</text>
+            <rect class="node-box" x="486" y="76" width="110" height="48" rx="10"/>
+            <text class="node-label" x="541" y="98">Azure ML</text>
+            <text class="node-hint" x="541" y="112">SageMaker</text>
+            <rect class="node-box" x="596" y="76" width="82" height="48" rx="10"/>
+            <text class="node-label" x="637" y="102">API</text>
+            <rect class="node-box" x="678" y="76" width="124" height="48" rx="10"/>
+            <text class="node-label" x="740" y="98">Alertas</text>
+            <text class="node-hint" x="740" y="112">motor · canais</text>
+            <circle id="closing-particle-1" class="particle" r="5" cx="116" cy="100"/>
+            <circle id="closing-particle-2" class="particle particle--slow" r="4" cx="116" cy="100"/>
+            <circle id="closing-particle-3" class="particle" r="3.5" cx="116" cy="100" opacity="0.85"/>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 Sequência (8 tópicos) -->
+    <section class="slide slide--accent" data-slide="2" aria-label="Roteiro">
+      <div class="slide__inner">
+        <p class="eyebrow">Ordem da apresentação</p>
+        <h2 class="slide-heading">Da origem ao dado servido</h2>
+        <div class="agenda-topics-viz" id="agenda-topics-viz" aria-label="Oito tópicos da apresentação em sequência">
+          <p class="agenda-topics-viz__cap">Roteiro em 8 passos · dado servido com qualidade e escala</p>
+          <svg viewBox="0 0 840 268" xmlns="http://www.w3.org/2000/svg" role="img">
+            <defs>
+              <linearGradient id="agendaFlowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.2"/>
+                <stop offset="45%" stop-color="#22d3ee" stop-opacity="1"/>
+                <stop offset="55%" stop-color="#fcd34d" stop-opacity="1"/>
+                <stop offset="100%" stop-color="#22d3ee" stop-opacity="0.2"/>
+              </linearGradient>
+              <filter id="agendaParticleGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1.1" result="b"/>
+                <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <path id="agenda-topics-path" class="ag-edge" d="M 126 70 L 310 70 L 494 70 L 678 70 L 678 188 L 494 188 L 310 188 L 126 188" fill="none"/>
+            <path id="agenda-topics-energy" class="ag-edge-energy" d="M 126 70 L 310 70 L 494 70 L 678 70 L 678 188 L 494 188 L 310 188 L 126 188" fill="none" pathLength="100"/>
+            <g id="agenda-nodes">
+              <rect id="ag-node-1" class="ag-node" x="38" y="36" width="176" height="68" rx="12"/>
+              <text class="ag-num" x="58" y="62">1</text>
+              <text class="ag-label" x="126" y="64" text-anchor="middle">Extração</text>
+              <text class="ag-label" x="126" y="80" text-anchor="middle" style="fill:#94a3b8;font-size:8px;font-weight:500">fontes · contrato</text>
+              <rect id="ag-node-2" class="ag-node" x="222" y="36" width="176" height="68" rx="12"/>
+              <text class="ag-num" x="242" y="62">2</text>
+              <text class="ag-label" x="310" y="64" text-anchor="middle">Ingestão</text>
+              <text class="ag-label" x="310" y="80" text-anchor="middle" style="fill:#94a3b8;font-size:8px;font-weight:500">stream · batch</text>
+              <rect id="ag-node-3" class="ag-node" x="406" y="36" width="176" height="68" rx="12"/>
+              <text class="ag-num" x="426" y="62">3</text>
+              <text class="ag-label" x="494" y="64" text-anchor="middle">Armazenamento</text>
+              <text class="ag-label" x="494" y="80" text-anchor="middle" style="fill:#94a3b8;font-size:8px;font-weight:500">lake · DW · NoSQL</text>
+              <rect id="ag-node-4" class="ag-node" x="590" y="36" width="176" height="68" rx="12"/>
+              <text class="ag-num" x="610" y="62">4</text>
+              <text class="ag-label" x="678" y="64" text-anchor="middle">Observabilidade</text>
+              <text class="ag-label" x="678" y="80" text-anchor="middle" style="fill:#94a3b8;font-size:8px;font-weight:500">SLI · métricas · trilhas</text>
+              <rect id="ag-node-5" class="ag-node" x="590" y="154" width="176" height="68" rx="12"/>
+              <text class="ag-num" x="610" y="180">5</text>
+              <text class="ag-label" x="678" y="182" text-anchor="middle">Segurança</text>
+              <text class="ag-label" x="678" y="198" text-anchor="middle" style="fill:#94a3b8;font-size:8px;font-weight:500">cripto · vault · RBAC</text>
+              <rect id="ag-node-6" class="ag-node" x="406" y="154" width="176" height="68" rx="12"/>
+              <text class="ag-num" x="426" y="180">6</text>
+              <text class="ag-label" x="494" y="182" text-anchor="middle">LGPD</text>
+              <text class="ag-label" x="494" y="198" text-anchor="middle" style="fill:#94a3b8;font-size:8px;font-weight:500">máscara · conformidade</text>
+              <rect id="ag-node-7" class="ag-node" x="222" y="154" width="176" height="68" rx="12"/>
+              <text class="ag-num" x="242" y="180">7</text>
+              <text class="ag-label" x="310" y="182" text-anchor="middle">Arquitetura</text>
+              <text class="ag-label" x="310" y="198" text-anchor="middle" style="fill:#94a3b8;font-size:8px;font-weight:500">Medallion · Kimball</text>
+              <rect id="ag-node-8" class="ag-node" x="38" y="154" width="176" height="68" rx="12"/>
+              <text class="ag-num" x="58" y="180">8</text>
+              <text class="ag-label" x="126" y="182" text-anchor="middle">Escalabilidade</text>
+              <text class="ag-label" x="126" y="198" text-anchor="middle" style="fill:#94a3b8;font-size:8px;font-weight:500">partições · autoscale</text>
+            </g>
+            <circle id="agenda-particle-1" class="ag-particle" r="5" cx="126" cy="70"/>
+            <circle id="agenda-particle-2" class="ag-particle ag-particle--2" r="4" cx="126" cy="70"/>
+          </svg>
+        </div>
+        <ul class="agenda-8 card-panel">
+          <li><span>Extração de dados</span><span class="ok" aria-hidden="true">✅</span></li>
+          <li><span>Ingestão de dados</span><span class="ok">✅</span></li>
+          <li><span>Armazenamento</span><span class="ok">✅</span></li>
+          <li><span>Observabilidade</span><span class="ok">✅</span></li>
+          <li><span>Segurança de dados</span><span class="ok">✅</span></li>
+          <li><span>Mascaramento &amp; LGPD</span><span class="ok">✅</span></li>
+          <li><span>Arquitetura de dados</span><span class="ok">✅</span></li>
+          <li><span>Escalabilidade</span><span class="ok">✅</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3 Contexto -->
+    <section class="slide slide--problem" data-slide="3">
+      <div class="slide__inner">
+        <div class="two-col">
+          <div class="card-panel">
+            <h2 class="slide-heading" style="font-size:1.5rem;">Contexto</h2>
+            <div class="grid-stats" style="margin-top:0;">
+              <div class="stat"><b>R$ 2,5 bi</b><span>fraudes digitais 2023</span></div>
+              <div class="stat"><b>+165%</b><span>tentativas (3 anos)</span></div>
+              <div class="stat"><b>PIX</b><span>volume e ataques em alta</span></div>
+              <div class="stat"><b>&lt; 2 s</b><span>meta de decisão</span></div>
+            </div>
+            <p class="quote" style="margin-bottom:0;">Objetivo: plataforma de dados confiável — não só um modelo — com rastreio, segurança e custo previsível.</p>
+          </div>
+          <div class="card-panel" style="padding:0; overflow:hidden;">
+            <table class="data">
+              <thead><tr><th>Requisito</th><th>Meta</th></tr></thead>
+              <tbody>
+                <tr><td>Latência</td><td>&lt; 2 s (score / alerta)</td></tr>
+                <tr><td>Precisão</td><td>Alto recall em fraude + controle de falso positivo</td></tr>
+                <tr><td>Escala-alvo</td><td><strong>10M+ transações/dia</strong> (picos com autoscaling)</td></tr>
+                <tr><td>Disponibilidade</td><td>99,9% SLA (camada crítica)</td></tr>
+                <tr><td>Conformidade</td><td>LGPD ponta a ponta</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 Visão macro -->
+    <section class="slide slide--accent" data-slide="4">
+      <div class="slide__inner" style="max-width:min(1120px,100%);">
+        <h2 class="slide-heading">Arquitetura alvo · Azure (pipeline completo)</h2>
+        <p class="sub" style="margin:-0.35rem 0 0.65rem;font-size:0.88rem;color:var(--muted);">Referência edital Data Master: ingestão → lake em camadas → governança → ML → API → consumo. Equivalentes AWS entre parênteses.</p>
+        <div class="card-panel" style="padding:0.85rem 1rem 1rem;">
+          <div class="mermaid-wrap" aria-label="Arquitetura Azure completa">
+            <div class="mermaid" id="mermaid-arch-diagram">
+flowchart TB
+  subgraph ING["Entrada e integração"]
+    F["Fontes<br/>core · APIs · parceiros · arquivos"]
+    ADF["Azure Data Factory<br/>(batch / orquestração)"]
+    EH["Azure Event Hubs<br/>(streaming · particionado)"]
+  end
+  subgraph PLAKE["Processamento e lake"]
+    DB["Azure Databricks<br/>(Spark · features · jobs)"]
+    LAKE["Azure Data Lake Storage Gen2<br/>Bronze · Silver · Gold"]
+    SYN["Azure Synapse / Fabric<br/>(SQL analítico · DW)"]
+  end
+  subgraph GOVML["Governança e ML"]
+    PUR["Microsoft Purview<br/>(catálogo · linhagem · políticas)"]
+    AML["Azure Machine Learning<br/>(treino · registro · endpoint)"]
+    KV["Azure Key Vault<br/>(secrets · chaves)"]
+  end
+  subgraph CONS["Serviços e canais"]
+    API["API / Container Apps / AKS<br/>(scoring · contrato REST)"]
+    PBI["Power BI / Fabric<br/>(BI e auditoria)"]
+    COS["Azure Cosmos DB<br/>(perfis user_profiles · estado operacional)"]
+    ALT["Alertas · motor · canais"]
+  end
+  subgraph BATCHP["Batch · perfis (serving)"]
+    HIST["Histórico / Bronze JSON"]
+    DP["Dataprep agregado<br/>por user_id"]
+  end
+  subgraph IDSEC["Identidade e observabilidade"]
+    ENT["Microsoft Entra ID<br/>(RBAC · identidade)"]
+    MON["Azure Monitor + Log Analytics"]
+    AI["Application Insights<br/>(APM · trilhas)"]
+  end
+  F --> ADF
+  F --> EH
+  ADF --> LAKE
+  HIST --> DP
+  DP --> COS
+  EH --> DB
+  DB --> LAKE
+  LAKE --> SYN
+  LAKE --> PUR
+  DB --> AML
+  LAKE --> AML
+  AML --> API
+  KV -.->|secrets| AML
+  KV -.->|secrets| API
+  SYN --> PBI
+  COS -->|perfis user_id| API
+  API --> ALT
+  ENT -.->|IAM| API
+  MON -.->|métricas / logs| EH
+  MON -.->|métricas / logs| DB
+  MON -.->|métricas / logs| API
+  AI -.->|traces| API
+            </div>
+          </div>
+          <div class="diagram" style="margin-top:0.85rem;font-size:0.76rem;"><strong>Par AWS (fala):</strong> Data Factory ↔ Glue/Step Functions · Event Hubs ↔ Kinesis/MSK · Databricks ↔ EMR · ADLS ↔ S3 · Synapse ↔ Redshift/Athena · Purview ↔ Lake Formation+Glue Catalog · AML ↔ SageMaker · Key Vault ↔ Secrets Manager+KMS · Cosmos ↔ DynamoDB · Monitor ↔ CloudWatch · App Insights ↔ X-Ray · API em containers ↔ EKS/ECS/Fargate.</div>
+          <div class="diagram" style="margin-top:0.45rem;font-size:0.78rem;"><strong>Local = mesmo desenho:</strong> <code>run_demo.sh</code> / fluxo completo no portal → <strong>MongoDB user_profiles</strong> + lake Medallion · console/dashboard → <strong>API Java</strong> :8080 (scoring <code>1.0.0-java-balanced</code>, fraude ≥ <strong>0,74</strong>) · <strong>Kafka</strong> (narrativa Event Hubs) · <strong>Streamlit</strong> (filtro, liberar, opinião IA, DeepSeek) · <strong>Prometheus/Grafana</strong>. Terraform: <code>apresentacao/</code>.</div>
+        </div>
+        <div class="pill-row">
+          <span class="pill">Demos ao vivo</span>
+          <span class="pill">Local = Azure (mesmo desenho)</span>
+          <span class="pill">Azure · AWS · Docker</span>
+          <span class="pill">draw.io em docs/arquitetura/</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4b Diagramas draw.io (complemento ao Mermaid) -->
+    <section class="slide slide--accent" data-slide="4b" aria-label="Diagramas draw.io">
+      <div class="slide__inner" style="max-width:min(1080px,100%);">
+        <p class="eyebrow">Arquitetura · artefatos do repositório</p>
+        <h2 class="slide-heading">Diagramas draw.io (local · Azure · AWS)</h2>
+        <p class="sub" style="margin:-0.35rem 0 0.75rem;font-size:0.88rem;color:var(--muted);">
+          Abra em <a href="https://app.diagrams.net" target="_blank" rel="noopener" style="color:var(--accent);">app.diagrams.net</a>
+          → <strong>File → Open from → Device</strong> → pasta <code>docs/arquitetura/</code> do projeto.
+          Use como <strong>zoom técnico</strong> depois do slide Mermaid anterior.
+        </p>
+        <div class="card-panel" style="padding:0; overflow:auto;">
+          <table class="data" style="font-size:0.8rem;">
+            <thead>
+              <tr><th>Arquivo</th><th>Quando projetar</th><th>Conteúdo</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>datamaster-00-visao-geral.drawio</code></td>
+                <td>Abertura / visão</td>
+                <td>Batch + online numa página; narrativa Lambda</td>
+              </tr>
+              <tr>
+                <td><code>datamaster-01-batch.drawio</code></td>
+                <td>Batch Mongo + lake</td>
+                <td>JSON → dataprep → <code>user_profiles</code> · Spark Medallion</td>
+              </tr>
+              <tr>
+                <td><code>datamaster-02-online.drawio</code></td>
+                <td>Demo ao vivo</td>
+                <td>Console :3333 → API :8080 → Mongo (sem Kafka no caminho crítico)</td>
+              </tr>
+              <tr>
+                <td><code>datamaster-03-mapa.drawio</code></td>
+                <td>Azure ↔ local</td>
+                <td>Mapa de equivalência serviços</td>
+              </tr>
+              <tr>
+                <td><code>datamaster-04-docker-compose.drawio</code></td>
+                <td>“O que sobe no Docker”</td>
+                <td>Cada container do <code>docker compose</code> e quem chama quem</td>
+              </tr>
+              <tr>
+                <td><code>datamaster-azure-aws-local.drawio</code></td>
+                <td>Encerramento / banca</td>
+                <td>Todas as abas: Azure, AWS e mesa local</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="two-col" style="margin-top:0.75rem;">
+          <ul class="clean card-panel" style="margin:0;font-size:0.84rem;">
+            <li><strong>Regenerar:</strong> <code>python3 scripts/generate_architecture_drawio.py</code></li>
+            <li><strong>Índice:</strong> <code>docs/arquitetura/README.md</code></li>
+            <li><strong>Cola verbal:</strong> <a href="roteiro.html" style="color:var(--accent);">roteiro.html</a> — seção draw.io</li>
+          </ul>
+          <ul class="clean card-panel" style="margin:0;font-size:0.84rem;">
+            <li>Online na demo: canal chama <strong>API direto</strong> (Kafka = narrativa Event Hubs).</li>
+            <li>Batch na demo: <code>bash scripts/run_demo.sh</code> ou botão <strong>fluxo completo</strong> no portal :8880.</li>
+            <li>Scoring: Java <code>1.0.0-java-balanced</code> · limiar fraude <strong>0,74</strong> (~5–15% em lote).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 Tópico 1 Extração -->
+    <section class="slide slide--accent" data-slide="5" aria-label="Extração">
+      <div class="slide__inner">
+        <p class="topic-num"><span class="mark">✅</span> Etapa 1 · Extração de dados</p>
+        <h2 class="slide-heading">Da fonte ao barramento</h2>
+        <ul class="clean card-panel">
+          <li><strong>Scripts Python (multi-fonte):</strong> conectores e jobs para APIs do core, arquivos de parceiros, exportações históricas e <code>scripts/generate_data.py</code> como simulador de carga. <strong>Adaptação de schema:</strong> <code>src/data_ingestion/transaction_adapters.py</code> normaliza JSON de simulador, fila (<strong>Event Hubs</strong> / <strong>Kinesis</strong>) ou CSV para o dicionário do modelo.</li>
+          <li><strong>Event Hub Producer (streaming):</strong> publicação assíncrona com metadados (<code>event_id</code>, timestamp) e particionamento — par AWS em <strong>Kinesis Data Streams</strong> ou <strong>MSK</strong>. <em>Repo:</em> <code>src/data_ingestion/event_hub_producer.py</code>.</li>
+          <li><strong>Azure Data Factory</strong> (Terraform) <strong>(Glue Workflow / Step Functions na AWS):</strong> pipelines (lookup → copy → trigger), secrets no <strong>Key Vault</strong> <strong>(Secrets Manager / SSM)</strong>, destino <strong>ADLS Gen2</strong> <strong>(S3)</strong>. <em>Infra declarativa</em> junto de Event Hubs / Kinesis.</li>
+        </ul>
+        <div class="demo-box">
+          <span class="demo-label">Demo ao vivo · extração / simulação de fontes</span>
+          <p>Com a stack no ar (<code>docker compose up -d --build</code>):</p>
+          <ul>
+            <li><code>docker compose exec api python scripts/generate_data.py -n 100 -o data/transactions.json</code> <em>ou</em> rode o mesmo script no host com o repo montado.</li>
+            <li>Mostre o arquivo <code>data/transactions.json</code> e relacione ao “landing” / Bronze.</li>
+            <li>Abra <code>src/data_ingestion/transaction_adapters.py</code> (<code>from_simulator_record</code> / <code>normalize_for_model</code>).</li>
+            <li>Abra <code>src/data_ingestion/event_hub_producer.py</code> e aponte <code>send_batch</code> / metadados (narrativa <strong>Event Hubs</strong> / <strong>Kinesis</strong>).</li>
+         
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5 Tópico 2 Ingestão -->
+    <section class="slide slide--accent" data-slide="6">
+      <div class="slide__inner">
+        <p class="topic-num"><span class="mark">✅</span> Etapa 2 · Ingestão de dados</p>
+        <h2 class="slide-heading">Streaming, batch e Lambda</h2>
+        <ul class="clean card-panel">
+          <li><strong>Streaming — Event Hubs</strong> <strong>(Kinesis / MSK)</strong> + consumer: <em>consumer group</em>, checkpoint em Blob Storage <strong>(S3 + metadados / client library Kinesis)</strong>; backpressure e replay. <em>Repo:</em> <code>event_hub_consumer.py</code> — na banca, <strong>Kafka no Docker</strong> ilustra o padrão.</li>
+          <li><strong>Batch — Data Factory</strong> <strong>(Glue / Step Functions)</strong> via Terraform: janelas de ingestão, landing em Raw <strong>(ADLS / S3)</strong>, validação na borda antes do lake.</li>
+          <li><strong>Batch de perfis (demo):</strong> <code>batch_dataprep_mongo.py</code> agrega histórico e grava <strong>Cosmos/Mongo</strong> — a API consulta na análise online (slide dedicado).</li>
+          <li><strong>Arquitetura Lambda (implementada no desenho):</strong> camada <em>speed</em> (streaming → API) + camada <em>batch</em> (lake Medallion + perfis Mongo); serving unificado na API e no painel.</li>
+        </ul>
+         <div class="demo-box">
+          <span class="demo-label">Demo ao vivo · ingestão streaming (Kafka local ≈ Event Hubs / Kinesis)</span>
+          <ul>
+            <li>Criar tópico e publicar/consomir (ajuste se o serviço do compose tiver outro nome):<br><code style="word-break:break-all;">docker compose exec kafka kafka-topics --bootstrap-server kafka:9092 --create --topic transactions-demo --if-not-exists</code></li>
+            <li><code>echo '{"transaction_id":"demo-1","amount":999.0}' | docker compose exec -T kafka kafka-console-producer --bootstrap-server kafka:9092 --topic transactions-demo</code></li>
+            <li>Consumer com <code>--from-beginning</code> / <code>--max-messages 1</code> (seguir a ordem do slide de ingestão).</li>
+            <li>Mostre <code>event_hub_consumer.py</code> — consumer group e checkpoint (<strong>Blob</strong> / <strong>S3</strong> conforme nuvem).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 Tópico 3 Armazenamento -->
+    <section class="slide slide--accent" data-slide="7">
+      <div class="slide__inner">
+        <p class="topic-num"><span class="mark">✅</span> Etapa 3 · Armazenamento</p>
+        <h2 class="slide-heading">Lake (Medalhão), warehouse e operacional</h2>
+        <div class="card-panel" style="margin-bottom:0.85rem;">
+          <div class="diagram" style="font-size:0.8rem;">BRONZE  landing   — JSON/CSV/Parquet bruto · schema-on-read · custo baixo
+    SILVER  refinado  — limpeza, dedup, DQ (notebook: clean + enrich)
+    GOLD    consumo   — features ML / KPIs (notebook: wide table transactions_ml)
+          mesmo padrão de pastas: <strong>ADLS Gen2 (S3)</strong> …/bronze|silver|gold</div>
+        </div>
+        <div class="two-col">
+          <ul class="clean card-panel" style="margin:0;">
+            <li><strong>Medalhão no código:</strong> <code>notebooks/01_dataprep_dq.py</code> lê <code>bronze/transactions</code>, grava <code>silver/transactions</code> e <code>gold/transactions_ml</code>. Referência: <code>src/data_architecture/medallion.py</code> e <code>config/medallion.yaml</code>.</li>
+            <li><strong>Lambda (arquitetura):</strong> <em>speed</em> = Kafka / Event Hub / Kinesis + API em tempo real; <em>batch</em> = Spark no lake reforça Silver/Gold. Alternativa <strong>Kappa:</strong> stream + replay.</li>
+            <li><strong>Azure Synapse</strong> (Terraform) <strong>(Redshift / Athena + Glue):</strong> <strong>DW</strong> para BI dimensional; Gold em tabelas externas.</li>
+          </ul>
+          <ul class="clean card-panel" style="margin:0;">
+            <li><strong>Cosmos DB / MongoDB</strong> <strong>(DynamoDB / DocumentDB)</strong>: <code>user_profiles</code> — perfis agregados do batch para consulta na API online.</li>
+            <li><strong>PostgreSQL</strong> <strong>(RDS Aurora PostgreSQL)</strong>: OLTP; fronteira com o analítico.</li>
+            <li><strong>Demo local:</strong> <code>data/transactions.json</code> ↔ Bronze; <code>batch_dataprep_mongo.py</code> ↔ Silver de perfil; API + painel = speed layer.</li>
+          </ul>
+        </div>
+        <div class="demo-box">
+          <span class="demo-label">Demo ao vivo · armazenamento / camadas (sem cluster Spark na sala)</span>
+          <ul>
+            <li>Abra <code>notebooks/01_dataprep_dq.py</code>: aponte <code>clean_transactions</code>, <code>enrich_data</code> e expectativas de qualidade.</li>
+            <li>Relacione <code>data/transactions.json</code> à ideia de <strong>Bronze</strong> e o notebook ao fluxo <strong>Silver → Gold</strong>.</li>
+            <li>Abra <code>src/data_architecture/medallion.py</code> (paths + notas Lambda/Kappa).</li>
+            <li><code>src/data_storage/datalake_client.py</code> — upload para <strong>ADLS Gen2</strong> <strong>(S3)</strong> com prefixos bronze/silver/gold.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Batch dataprep → MongoDB → API online -->
+    <section class="slide slide--accent" data-slide="7b" aria-label="Batch MongoDB serving">
+      <div class="slide__inner" style="max-width:min(1080px,100%);">
+        <p class="topic-num"><span class="mark">✅</span> Camada batch · perfis para serving online</p>
+        <h2 class="slide-heading">Dataprep histórico → MongoDB → API</h2>
+        <p class="sub" style="margin:-0.35rem 0 0.75rem;font-size:0.88rem;color:var(--muted);">Dois braços da arquitetura Lambda: <strong>batch</strong> materializa comportamento histórico; <strong>speed</strong> consulta na análise em tempo real.</p>
+        <div class="card-panel batch-flow-viz" style="padding:0.75rem 1rem;margin-bottom:0.85rem;">
+          <svg viewBox="0 0 920 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Fluxo batch MongoDB API" style="width:100%;height:auto;display:block;">
+            <defs>
+              <marker id="bf-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#22d3ee"/>
+              </marker>
+            </defs>
+            <rect class="node-box" x="8" y="36" width="118" height="48" rx="10"/>
+            <text class="node-label" x="67" y="58" text-anchor="middle">Histórico</text>
+            <text class="node-hint" x="67" y="72" text-anchor="middle">JSON · core · ADLS Bronze</text>
+            <rect class="node-box" x="148" y="36" width="130" height="48" rx="10"/>
+            <text class="node-label" x="213" y="58" text-anchor="middle">Dataprep</text>
+            <text class="node-hint" x="213" y="72" text-anchor="middle">agrega por user_id</text>
+            <rect class="node-box" x="300" y="28" width="118" height="64" rx="10" style="stroke:#a78bfa"/>
+            <text class="node-label" x="359" y="52" text-anchor="middle">MongoDB</text>
+            <text class="node-hint" x="359" y="68" text-anchor="middle">user_profiles</text>
+            <text class="node-hint" x="359" y="82" text-anchor="middle">Cosmos (Azure)</text>
+            <rect class="node-box" x="440" y="36" width="118" height="48" rx="10"/>
+            <text class="node-label" x="499" y="58" text-anchor="middle">API Java</text>
+            <text class="node-hint" x="499" y="72" text-anchor="middle">POST /analyze</text>
+            <rect class="node-box" x="580" y="36" width="118" height="48" rx="10"/>
+            <text class="node-label" x="639" y="58" text-anchor="middle">Score + boost</text>
+            <text class="node-hint" x="639" y="72" text-anchor="middle">anomaly_reasons</text>
+            <rect class="node-box" x="720" y="28" width="192" height="64" rx="10" style="stroke:#fcd34d"/>
+            <text class="node-label" x="816" y="52" text-anchor="middle">Dashboard</text>
+            <text class="node-hint" x="816" y="68" text-anchor="middle">filtro · liberar · DeepSeek</text>
+            <path d="M 126 60 L 148 60" stroke="#22d3ee" stroke-width="2" marker-end="url(#bf-arrow)" fill="none"/>
+            <path d="M 278 60 L 300 60" stroke="#22d3ee" stroke-width="2" marker-end="url(#bf-arrow)" fill="none"/>
+            <path d="M 418 60 L 440 60" stroke="#22d3ee" stroke-width="2" marker-end="url(#bf-arrow)" fill="none"/>
+            <path d="M 558 60 L 580 60" stroke="#22d3ee" stroke-width="2" marker-end="url(#bf-arrow)" fill="none"/>
+            <path d="M 698 60 L 720 60" stroke="#fcd34d" stroke-width="2" marker-end="url(#bf-arrow)" fill="none"/>
+          </svg>
+        </div>
+        <div class="two-col">
+          <ul class="clean card-panel" style="margin:0;">
+            <li><strong>Entrada batch:</strong> <code>data/transactions.json</code> (simula exportação histórica / landing Bronze).</li>
+            <li><strong>Dataprep:</strong> <code>scripts/batch_dataprep_mongo.py</code> — média, desvio, P95, categorias típicas, % internacional.</li>
+            <li><strong>Serving store:</strong> MongoDB <code>user_profiles</code> — na Azure, <strong>Cosmos DB</strong> (API MongoDB) com mesma ideia.</li>
+            <li><strong>Online:</strong> API consulta perfil e aplica <code>profile_anomaly_boost</code> ao score de fraude.</li>
+          </ul>
+          <ul class="clean card-panel" style="margin:0;">
+            <li><strong>Spark Medallion</strong> (paralelo): lake Bronze→Silver→Gold para analítico e retreino.</li>
+            <li><strong>Operação:</strong> painel filtra fraudes, <strong>libera</strong> com <strong>opinião da IA</strong>, chat <strong>DeepSeek</strong> no contexto.</li>
+            <li><strong>Scoring demo:</strong> Java <code>1.0.0-java-balanced</code> · <code>is_fraud</code> se score ≥ <strong>0,74</strong> (~5–15% em lote típico).</li>
+            <li><strong>Hub:</strong> botão <em>Executar fluxo completo</em> no portal :8880 (Mongo + Spark via console :3333).</li>
+          </ul>
+        </div>
+        <div class="demo-box">
+          <span class="demo-label">Demo ao vivo · batch → Mongo → analyze com user_id</span>
+          <ul>
+            <li>Portal :8880 → <strong>Executar fluxo completo</strong> (ou <code>bash scripts/run_demo.sh</code>)</li>
+            <li><code>curl -s http://localhost:8080/api/v1/batch/profile-stats | python3 -m json.tool</code></li>
+            <li>Analyze com perfil: <code style="word-break:break-all;">curl -s -X POST http://localhost:8080/api/v1/transactions/analyze -H "Content-Type: application/json" -d '{"amount":50000,"merchant_category":"Viagem","user_country":"BR","merchant_country":"US","payment_method":"CREDIT_CARD","hour":3,"is_weekend":1,"is_international":1,"user_id":"user_1001"}'</code></li>
+            <li>Dashboard :8501 — gráficos + modelo, filtro fraudes, <strong>Liberar</strong>, <strong>Opinião da IA</strong>, chat DeepSeek</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 Tópico 4 Observabilidade -->
+    <section class="slide slide--accent" data-slide="8">
+      <div class="slide__inner">
+        <p class="topic-num"><span class="mark">✅</span> Etapa 4 · Observabilidade</p>
+        <h2 class="slide-heading">Telemetria de ponta a ponta</h2>
+        <ul class="clean card-panel">
+          <li><strong>Azure Monitor</strong> <strong>(CloudWatch + CloudWatch Logs)</strong>: métricas de plataforma (throughput Event Hubs / shards Kinesis, Databricks / EMR, Synapse / Redshift, <strong>Cosmos DB</strong> / <strong>DynamoDB</strong>), alertas e SLO.</li>
+          <li><strong>Application Insights</strong> <strong>(X-Ray / OTel + CloudWatch)</strong>: APM na Azure (Terraform <code>apresentacao</code>); localmente <strong>Prometheus + Grafana</strong> no Compose.</li>
+          <li><strong>Métricas customizadas:</strong> latência de scoring, lag do consumer, taxas por canal — em produção, <strong>Monitor</strong> / <strong>CloudWatch</strong>; na demo, <strong>Prometheus</strong>.</li>
+          <li><strong>Log Analytics</strong> <strong>(CloudWatch Logs Insights)</strong>: consultas (KQL ↔ CloudWatch Logs Insights), retenção — paralelo aos logs nos containers.</li>
+        </ul>
+        <div class="demo-box">
+          <span class="demo-label">Demo ao vivo · observabilidade (Python)</span>
+          <ul>
+            <li><a href="http://localhost:8080/health" target="_blank" rel="noopener" style="color:var(--accent);">http://localhost:8080/health</a> — disponibilidade da API.</li>
+            <li><a href="http://localhost:8080/swagger-ui.html" target="_blank" rel="noopener" style="color:var(--accent);">Swagger</a> — contrato e tráfego manual.</li>
+            <li>Prometheus: <code>:9090</code> (targets) · Grafana: <code>:3000</code> — diga: “produção Azure: <strong>Monitor + App Insights</strong>; AWS: <strong>CloudWatch + X-Ray</strong>; aqui o mesmo desenho pull de métricas.”</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8 Tópico 5 Segurança -->
+    <section class="slide slide--accent" data-slide="9">
+      <div class="slide__inner">
+        <p class="topic-num"><span class="mark">✅</span> Etapa 5 · Segurança de dados</p>
+        <h2 class="slide-heading">Defesa em profundidade: Azure <span style="color:var(--muted);font-size:0.85em;">(AWS entre parênteses)</span></h2>
+        <ul class="clean card-panel">
+          <li><strong>Criptografia (nativa cloud):</strong> TLS; repouso com CMK no <strong>Key Vault</strong> <strong>(KMS + Secrets Manager / SSM)</strong>.</li>
+          <li><strong>Azure Key Vault</strong> <strong>(Secrets Manager / SSM + KMS)</strong>: secrets de <strong>Data Factory</strong> / <strong>Glue</strong>, strings de <strong>Event Hubs</strong> / <strong>Kinesis</strong>, credenciais <strong>Synapse</strong>/<strong>Cosmos DB</strong> <strong>(Redshift / DynamoDB)</strong> — rotação e identidade gerenciada <strong>(IAM roles)</strong>.</li>
+          <li><strong>Microsoft Entra ID</strong> <strong>(IAM + IAM Identity Center)</strong> + RBAC: papéis por workload; escopos no lake <strong>(ABAC S3 / Lake Formation)</strong>; auditoria <strong>(CloudTrail)</strong>.</li>
+          <li><strong>Mascaramento de dados:</strong> aplicado em APIs, pipelines de exportação e ambientes não produtivos — detalhado no próximo bloco.</li>
+        </ul>
+        <div class="demo-box">
+          <span class="demo-label">Demo ao vivo · segurança (camada aplicação)</span>
+          <p>Na fala: <strong>Key Vault</strong> / <strong>Entra</strong> (Azure) ↔ <strong>Secrets Manager + IAM</strong> (AWS). Na mesa: <strong>API</strong> + código de mascaramento (próximo slide).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 Tópico 6 Mascaramento -->
+    <section class="slide slide--accent" data-slide="10">
+      <div class="slide__inner">
+        <p class="topic-num"><span class="mark">✅</span> Etapa 6 · Mascaramento de dados</p>
+        <h2 class="slide-heading">DataMasker e conformidade LGPD</h2>
+        <ul class="clean card-panel">
+          <li><strong>Classe <code>DataMasker</code> completa</strong> em <code>src/utils/data_masker.py</code> — reutilizável na API, em jobs e em testes.</li>
+          <li><strong>Campos cobertos:</strong> <strong>CPF, e-mail, telefone, nome, cartão</strong> — padrões configuráveis (últimos dígitos visíveis quando permitido).</li>
+          <li><strong>Anonimização via hash</strong> (salt + algoritmo forte) para ambientes analíticos onde o vínculo deve ser irreversível.</li>
+          <li><strong>LGPD:</strong> minimização, finalidade, rastreio de acesso; endpoint <code>POST /api/v1/lgpd/mask</code> para demonstração em painel.</li>
+        </ul>
+        <pre class="code"><code>python -c "
+from src.utils.data_masker import DataMasker
+m = DataMasker()
+print(m.mask_cpf('123.456.789-00'))
+"</code></pre>
+        <div class="demo-box">
+          <span class="demo-label">Demo ao vivo · LGPD (recomendado)</span>
+          <ul style="margin:0.35rem 0 0;font-size:0.84rem;">
+            <li><strong>Dashboard</strong> <a href="http://localhost:8501" target="_blank" rel="noopener" style="color:var(--accent);">:8501</a> → aba <strong>LGPD / mascaramento</strong> → botão <em>Aplicar mascaramento</em> (tabela antes × depois + explicação por campo)</li>
+            <li>Alternativa terminal:</li>
+          </ul>
+          <pre class="code" style="margin-top:0.5rem;font-size:0.68rem;"><code>curl -s -X POST http://localhost:8080/api/v1/lgpd/mask \
+  -H "Content-Type: application/json" \
+  -d '{"cpf":"123.456.789-00","email":"joao.silva@banco.com.br","phone":"(11) 98765-4321","name":"Joao Silva","card_number":"1234 5678 9012 3456"}' | python3 -m json.tool</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10 Tópico 7 Arquitetura -->
+    <section class="slide slide--accent" data-slide="11">
+      <div class="slide__inner">
+        <p class="topic-num"><span class="mark">✅</span> Etapa 7 · Arquitetura de dados</p>
+        <h2 class="slide-heading">Modelo analítico e features</h2>
+        <ul class="clean card-panel">
+          <li><strong>Data lake (Medallion):</strong> <strong>Raw → Processed → Curated</strong> com contratos de qualidade; Delta/ACID em <strong>Databricks</strong> <strong>(EMR / Glue + Delta no S3)</strong>.</li>
+          <li><strong>Data warehouse — Kimball (star schema):</strong> fato de transações, dimensões de cliente/canal/tempo; sumarizações em <strong>Synapse</strong> <strong>(Redshift)</strong> ou <strong>Athena</strong>.</li>
+          <li><strong>Features / perfis para serving online:</strong> <strong>Cosmos DB</strong> <strong>(MongoDB local)</strong> com documento <code>user_profiles</code> por <code>user_id</code>; Gold no lake alimenta retreino; perfis alimentam <code>/analyze</code>.</li>
+          <li><strong>Processamento distribuído:</strong> <strong>Databricks</strong> <strong>(EMR / Glue Spark)</strong> no <strong>ADLS Gen2</strong> <strong>(S3)</strong>.</li>
+        </ul>
+        <div class="demo-box">
+          <span class="demo-label">Demo ao vivo · qualidade / arquitetura no código</span>
+          <ul>
+            <li><code>curl -s http://localhost:8080/api/v1/data-quality/report | python3 -m json.tool</code></li>
+            <li>Abra <code>governanca.yaml</code> e relacione ao relatório da API.</li>
+            <li>Reforce o notebook <code>01_dataprep_dq.py</code> como implementação do fluxo Medallion + DQ.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 Tópico 8 Escalabilidade -->
+    <section class="slide slide--accent" data-slide="12">
+      <div class="slide__inner">
+        <p class="topic-num"><span class="mark">✅</span> Etapa 8 · Escalabilidade</p>
+        <h2 class="slide-heading">Pronto para crescimento</h2>
+        <ul class="clean card-panel">
+          <li><strong>Auto-scaling:</strong> TU/partições <strong>Event Hubs</strong> <strong>(Kinesis shards / MSK)</strong>, workers <strong>Databricks</strong> <strong>(EMR)</strong>, RU/s <strong>Cosmos DB</strong> <strong>(DynamoDB WCU/RCU)</strong>, pools <strong>Synapse</strong> <strong>(Redshift)</strong>.</li>
+          <li><strong>Particionamento:</strong> lake <strong>ADLS/S3</strong>; shuffle no Spark; partition key em <strong>Cosmos DB</strong> <strong>(DynamoDB)</strong> sem hotspot.</li>
+          <li><strong>Escalonamento horizontal:</strong> API em <strong>AKS / Container Apps</strong> <strong>(EKS / ECS / Fargate)</strong>; novos consumidores / consumer groups.</li>
+          <li><strong>Capacidade-alvo:</strong> <strong>10M+ transações/dia</strong> com margem para picos (Black Friday, PIX em massa) — validação por teste de carga e custo (FinOps).</li>
+        </ul>
+        <div class="pill-row">
+          <span class="pill">SLO + alertas</span>
+          <span class="pill">Custo por 1M tx</span>
+          <span class="pill">DR / multi-região (roadmap)</span>
+        </div>
+        <div class="demo-box">
+          <span class="demo-label">Demo ao vivo · carga na API (throughput ponta-a-ponta da mesa)</span>
+          <ul>
+            <li><code>curl -s -X POST http://localhost:8080/api/v1/transactions/batch -H "Content-Type: application/json" -d '[{"amount":150,"merchant_category":"Alimentacao","user_country":"BR","merchant_country":"BR","payment_method":"PIX","hour":14,"is_weekend":0,"is_international":0},{"amount":45000,"merchant_category":"Eletronicos","user_country":"BR","merchant_country":"US","payment_method":"CREDIT_CARD","hour":3,"is_weekend":1,"is_international":1}]' | python3 -m json.tool</code></li>
+            <li><code>curl -s http://localhost:8080/api/v1/model/metrics | python3 -m json.tool</code></li>
+            <li><code>docker compose ps</code> — cite portas e serviços (escaláveis com mais réplicas em orquestrador).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12 Trilha de demo = roteiro T0–T11 -->
+    <section class="slide slide--accent" data-slide="13">
+      <div class="slide__inner">
+        <p class="eyebrow">Demonstração ao vivo</p>
+        <h2 class="slide-heading">Trilha de demonstração · escolha <span class="badge-time">1 modo</span></h2>
+        <p class="stack-note" style="margin-bottom:0.85rem;"><strong>Na banca use Docker Compose</strong> — espelha o diagrama Azure. Na nuvem: <code>cd infrastructure/terraform/apresentacao && terraform apply</code> (mesmos blocos: Event Hubs, ADLS Medallion, API em Container Apps, Monitor).</p>
+        <div class="card-panel" style="margin:0;">
+          <strong style="color:var(--accent-2); font-size:0.8rem;">Demo local (Compose)</strong>
+          <ul class="clean" style="margin-top:0.5rem;font-size:0.84rem;">
+            <li><code>docker compose up -d --build</code> · portal <a href="http://localhost:8880" target="_blank" rel="noopener" style="color:var(--accent);">:8880</a></li>
+            <li><a href="http://localhost:8080/health" target="_blank" rel="noopener" style="color:var(--accent);">/health</a> · <a href="http://localhost:8080/swagger-ui.html" target="_blank" rel="noopener" style="color:var(--accent);">Swagger</a> · <a href="http://localhost:8501" target="_blank" rel="noopener" style="color:var(--accent);">Streamlit</a></li>
+            <li><code>bash scripts/run_demo.sh</code> — JSON + <strong>batch Mongo</strong> + Spark Medallion</li>
+            <li>Portal :8880 → botão <strong>Executar fluxo completo</strong></li>
+          </ul>
+        </div>
+        <div class="two-col" style="margin-top:0.75rem;">
+          <div class="card-panel" style="margin:0;">
+            <strong style="color:var(--accent-2); font-size:0.8rem;">Checklist T0–T7 (ordem sugerida)</strong>
+            <ul class="clean" style="margin-top:0.5rem;font-size:0.84rem;">
+              <li><strong>T0</strong> — <code>docker compose up -d --build</code> (local) ou <code>terraform apply</code> em <code>infrastructure/terraform/apresentacao</code></li>
+              <li><strong>T1</strong> — <a href="http://localhost:8080/health" target="_blank" rel="noopener" style="color:var(--accent);">/health</a></li>
+              <li><strong>T2</strong> — <a href="http://localhost:8080/swagger-ui.html" target="_blank" rel="noopener" style="color:var(--accent);">Swagger</a></li>
+              <li><strong>T3</strong> — <strong>Batch dataprep</strong> → Mongo (<code>/batch/profile-stats</code> &gt; 0)</li>
+              <li><strong>T4</strong> — <a href="http://localhost:8501" target="_blank" rel="noopener" style="color:var(--accent);">Streamlit</a> — fraudes · liberar · opinião IA</li>
+              <li><strong>T4b</strong> — Streamlit aba <strong>LGPD / mascaramento</strong> (slide Etapa 6)</li>
+              <li><strong>T5</strong> — <code>POST …/analyze</code> com <code>user_id</code> (perfil histórico)</li>
+              <li><strong>T6</strong> — Analyze suspeito + <code>anomaly_reasons</code> no JSON</li>
+              <li><strong>T7</strong> — <code>POST …/transactions/batch</code> (carga na API)</li>
+            </ul>
+          </div>
+          <div class="card-panel" style="margin:0;">
+            <strong style="color:var(--accent-2); font-size:0.8rem;">Checklist T8–T12 + artefatos</strong>
+            <ul class="clean" style="margin-top:0.5rem;font-size:0.84rem;">
+              <li><strong>T8</strong> — Kafka: tópico + producer + consumer (Slide de ingestão)</li>
+              <li><strong>T9</strong> — <code>notebooks/01_dataprep_dq.py</code> + Spark Medallion</li>
+              <li><strong>T10</strong> — <code>batch_dataprep_mongo.py</code> (slide batch→Mongo→API)</li>
+              <li><strong>T11</strong> — Prometheus <code>:9090</code> · Grafana <code>:3000</code></li>
+              <li><strong>T12</strong> — <code>bash scripts/run_demo.sh</code> · slide <strong>draw.io</strong> (04 ou azure-aws-local)</li>
+            </ul>
+          </div>
+        </div>
+        <pre class="code" style="margin-top:0.75rem;font-size:0.66rem;"><code># Analyze com perfil Mongo (complementa T5–T6)
+curl -s -X POST http://localhost:8080/api/v1/transactions/analyze \
+  -H "Content-Type: application/json" \
+  -d '{"amount":50000,"merchant_category":"Viagem","user_country":"BR","merchant_country":"US","payment_method":"CREDIT_CARD","hour":3,"is_weekend":1,"is_international":1,"user_id":"user_1001"}'</code></pre>
+      </div>
+    </section>
+
+    <!-- 13 Multi-cloud -->
+    <section class="slide slide--accent" data-slide="14">
+      <div class="slide__inner">
+        <h2 class="slide-heading">Mapa rápido: Azure <span style="color:var(--muted);font-weight:500;">(AWS entre parênteses)</span> <span class="badge-time">referência</span></h2>
+        <div class="card-panel" style="padding:0; overflow:auto;">
+          <table class="data">
+            <thead><tr><th>Função</th><th>Azure (equivalente AWS)</th></tr></thead>
+            <tbody>
+              <tr><td>Streaming ingestão</td><td>Event Hubs (Kinesis Data Streams / MSK)</td></tr>
+              <tr><td>Lake objeto</td><td>ADLS Gen2 (S3)</td></tr>
+              <tr><td>Governança / catálogo</td><td>Purview (Lake Formation + Glue Catalog)</td></tr>
+              <tr><td>Orquestração ETL</td><td>Data Factory (Glue Workflow / Step Functions)</td></tr>
+              <tr><td>Spark</td><td>Azure Databricks (EMR / Glue Spark)</td></tr>
+              <tr><td>DW / SQL analítico</td><td>Synapse / Fabric (Redshift / Athena)</td></tr>
+              <tr><td>NoSQL wide-column</td><td>Cosmos DB (DynamoDB)</td></tr>
+              <tr><td>ML treino &amp; deploy</td><td>Azure ML (SageMaker)</td></tr>
+              <tr><td>Secrets</td><td>Key Vault (Secrets Manager / SSM / KMS)</td></tr>
+              <tr><td>Métricas &amp; logs</td><td>Monitor / Log Analytics (CloudWatch / Logs Insights)</td></tr>
+              <tr><td>Tracing APM</td><td>Application Insights (X-Ray / OpenTelemetry)</td></tr>
+              <tr><td>Containers orquestrados</td><td>AKS / Container Apps (EKS / ECS / Fargate)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 14 Encerramento -->
+    <section class="slide slide--cover" data-slide="15" style="background: linear-gradient(145deg, #0f172a, #1e1b4b);">
+      <div class="slide__inner" style="text-align:center;">
+        <p class="eyebrow">Obrigado</p>
+        <div class="thanks-viz" id="thanks-viz" aria-label="Agradecimento — dados em movimento">
+          <svg viewBox="0 0 440 200" xmlns="http://www.w3.org/2000/svg" role="img">
+            <defs>
+              <linearGradient id="thanksGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#22d3ee"/>
+                <stop offset="100%" stop-color="#6366f1"/>
+              </linearGradient>
+              <filter id="thanksGlow" x="-80%" y="-80%" width="260%" height="260%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="1.5" result="g"/>
+                <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <g opacity="0.55">
+              <text class="bit-col" id="thanks-bit-a1" x="28" y="32">1</text>
+              <text class="bit-col" id="thanks-bit-a2" x="28" y="52">0</text>
+              <text class="bit-col" id="thanks-bit-a3" x="28" y="72">1</text>
+              <text class="bit-col" id="thanks-bit-b1" x="404" y="40">0</text>
+              <text class="bit-col" id="thanks-bit-b2" x="404" y="60">1</text>
+              <text class="bit-col" id="thanks-bit-b3" x="404" y="80">1</text>
+              <text class="bit-col" id="thanks-bit-b4" x="404" y="100">0</text>
+            </g>
+            <ellipse id="thanks-ring-3" class="pulse-ring" cx="220" cy="108" rx="18" ry="10"/>
+            <ellipse id="thanks-ring-2" class="pulse-ring" cx="220" cy="108" rx="18" ry="10"/>
+            <ellipse id="thanks-ring-1" class="pulse-ring" cx="220" cy="108" rx="18" ry="10"/>
+            <path id="thanks-orbit" d="M 298 108 A 78 78 0 1 1 142 108 A 78 78 0 1 1 298 108" fill="none"/>
+            <circle id="thanks-orbit-dot" class="orbit-dot" r="5" cx="298" cy="108"/>
+            <g id="thanks-db">
+              <ellipse class="db-top" cx="220" cy="72" rx="52" ry="14"/>
+              <path class="db-body" d="M 168 72 v 52 c 0 8 104 8 104 0 V 72"/>
+              <ellipse class="db-top" cx="220" cy="124" rx="52" ry="14" style="fill:rgba(15,23,42,0.5);"/>
+              <line x1="188" y1="90" x2="252" y2="90" stroke="rgba(34,211,238,0.35)" stroke-width="1"/>
+              <line x1="188" y1="104" x2="252" y2="104" stroke="rgba(34,211,238,0.25)" stroke-width="1"/>
+            </g>
+            <text x="220" y="168" text-anchor="middle" fill="#94a3b8" font-family="DM Sans, system-ui, sans-serif" font-size="11" font-weight="600">pipeline fechado · integridade &amp; insight</text>
+          </svg>
+          <p class="thanks-viz__tagline" id="thanks-tagline">Da coleta ao valor — <strong style="color:var(--accent-2);font-weight:600;">obrigado a todos</strong></p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="toolbar">
+    <div class="btns">
+      <a href="index.html" style="color:var(--muted);font-size:0.78rem;text-decoration:none;margin-right:0.5rem;"><i class="bi bi-house"></i> Hub</a>
+      <button type="button" id="btn-prev" title="Anterior (←)"><i class="bi bi-chevron-left"></i> Anterior</button>
+      <button type="button" id="btn-next" class="primary" title="Próximo (→)">Próximo <i class="bi bi-chevron-right"></i></button>
+    </div>
+    <span class="counter" id="counter" aria-live="polite">1 / 16</span>
+  </div>
+
+  <script>
+(function () {
+  if (typeof mermaid !== "undefined") {
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "dark",
+      securityLevel: "loose",
+      themeVariables: {
+        primaryTextColor: "#f1f5f9",
+        lineColor: "#64748b",
+        textColor: "#f1f5f9",
+        mainBkg: "#1e293b",
+        nodeBorder: "#22d3ee"
+      },
+      flowchart: { useMaxWidth: true, curve: "basis" }
+    });
+  }
+
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var total = slides.length;
+  var idx = 0;
+  var progressFill = document.getElementById("progress-fill");
+  var counter = document.getElementById("counter");
+  var mermaidArchDone = false;
+  var closingFlowAnims = [];
+  var closingFlowInited = false;
+
+  function setClosingFlowPlaying(on) {
+    if (typeof anime === "undefined") return;
+    closingFlowAnims.forEach(function (a) {
+      if (on) a.play();
+      else a.pause();
+    });
+  }
+
+  function initClosingFlowAnims() {
+    if (closingFlowInited || typeof anime === "undefined") return;
+    var pathEnergy = document.getElementById("closing-flow-energy");
+    var pathMain = document.getElementById("closing-flow-path");
+    if (!pathEnergy || !pathMain) return;
+    closingFlowInited = true;
+    pathEnergy.setAttribute("stroke-dasharray", "14 86");
+    pathEnergy.setAttribute("stroke-dashoffset", "0");
+    closingFlowAnims.push(
+      anime({
+        targets: pathEnergy,
+        strokeDashoffset: [0, -100],
+        duration: 3800,
+        easing: "linear",
+        loop: true
+      })
+    );
+    var len = pathMain.getTotalLength();
+    var phases = [
+      { sel: "#closing-particle-1", period: 9200, phase: 0 },
+      { sel: "#closing-particle-2", period: 12400, phase: 0.38 },
+      { sel: "#closing-particle-3", period: 10800, phase: 0.72 }
+    ];
+    phases.forEach(function (c) {
+      var o = { v: 0 };
+      closingFlowAnims.push(
+        anime({
+          targets: o,
+          v: 100,
+          duration: c.period,
+          easing: "linear",
+          loop: true,
+          update: function () {
+            var t = (o.v / 100 + c.phase) % 1;
+            var pt = pathMain.getPointAtLength(t * len);
+            var el = document.querySelector(c.sel);
+            if (el) {
+              el.setAttribute("cx", pt.x);
+              el.setAttribute("cy", pt.y);
+            }
+          }
+        })
+      );
+    });
+    document.querySelectorAll(".closing-flow .edge-observe").forEach(function (el) {
+      closingFlowAnims.push(
+        anime({
+          targets: el,
+          strokeDashoffset: [0, -40],
+          duration: 7000,
+          easing: "linear",
+          loop: true
+        })
+      );
+    });
+    setClosingFlowPlaying(false);
+  }
+
+  function syncClosingFlow(slideIndex) {
+    initClosingFlowAnims();
+    if (!closingFlowInited) return;
+    setClosingFlowPlaying(slideIndex === 1);
+  }
+
+  var agendaTopicsAnims = [];
+  var agendaTopicsInited = false;
+
+  function setAgendaTopicsPlaying(on) {
+    if (typeof anime === "undefined") return;
+    agendaTopicsAnims.forEach(function (a) {
+      if (on) a.play();
+      else a.pause();
+    });
+  }
+
+  function clearAgendaNodeHot() {
+    for (var k = 1; k <= 8; k++) {
+      var el = document.getElementById("ag-node-" + k);
+      if (el) el.classList.remove("ag-node--hot");
+    }
+  }
+
+  function initAgendaTopicsAnims() {
+    if (agendaTopicsInited || typeof anime === "undefined") return;
+    var pathEnergy = document.getElementById("agenda-topics-energy");
+    var pathMain = document.getElementById("agenda-topics-path");
+    if (!pathEnergy || !pathMain) return;
+    agendaTopicsInited = true;
+    pathEnergy.setAttribute("stroke-dasharray", "10 90");
+    pathEnergy.setAttribute("stroke-dashoffset", "0");
+    agendaTopicsAnims.push(
+      anime({
+        targets: pathEnergy,
+        strokeDashoffset: [0, -100],
+        duration: 4200,
+        easing: "linear",
+        loop: true
+      })
+    );
+    var len = pathMain.getTotalLength();
+    var p1 = document.getElementById("agenda-particle-1");
+    var p2 = document.getElementById("agenda-particle-2");
+    function setHotFromT(t) {
+      var hi = Math.min(7, Math.floor(t * 8));
+      for (var k = 1; k <= 8; k++) {
+        var el = document.getElementById("ag-node-" + k);
+        if (el) el.classList.toggle("ag-node--hot", k === hi + 1);
+      }
+    }
+    var o1 = { v: 0 };
+    agendaTopicsAnims.push(
+      anime({
+        targets: o1,
+        v: 100,
+        duration: 13200,
+        easing: "linear",
+        loop: true,
+        update: function () {
+          var t = o1.v / 100;
+          var pt = pathMain.getPointAtLength(t * len);
+          if (p1) {
+            p1.setAttribute("cx", pt.x);
+            p1.setAttribute("cy", pt.y);
+          }
+          setHotFromT(t);
+        }
+      })
+    );
+    var o2 = { v: 0 };
+    agendaTopicsAnims.push(
+      anime({
+        targets: o2,
+        v: 100,
+        duration: 15200,
+        easing: "linear",
+        loop: true,
+        update: function () {
+          var t = (o2.v / 100 + 0.42) % 1;
+          var pt = pathMain.getPointAtLength(t * len);
+          if (p2) {
+            p2.setAttribute("cx", pt.x);
+            p2.setAttribute("cy", pt.y);
+          }
+        }
+      })
+    );
+    setAgendaTopicsPlaying(false);
+  }
+
+  function syncAgendaTopics(slideIndex) {
+    initAgendaTopicsAnims();
+    if (!agendaTopicsInited) return;
+    if (slideIndex !== 2) clearAgendaNodeHot();
+    setAgendaTopicsPlaying(slideIndex === 2);
+  }
+
+  var thanksAnims = [];
+  var thanksInited = false;
+
+  function setThanksPlaying(on) {
+    if (typeof anime === "undefined") return;
+    thanksAnims.forEach(function (a) {
+      if (on) a.play();
+      else a.pause();
+    });
+  }
+
+  function initThanksAnims() {
+    if (thanksInited || typeof anime === "undefined") return;
+    if (!document.getElementById("thanks-viz")) return;
+    thanksInited = true;
+
+    [1, 2, 3].forEach(function (n, i) {
+      var el = document.getElementById("thanks-ring-" + n);
+      if (!el) return;
+      thanksAnims.push(
+        anime({
+          targets: el,
+          rx: [18, 96],
+          ry: [10, 54],
+          opacity: [0.5, 0],
+          duration: 2600,
+          delay: i * 520,
+          easing: "easeOutQuad",
+          loop: true
+        })
+      );
+    });
+
+    var orbit = document.getElementById("thanks-orbit");
+    var orbitDot = document.getElementById("thanks-orbit-dot");
+    if (orbit && orbitDot) {
+      var olen = orbit.getTotalLength();
+      var ov = { v: 0 };
+      thanksAnims.push(
+        anime({
+          targets: ov,
+          v: 100,
+          duration: 6400,
+          easing: "linear",
+          loop: true,
+          update: function () {
+            var pt = orbit.getPointAtLength((ov.v / 100) * olen);
+            orbitDot.setAttribute("cx", pt.x);
+            orbitDot.setAttribute("cy", pt.y);
+          }
+        })
+      );
+    }
+
+    var db = document.getElementById("thanks-db");
+    if (db) {
+      thanksAnims.push(
+        anime({
+          targets: db,
+          translateY: [0, -5, 0],
+          duration: 3000,
+          easing: "easeInOutSine",
+          loop: true
+        })
+      );
+    }
+
+    document.querySelectorAll('[id^="thanks-bit-"]').forEach(function (el, i) {
+      thanksAnims.push(
+        anime({
+          targets: el,
+          translateY: [0, 5, 0],
+          opacity: [0.4, 0.95, 0.4],
+          duration: 2100 + (i % 4) * 140,
+          delay: (i * 160) % 900,
+          easing: "easeInOutSine",
+          loop: true
+        })
+      );
+    });
+
+    var tagEl = document.getElementById("thanks-tagline");
+    if (tagEl) {
+      thanksAnims.push(
+        anime({
+          targets: tagEl,
+          opacity: [0.72, 1],
+          duration: 2400,
+          direction: "alternate",
+          easing: "easeInOutSine",
+          loop: true
+        })
+      );
+    }
+
+    setThanksPlaying(false);
+  }
+
+  function syncThanksAnims(slideIndex) {
+    initThanksAnims();
+    if (!thanksInited) return;
+    setThanksPlaying(slideIndex === total - 1);
+  }
+
+  function tryRenderArchMermaid(i) {
+    if (i !== 4 || mermaidArchDone || typeof mermaid === "undefined") return;
+    var node = document.getElementById("mermaid-arch-diagram");
+    if (!node) return;
+    mermaidArchDone = true;
+    requestAnimationFrame(function () {
+      mermaid.run({ nodes: [node] }).catch(function (err) {
+        console.warn("Mermaid:", err);
+        mermaidArchDone = false;
+      });
+    });
+  }
+
+  function show(i) {
+    idx = Math.max(0, Math.min(total - 1, i));
+    slides.forEach(function (s, j) {
+      s.classList.toggle("is-active", j === idx);
+    });
+    var pct = total > 1 ? (idx / (total - 1)) * 100 : 100;
+    progressFill.style.width = pct + "%";
+    counter.textContent = (idx + 1) + " / " + total;
+    history.replaceState(null, "", "#" + (idx + 1));
+    tryRenderArchMermaid(idx);
+    syncClosingFlow(idx);
+    syncAgendaTopics(idx);
+    syncThanksAnims(idx);
+  }
+
+  function go(delta) {
+    show(idx + delta);
+  }
+
+  document.getElementById("btn-prev").addEventListener("click", function () { go(-1); });
+  document.getElementById("btn-next").addEventListener("click", function () { go(1); });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.isContentEditable) return;
+    if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); go(-1); }
+    if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); go(1); }
+    if (e.key === "Home") { e.preventDefault(); show(0); }
+    if (e.key === "End") { e.preventDefault(); show(total - 1); }
+  });
+
+  var sx = 0;
+  document.getElementById("deck").addEventListener("touchstart", function (e) {
+    sx = e.changedTouches[0].screenX;
+  }, { passive: true });
+  document.getElementById("deck").addEventListener("touchend", function (e) {
+    var dx = e.changedTouches[0].screenX - sx;
+    if (dx > 60) go(-1);
+    else if (dx < -60) go(1);
+  }, { passive: true });
+
+  if (location.hash && /^#\d+$/.test(location.hash)) {
+    var n = parseInt(location.hash.slice(1), 10);
+    if (n >= 1 && n <= total) show(n - 1);
+    else show(0);
+  } else {
+    show(0);
+  }
+})();
+  </script>
+</body>
+</html>

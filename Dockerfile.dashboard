@@ -1,0 +1,24 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Instalar dependencias do sistema
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar requirements e instalar dependencias Python
+COPY requirements-demo.txt .
+RUN pip install --no-cache-dir -r requirements-demo.txt
+
+# Copiar codigo fonte
+COPY src/ /app/src/
+
+# Variáveis de ambiente
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+EXPOSE 8501
+
+# Iniciar Dashboard Streamlit
+CMD ["streamlit", "run", "src/dashboard/app.py", "--server.port=8501", "--server.address=0.0.0.0", "--server.headless=true"]

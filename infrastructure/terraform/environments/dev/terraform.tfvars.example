@@ -1,0 +1,18 @@
+resource_group_name = "rg-fraud-detection-dev"
+location            = "brazilsouth"
+storage_account_name = "fraudstoragedev"
+event_hub_namespace = "fraud-events-dev"
+project_name = "fraud-detection"
+# key_vault_name = null  # default: nome gerado (único global), ex.: frauddetectionkv1a2b3c4d
+db_admin_username = "fraudadmin"
+db_admin_password = "ChangeMe123!"
+
+# Padrão econômico: não cria Synapse / Databricks / Azure ML (custam muito).
+enable_analytics_stack = false
+analytics_high_cost_acknowledged = false
+
+# Stack cara (só com os dois abaixo): custo elevado — crie orçamento no Azure Cost Management.
+# enable_analytics_stack           = true
+# analytics_high_cost_acknowledged = true
+# databricks_sku = "standard"
+

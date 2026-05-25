@@ -1,0 +1,314 @@
+services:
+  # Portal de início (links + como subir a stack)
+  portal:
+    build:
+      context: .
+      dockerfile: portal/Dockerfile
+    container_name: fraud-portal
+    ports:
+      - "8880:80"
+    networks:
+      - fraud-network
+
+  # API Java (Spring Boot) — perfil local, mesmas rotas da demo
+  api:
+    build:
+      context: ./api-java
+      dockerfile: Dockerfile
+    container_name: fraud-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=local
+      - MONGODB_URI=mongodb://admin:admin123@mongodb:27017/fraud_detection?authSource=admin
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+    depends_on:
+      mongodb:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 60s
+    networks:
+      - fraud-network
+
+  # Console Node — gerador de dados + demo_loop
+  data-console:
+    build:
+      context: .
+      dockerfile: data-generator-console/Dockerfile
+    container_name: fraud-data-console
+    ports:
+      - "3333:3333"
+    environment:
+      - API_URL=http://api:8080
+      - PROJECT_ROOT=/workspace
+      - COMPOSE_PROJECT_NAME=datamaster
+    volumes:
+      - .:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      api:
+        condition: service_healthy
+      spark-master:
+        condition: service_started
+    networks:
+      - fraud-network
+
+  # Dashboard Streamlit — Sistema de Detecção de Fraudes (UI)
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: fraud-dashboard
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8080
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+    networks:
+      - fraud-network
+
+  # Batch dataprep → MongoDB (perfis históricos para API online)
+  batch-prep:
+    image: python:3.11-slim
+    container_name: fraud-batch-prep
+    profiles: ["batch"]
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+    environment:
+      MONGODB_URI: mongodb://admin:admin123@mongodb:27017/fraud_detection?authSource=admin
+    command: >
+      bash -c "pip install -q pymongo &&
+      python3 scripts/generate_data.py -n 800 -o data/transactions.json &&
+      python3 scripts/batch_dataprep_mongo.py -i data/transactions.json"
+    depends_on:
+      mongodb:
+        condition: service_started
+    networks:
+      - fraud-network
+
+  # MongoDB
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+    volumes:
+      - mongodb_data:/data/db
+      - ./scripts/init_mongo.js:/docker-entrypoint-initdb.d/init_mongo.js
+    networks:
+      - fraud-network
+
+  # Kafka (KRaft — necessário para o job spark-job e notebooks)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - fraud-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    networks:
+      - fraud-network
+
+  # MinIO (S3 compatível)
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - fraud-network
+
+  # Cria buckets bronze / silver / gold (par ADLS na Azure)
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 3;
+      mc alias set local http://minio:9000 minioadmin minioadmin;
+      mc mb -p local/bronze local/silver local/gold 2>/dev/null || true;
+      echo 'Buckets Medallion prontos';
+      "
+    networks:
+      - fraud-network
+
+  # PostgreSQL
+  postgres:
+    image: postgres:14
+    container_name: postgres
+    environment:
+      POSTGRES_DB: fraud_detection
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./sql/seed_demo.sql:/docker-entrypoint-initdb.d/02-seed_demo.sql:ro
+    networks:
+      - fraud-network
+
+  # Redis
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - fraud-network
+
+  # Apache Spark (cluster local para apresentação + notebook PySpark)
+  spark-master:
+    image: bitnamilegacy/spark:3.5.5
+    container_name: spark-master
+    ports:
+      - "18080:8080"
+      - "7077:7077"
+    environment:
+      SPARK_MODE: master
+      SPARK_RPC_AUTHENTICATION_ENABLED: "no"
+      SPARK_RPC_ENCRYPTION_ENABLED: "no"
+    networks:
+      - fraud-network
+
+  spark-worker:
+    image: bitnamilegacy/spark:3.5.5
+    container_name: spark-worker
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_WORKER_MEMORY: 2G
+      SPARK_WORKER_CORES: 2
+    networks:
+      - fraud-network
+
+  # Job batch Medallion (rode após gerar data/transactions.json)
+  # docker compose run --rm spark-job
+  spark-job:
+    image: bitnamilegacy/spark:3.5.5
+    profiles: ["spark-run"]
+    user: "0:0"
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    environment:
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_DEMO_LOCAL: "1"
+      PROJECT_ROOT: /workspace
+      SPARK_INPUT: data/transactions.json
+      HOME: /tmp
+      USER: root
+      HADOOP_USER_NAME: root
+    entrypoint: ["/bin/bash", "/workspace/docker/spark-job-entrypoint.sh"]
+    depends_on:
+      - spark-master
+      - spark-worker
+    networks:
+      - fraud-network
+
+  # Jupyter + PySpark (notebook 01_dataprep_dq.py e testes interativos)
+  jupyter:
+    image: quay.io/jupyter/pyspark-notebook:spark-3.5.0
+    container_name: fraud-jupyter
+    ports:
+      - "8888:8888"
+    environment:
+      JUPYTER_TOKEN: datamaster
+      SPARK_MASTER: spark://spark-master:7077
+      PYSPARK_SUBMIT_ARGS: "--master spark://spark-master:7077 pyspark-shell"
+    volumes:
+      - .:/home/jovyan/work
+    command:
+      - start-notebook.sh
+      - --NotebookApp.token=datamaster
+      - --NotebookApp.password=
+    depends_on:
+      - spark-master
+      - spark-worker
+    networks:
+      - fraud-network
+
+  # Prometheus + Grafana
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - fraud-network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_DEFAULT_THEME: dark
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    networks:
+      - fraud-network
+
+volumes:
+  mongodb_data:
+  postgres_data:
+  minio_data:
+  grafana_data:
+
+networks:
+  fraud-network:
+    driver: bridge

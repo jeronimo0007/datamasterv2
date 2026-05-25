@@ -1,0 +1,21 @@
+# Convenção de camadas Medallion no data lake (Azure ADLS ou AWS S3).
+# Prefixo completo = {base_uri}/layer/entity  — ver src/data_architecture/medallion.py
+
+layers:
+  bronze:
+    description: "Landing — dados como chegaram; retencao longa; schema flexivel"
+    default_entity: "transactions"
+  silver:
+    description: "Limpeza, dedup, enriquecimento, DQ; dataset confiavel analitico"
+    default_entity: "transactions"
+  gold:
+    description: "Consumo negocio e ML — agregados, wide tables, features"
+    default_entity: "transactions_ml"
+
+# Mapeamento rapido com padroes de streaming (fala tecnica)
+streaming_patterns:
+  lambda:
+    speed: "Event Hubs / Kafka / Kinesis → score / API em baixa latencia"
+    batch: "ADF / Glue / Spark (este notebook) → Silver / Gold no lake"
+  kappa:
+    note: "Um unico log/stream com replay para reprocessamento; menos componentes, mais exigencia no pipeline de stream"

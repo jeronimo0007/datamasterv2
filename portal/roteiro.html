@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cola verbal — DataMaster</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070b14;
+      --card: rgba(15, 23, 42, 0.85);
+      --accent: #22d3ee;
+      --accent-2: #fcd34d;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --progress-h: 4px;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: clamp(15px, 1.45vw, 18px);
+    }
+    .progress-top {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--progress-h);
+      background: rgba(255,255,255,0.06);
+      z-index: 100;
+    }
+    .progress-top__fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transition: width 0.35s ease;
+    }
+    .deck { height: 100vh; position: relative; }
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: clamp(1rem, 3vw, 2.5rem);
+      padding-bottom: 4.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      background:
+        linear-gradient(160deg, #0c1222 0%, #1e1b4b 38%, #0f172a 100%),
+        radial-gradient(ellipse 70% 45% at 20% 35%, rgba(34, 211, 238, 0.1), transparent);
+    }
+    .slide.is-active {
+      display: flex;
+      opacity: 1;
+      pointer-events: auto;
+      z-index: 1;
+    }
+    .slide--cover {
+      text-align: center;
+      background:
+        linear-gradient(135deg, rgba(7, 11, 20, 0.94) 0%, rgba(15, 23, 42, 0.9) 100%),
+        url("https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&w=1600&q=75") center/cover no-repeat;
+    }
+    .slide__inner {
+      width: min(720px, 100%);
+      max-height: calc(100vh - 5rem);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent) transparent;
+    }
+    .slide__inner--wide {
+      width: min(900px, 100%);
+    }
+    .eyebrow {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--accent);
+      margin-bottom: 0.65rem;
+      font-weight: 700;
+    }
+    h1 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(1.85rem, 4.2vw, 2.75rem);
+      font-weight: 400;
+      line-height: 1.12;
+      margin: 0 0 0.75rem;
+    }
+    h1 em { font-style: italic; color: var(--accent-2); }
+    h2 {
+      font-family: "Instrument Serif", Georgia, serif;
+      font-size: clamp(1.35rem, 2.8vw, 1.85rem);
+      font-weight: 400;
+      margin: 0 0 0.9rem;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin: 0 0 1rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 1rem;
+      padding: 1.1rem 1.25rem;
+      text-align: left;
+    }
+    ul.fala {
+      margin: 0;
+      padding-left: 1.15rem;
+      line-height: 1.65;
+      color: var(--text);
+    }
+    ul.fala li { margin-bottom: 0.5rem; }
+    ul.fala strong { color: var(--accent-2); }
+    .frase {
+      margin-top: 0.75rem;
+      padding: 0.85rem 1rem;
+      border-left: 3px solid var(--accent-2);
+      background: rgba(252, 211, 77, 0.07);
+      border-radius: 0 0.5rem 0.5rem 0;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .toolbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.55rem 1rem;
+      background: rgba(7, 11, 20, 0.92);
+      border-top: 1px solid rgba(148, 163, 184, 0.15);
+    }
+    .toolbar button {
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.4rem 0.85rem;
+      border-radius: 0.45rem;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(255,255,255,0.07);
+      color: var(--text);
+      cursor: pointer;
+    }
+    .toolbar button.primary {
+      background: linear-gradient(135deg, rgba(34, 211, 238, 0.28), rgba(52, 211, 153, 0.18));
+      border-color: rgba(34, 211, 238, 0.45);
+    }
+    .counter {
+      font-size: 0.78rem;
+      color: var(--muted);
+      min-width: 6ch;
+      text-align: center;
+    }
+    table.compact {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      margin-top: 0.5rem;
+    }
+    table.compact th, table.compact td {
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      padding: 0.45rem 0.5rem;
+      text-align: left;
+    }
+    table.compact th {
+      background: rgba(34, 211, 238, 0.12);
+      color: var(--accent);
+    }
+    table.cloud-map {
+      font-size: 0.76rem;
+      margin-top: 0.35rem;
+    }
+    table.cloud-map th:first-child {
+      width: 28%;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    table.cloud-map td:nth-child(2) {
+      color: #a5f3fc;
+      font-weight: 500;
+    }
+    table.cloud-map td:nth-child(3) {
+      color: #cbd5e1;
+    }
+    .cloud-hint {
+      margin-top: 0.85rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .cloud-hint strong { color: var(--accent-2); }
+  </style>
+</head>
+<body>
+  <div class="progress-top" aria-hidden="true"><div class="progress-top__fill" id="progress-fill"></div></div>
+
+  <div class="deck" id="deck">
+
+    <section class="slide slide--cover is-active" aria-label="Capa">
+      <div class="slide__inner">
+        <p class="eyebrow">Minha cola · falo olhando pra banca</p>
+        <h1>O que <em>eu</em> digo na banca</h1>
+        <p class="sub" style="max-width:42ch;margin-left:auto;margin-right:auto;">Cola verbal — no projetor use <a href="banca.html" style="color:var(--accent);">banca.html</a> (slides). Setas ou espaço.</p>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Mensagem central">
+      <div class="slide__inner">
+        <p class="eyebrow">Eu começo posicionando assim</p>
+        <h2>Mensagem central</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“Eu usei <strong>fraude bancária</strong> como caso, mas o que eu quis mostrar é <strong>plataforma de dados</strong> de verdade: entrada de dado, camadas, qualidade, modelo em produção, LGPD, observabilidade e como isso escala.”</li>
+            <li>“Não era pra ser só um Jupyter bonito — é <strong>pipeline, governança e uma API com contrato</strong> que segura a decisão de risco em tempo aceitável.”</li>
+            <li>“Eu conto em <strong>Azure</strong> porque foi o edital, mas eu costumo soltar no mesmo parágrafo o <strong>par na AWS</strong> — não é narrativa presa a um vendor, é padrão.”</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Abertura">
+      <div class="slide__inner">
+        <p class="eyebrow">Primeiros minutos — cola</p>
+        <h2>Abertura</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“Boa tarde — eu me apresento em uma ou duas frases no contexto de <strong>risco / motores / dados</strong>…” (sem ler currículo inteiro).</li>
+            <li>“Eu vou fazer uma <strong>demo ao vivo</strong> — API, painel, alguns comandos. O desenho no slide é o <strong>alvo na nuvem</strong>; o repositório é um <strong>corte que imita o mesmo padrão</strong>, não o datacenter inteiro.”</li>
+            <li>“Podem me interromper à vontade por <strong>dado, modelo, operação, segurança ou custo</strong> — eu prefiro assim.”</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Problema">
+      <div class="slide__inner">
+        <p class="eyebrow">Por que isso existe</p>
+        <h2>Problema → requisito</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“Fraude hoje vem em <strong>volume e velocidade</strong>, principalmente com PIX; quem opera precisa decidir <strong>rápido</strong> e ainda assim ser <strong>auditável</strong>.”</li>
+            <li>“Então eu traduzi isso em requisito: <strong>latência</strong>, <strong>escala</strong>, <strong>SLA</strong>, <strong>LGPD</strong> e um trade-off honesto entre <strong>pagar caro em recall</strong> e <strong>não afogar o time em falso positivo</strong>.”</li>
+            <li>“Por isso eu não começo a história no notebook — eu começo na <strong>origem do dado</strong> e no <strong>que chega na API</strong> como contrato.”</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Pipeline">
+      <div class="slide__inner">
+        <p class="eyebrow">Eu resumo o fluxo assim</p>
+        <h2>Pipeline (versão curta)</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“Dado sai das <strong>fontes</strong> e entra no barramento — na Azure é <strong>Event Hubs</strong>; eu cito Kinesis ou MSK; na minha mesa o <strong>Kafka</strong> do Docker só ilustra o mesmo padrão.”</li>
+            <li>“Eu processo com <strong>Spark em Databricks</strong> (ou EMR na outra nuvem) e guardo em <strong>lake em camadas Bronze, Silver, Gold</strong>.”</li>
+            <li>“O modelo treina, mas quem fecha o negócio é a <strong>API</strong>; e observabilidade eu penso <strong>atravessando tudo</strong> — métrica, log, trilha quando precisar.”</li>
+            <li>“Eu tenho <strong>Terraform</strong> no repositório porque infra declarativa é parte da história, mesmo quando eu subo rápido com Compose.”</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Diagramas draw.io">
+      <div class="slide__inner slide__inner--wide">
+        <p class="eyebrow">Slide «Diagramas draw.io» (após Azure Mermaid)</p>
+        <h2>Como eu uso os arquivos .drawio</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“No slide anterior eu mostrei o <strong>Mermaid</strong> na tela; agora eu abro o <strong>draw.io</strong> do repositório para o avaliador ver o detalhe técnico — container por container.”</li>
+            <li>“Eu abro <strong>app.diagrams.net</strong>, <strong>File → Open from Device</strong>, pasta <code>docs/arquitetura/</code>.”</li>
+            <li><strong>Visão geral:</strong> <code>datamaster-00-visao-geral.drawio</code> — batch e online juntos.</li>
+            <li><strong>Batch na banca:</strong> <code>datamaster-01-batch.drawio</code> — histórico, perfis Mongo, lake.</li>
+            <li><strong>Demo online:</strong> <code>datamaster-02-online.drawio</code> — console e dashboard chamam a API <strong>direto</strong>; Kafka é narrativa de streaming.</li>
+            <li><strong>Docker:</strong> <code>datamaster-04-docker-compose.drawio</code> — cada serviço do Compose e a seta de quem chama quem.</li>
+            <li><strong>Encerramento:</strong> <code>datamaster-azure-aws-local.drawio</code> — Azure, AWS e mesa local na mesma lousa.</li>
+          </ul>
+          <p class="frase">“Os diagramas estão versionados no repo; se a banca pedir PNG, eu exporto do draw.io em cinco minutos.”</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Arquitetura Azure">
+      <div class="slide__inner slide__inner--wide">
+        <p class="eyebrow">No slide grande do index (Azure)</p>
+        <h2>Como eu apresento aquele diagrama</h2>
+        <p class="sub" style="margin-top:-0.25rem;">Projetor: <strong>«Arquitetura alvo · Azure»</strong>. Eu não leio cada caixa — eu conto o caminho do dado em cerca de <strong>um minuto</strong>.</p>
+        <div class="card">
+          <ul class="fala">
+            <li><strong>Abro dizendo:</strong> “Esse é o meu <strong>desenho de referência na Azure</strong> — ingestão, lake, governança, ML e saída por API; se vocês quiserem AWS, eu tenho o par na legenda ou eu falo na hora.”</li>
+            <li><strong>Entrada:</strong> “Aqui as <strong>fontes</strong> alimentam <strong>Data Factory</strong> no batch e <strong>Event Hubs</strong> no stream — eu deixo claro que são dois braços, estilo arquitetura Lambda.”</li>
+            <li><strong>Meio:</strong> “O <strong>Databricks</strong> processa; o <strong>ADLS</strong> segura Bronze, Silver e Gold; <strong>Synapse ou Fabric</strong> é onde o analítico pesado conversa com o negócio; <strong>Purview</strong> é onde eu não deixo o virar pântano.”</li>
+            <li><strong>ML e saída:</strong> “<strong>Azure ML</strong> é o ciclo do modelo; a <strong>API em Container Apps ou AKS</strong> é o contrato com canal e motor; se eu precisar de baixa latência operacional, eu cito <strong>Cosmos DB</strong>.”</li>
+            <li><strong>Transversal:</strong> “Segredo no <strong>Key Vault</strong>, identidade no <strong>Entra ID</strong>, <strong>Monitor e App Insights</strong> como promessa de SLO — não só log bonito.”</li>
+            <li><strong>Fechar:</strong> “Na demo eu mostro <strong>só um recorte</strong> — API Java, Kafka, notebook — mas eu obedeco a <strong>essa lógica aqui</strong>.”</li>
+          </ul>
+          <p class="frase" style="margin-top:0.85rem;margin-bottom:0;">Se alguém insistir em AWS, eu digo: “é o mesmo desenho — eu troco Factory por Glue, Hub por Kinesis, dados no S3 — sem mudar a narrativa.”</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Azure e AWS">
+      <div class="slide__inner slide__inner--wide">
+        <p class="eyebrow">Se eu precisar da tabela</p>
+        <h2>Azure ↔ AWS — como eu uso isso</h2>
+        <p class="sub" style="margin-top:-0.35rem;">“Eu <strong>não leio linha por linha</strong> — eu pego <strong>três ou quatro</strong> serviços que eu acabei de falar no diagrama e falo o par.”</p>
+        <div class="card">
+          <table class="compact cloud-map">
+            <thead><tr><th>Função</th><th>Azure</th><th>AWS (equivalente usual)</th></tr></thead>
+            <tbody>
+              <tr><td>Ingestão streaming</td><td>Event Hubs (partições, consumer group)</td><td>Kinesis Data Streams ou MSK (Kafka)</td></tr>
+              <tr><td>Lake objeto</td><td>ADLS Gen2 (hierárquico + ACL)</td><td>S3 + prefixos; Lake Formation na governança</td></tr>
+              <tr><td>Orquestração ETL</td><td>Data Factory (pipelines, triggers)</td><td>Glue Workflow, Step Functions</td></tr>
+              <tr><td>Spark gerenciado</td><td>Azure Databricks</td><td>EMR ou Glue Spark</td></tr>
+              <tr><td>SQL analítico / DW</td><td>Synapse / Fabric</td><td>Redshift; Athena sobre dados no S3</td></tr>
+              <tr><td>Catálogo / governança</td><td>Microsoft Purview</td><td>Glue Data Catalog + Lake Formation</td></tr>
+              <tr><td>ML treino &amp; deploy</td><td>Azure Machine Learning</td><td>SageMaker</td></tr>
+              <tr><td>Segredos e chaves</td><td>Key Vault</td><td>Secrets Manager / Parameter Store + KMS</td></tr>
+              <tr><td>Identidade &amp; acesso</td><td>Entra ID (Azure AD) + RBAC no recurso</td><td>IAM (usuários, roles, policies) + SSO org.</td></tr>
+              <tr><td>Métricas &amp; logs</td><td>Monitor + Log Analytics</td><td>CloudWatch Metrics + Logs Insights</td></tr>
+              <tr><td>Tracing / APM</td><td>Application Insights</td><td>X-Ray; OpenTelemetry em ambos</td></tr>
+              <tr><td>Containers orquestrados</td><td>AKS / Container Apps</td><td>EKS / ECS / Fargate</td></tr>
+            </tbody>
+          </table>
+          <p class="cloud-hint">“Se me perguntarem diferença na prática: na AWS eu penso muito em <strong>IAM role</strong> no recurso; na Azure eu penso em <strong>managed identity</strong> mais <strong>RBAC</strong> no escopo. O <strong>fluxo do dado</strong> é o mesmo — o que muda é produto e cobrança.”</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="LGPD mascaramento">
+      <div class="slide__inner slide__inner--wide">
+        <p class="eyebrow">Slide «DataMasker e conformidade LGPD» (Etapa 6)</p>
+        <h2>LGPD — o que eu falo e como demonstro</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“A LGPD não é slide de compliance solto — entra no <strong>desenho de dados</strong>: minimização, finalidade, segurança e rastreio de quem acessou PII.”</li>
+            <li>“Eu mascaro <strong>CPF, e-mail, telefone, nome e cartão</strong> antes de expor em painel, export ou homologação — mesma regra na API Java e na biblioteca Python <code>DataMasker</code>.”</li>
+            <li>“Na mesa eu abro o <strong>dashboard :8501</strong>, aba <strong>LGPD / mascaramento</strong>, clico <strong>Aplicar mascaramento</strong> e mostro a tabela <strong>antes × depois</strong> — é o mesmo contrato do <code>POST /api/v1/lgpd/mask</code>.”</li>
+            <li>“Em produção isso sobe para <strong>Purview</strong> no lake, <strong>Key Vault</strong> nos segredos e RBAC no acesso; na AWS o par é Macie + Secrets Manager.”</li>
+            <li>“Para analytics sem reidentificação eu cito <strong>hash com salt</strong> no <code>data_masker.py</code> — irreversível quando a finalidade não exige o dado bruto.”</li>
+          </ul>
+          <p class="frase">“O analista de fraude vê padrão e score; o titular não vaza em log nem em demo.”</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Batch Mongo API">
+      <div class="slide__inner slide__inner--wide">
+        <p class="eyebrow">Slide dedicado · tratamento de dados</p>
+        <h2>Batch → MongoDB → API — o que eu falo</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“Além do <strong>online</strong>, eu mostro <strong>engenharia de dados</strong>: pego histórico, faço <strong>dataprep</strong> agregado por cliente e materializo no <strong>Mongo</strong> — na Azure isso é <strong>Cosmos</strong> com API Mongo.”</li>
+            <li>“Cada <strong>analyze</strong> consulta o documento do <code>user_id</code>. Se o valor ou a categoria fogem do padrão, entram <strong>anomaly_reasons</strong> e um <strong>boost</strong> no score.”</li>
+            <li>“No portal eu clico <strong>Executar fluxo completo</strong> — na banca isso é Data Factory + agregação + job Spark no mesmo gesto.”</li>
+            <li>“No painel: gráfico de fraudes, filtro, <strong>libero</strong> com <strong>opinião da IA</strong> na transação e, se tiver chave, o <strong>DeepSeek</strong> no chat.”</li>
+          </ul>
+          <p class="frase">“Batch prepara o comportamento histórico; a API usa na hora; o analista fecha o ciclo no painel.”</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Demo">
+      <div class="slide__inner">
+        <p class="eyebrow">Na hora da demo</p>
+        <h2>O que eu faço na mesa</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“Eu subo com <strong>Docker Compose</strong> — API Java na <strong>:8080</strong> — e deixo a URL coerente no Streamlit.”</li>
+            <li>“Eu mostro <strong>/health</strong>, <strong>Swagger</strong>, depois <code>bash scripts/run_demo.sh</code> ou o botão <strong>fluxo completo</strong> no portal e confirmo <code>profile-stats</code>.”</li>
+            <li>“Eu mando <strong>analyze</strong> com <code>user_id</code>, mostro <strong>anomaly_reasons</strong>, filtro fraudes no Streamlit, <strong>libero</strong> com <strong>opinião da IA</strong> e, se tiver chave, o <strong>chat DeepSeek</strong>.”</li>
+            <li>“Antes de encerrar ou se perguntarem LGPD: aba <strong>LGPD / mascaramento</strong> no :8501 — mascaramento ao vivo na API.”</li>
+            <li>“Se der tempo eu mostro Kafka, notebook, Prometheus — sempre dizendo o <strong>par Azure</strong> de cada peça.”</li>
+          </ul>
+          <p class="frase">“Se quebrar alguma coisa, eu não panico: eu fico só na <strong>API</strong> e num <strong>POST no Swagger</strong> — o resto vira opcional.”</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="ML">
+      <div class="slide__inner">
+        <p class="eyebrow">Se falarem do modelo</p>
+        <h2>Detecção — como eu explico</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“Na <strong>demo Docker</strong> o scoring é <strong>Java Spring</strong> (<code>1.0.0-java-balanced</code>): heurística interpretável mais <strong>boost de perfil Mongo</strong> quando o comportamento foge do histórico.”</li>
+            <li>“No repositório eu tenho também pipeline <strong>Python/Spark</strong> e modelo ensemble para treino — na mesa eu mostro o <strong>contrato da API</strong> e o painel de importância das features.”</li>
+            <li>“Calibrei a demo para <strong>cerca de 5% a 15%</strong> de fraudes em lote típico — limiar <strong>0,74</strong> — sem zerar fraude nem marcar todo mundo.”</li>
+            <li>“Eu mostro <strong>faixa de risco</strong> pra operação — aprovou, monitora, revisa, bloqueia. <strong>Fraude no KPI</strong> é score ≥ <strong>0,74</strong>.”</li>
+            <li>“Features: valor, hora, fim de semana, internacional, categoria, pagamento, log do valor — nomes legíveis no dashboard.”</li>
+          </ul>
+          <p class="frase">“Batch prepara o perfil; a API pontua na hora; o analista valida no Streamlit — com opinião da IA na liberação se quiser.”</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Tabela risco">
+      <div class="slide__inner">
+        <p class="eyebrow">Se perguntarem “mas e a faixa?”</p>
+        <h2>Eu aponto a tabela e digo</h2>
+        <div class="card">
+          <p class="sub" style="margin:0 0 0.65rem;">“Quanto maior o score, mais grave a faixa; <strong>fraude no KPI</strong> eu conto a partir de <strong>0,74</strong> (demo calibrada ~5–15%).”</p>
+          <table class="compact">
+            <thead><tr><th>Score</th><th>Risco</th><th>Ação</th></tr></thead>
+            <tbody>
+              <tr><td>≥ 0,80</td><td>CRITICAL</td><td>BLOCK</td></tr>
+              <tr><td>0,50 a 0,79</td><td>HIGH</td><td>REVIEW</td></tr>
+              <tr><td>0,30 a 0,49</td><td>MEDIUM</td><td>MONITOR</td></tr>
+              <tr><td>Abaixo de 0,30</td><td>LOW</td><td>APPROVE</td></tr>
+            </tbody>
+          </table>
+          <p class="sub" style="margin-top:0.75rem;margin-bottom:0;">“<strong>is_fraud</strong> na API: score ≥ <strong>0,74</strong>.”</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Honestidade">
+      <div class="slide__inner">
+        <p class="eyebrow">Se acharem que é “só Docker”</p>
+        <h2>Eu deixo explícito</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“O Compose na minha máquina é um <strong>recorte</strong> — API, dashboard, Kafka, às vezes métrica; não é fingir que eu tenho o datacenter inteiro.”</li>
+            <li>“Event Hub, ADLS, Databricks, Purview — isso é o <strong>alvo</strong>; na mesa eu falo qual peça local está <strong>representando</strong> qual peça da nuvem.”</li>
+            <li>“O Streamlit substitui o Power BI na hora da demo, mas a ideia é a mesma: <strong>consumo</strong> com responsabilidade de SLA.”</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Frase pronta">
+      <div class="slide__inner">
+        <p class="eyebrow">Observabilidade — eu solto assim</p>
+        <h2>Uma frase que eu decoro</h2>
+        <div class="card">
+          <p class="frase" style="margin:0;">“Aqui na mesa eu tenho Prometheus e Grafana no Docker; se isso vira Azure eu penso <strong>Monitor e Application Insights</strong>; na AWS seria <strong>CloudWatch e X-Ray</strong>. O problema não muda — é <strong>SLO, alerta e achar causa</strong>; só muda o produto.”</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Encerramento">
+      <div class="slide__inner">
+        <p class="eyebrow">Fecho</p>
+        <h2>Encerramento</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“Muito obrigado — eu queria deixar claro que da minha parte o fio condutor é: <strong>dado confiável</strong>, <strong>modelo que opera de verdade</strong>, e <strong>segurança com escala</strong>.”</li>
+            <li>“Fiquem à vontade — podem perguntar por <strong>camada</strong>: ingestão, lake, modelo, API, LGPD, observabilidade, custo.”</li>
+            <li>“Se eu não implementei alguma coisa até o fim — CI/CD pesado, Delta em produção — eu prefiro <strong>assumir</strong> e dizer o que seria o próximo passo, em vez de enrolar.”</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="toolbar">
+    <a href="index.html" style="color:var(--muted);font-size:0.78rem;text-decoration:none;">Hub</a>
+    <button type="button" id="btn-prev" title="Anterior (←)">← Anterior</button>
+    <span class="counter" id="counter" aria-live="polite">1 / 13</span>
+    <button type="button" id="btn-next" class="primary" title="Próximo (→)">Próximo →</button>
+  </div>
+
+  <script>
+(function () {
+  var slides = document.querySelectorAll(".deck .slide");
+  var total = slides.length;
+  var idx = 0;
+  var progressFill = document.getElementById("progress-fill");
+  var counter = document.getElementById("counter");
+
+  function show(i) {
+    idx = Math.max(0, Math.min(total - 1, i));
+    slides.forEach(function (s, j) {
+      s.classList.toggle("is-active", j === idx);
+    });
+    var pct = total > 1 ? (idx / (total - 1)) * 100 : 100;
+    progressFill.style.width = pct + "%";
+    counter.textContent = (idx + 1) + " / " + total;
+    history.replaceState(null, "", "#" + (idx + 1));
+  }
+
+  function go(d) { show(idx + d); }
+
+  document.getElementById("btn-prev").addEventListener("click", function () { go(-1); });
+  document.getElementById("btn-next").addEventListener("click", function () { go(1); });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.isContentEditable) return;
+    if (e.key === "ArrowLeft" || e.key === "PageUp")      { e.preventDefault(); go(-1); }
+    if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === " ") { e.preventDefault(); go(1); }
+    if (e.key === "Home") { e.preventDefault(); show(0); }
+    if (e.key === "End")  { e.preventDefault(); show(total - 1); }
+  });
+
+  if (location.hash && /^#\d+$/.test(location.hash)) {
+    var n = parseInt(location.hash.slice(1), 10);
+    if (n >= 1 && n <= total) show(n - 1);
+    else show(0);
+  } else show(0);
+})();
+  </script>
+</body>
+</html>

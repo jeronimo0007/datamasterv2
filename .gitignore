@@ -1,0 +1,109 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Java
+target/
+.mvn/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+.settings/
+.classpath
+.project
+.factorypath
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Azure
+.azure/
+
+# Secrets
+secrets/
+*.pem
+*.key
+
+# Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Data
+data/
+*.csv
+*.parquet
+*.json
+
+# ML Models
+models/
+*.pkl
+*.joblib
+*.h5
+
+# Documentação — ignorar por padrão; liberar material de avaliação e arquitetura
+docs/**
+!docs/README.md
+!docs/QUICK_START.md
+!docs/SERVICOS_DOCKER.md
+!docs/MONGODB_COMPASS.md
+!docs/LOCAL_SPARK.md
+!docs/ARCHITECTURE.md
+!docs/PROJETO_ESTRUTURADO.md
+!docs/cloud_comparison.md
+!docs/CONTRIBUTING.md
+!docs/DEPLOYMENT.md
+!docs/APRESENTACAO_BANCA.md
+!docs/GUIA_APRESENTACAO_BANCA.md
+!docs/ESTUDO_BANCA.md
+!docs/TERRAFORM_BANCA_MINIMO.md
+!docs/TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md
+!docs/arquitetura/
+!docs/arquitetura/**
+!docs/examples/
+!docs/examples/**
+!docs/base_estudo/contexto_pedido_arquitetura.md
+!docs/base_estudo/respostas_banca.md
+!docs/base_estudo/estrutura_completa.txt
+
