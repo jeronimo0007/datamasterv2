@@ -1,12 +1,12 @@
 # Documentação DataMaster
 
-Índice da pasta `docs/` — quick start, arquitetura, operação Docker, estudo, diagramas e material de apoio à banca.
+Índice da pasta `docs/` — operação Docker, arquitetura técnica, cloud e diagramas.
 
 Diagramas draw.io: [arquitetura/](arquitetura/) (índice em [arquitetura/README.md](arquitetura/README.md)). Regenerar: `python3 scripts/generate_architecture_drawio.py` na raiz do projeto.
 
-**O que não está neste índice (ver `.gitignore` na raiz):** rascunhos e scripts em `base_estudo/` (exceto alguns `.md` versionados); duplicatas em `apresentacao/`.
+**Estudo e apresentação (não versionados):** pasta [`../banca/`](../banca/) na raiz do projeto — roteiros, planos de estudo e rascunhos (ver `.gitignore`).
 
-**Apresentação ao vivo (demo local):** slides e cola verbal em `portal/banca.html` e `portal/roteiro.html` — http://localhost:8880 após `docker compose up -d portal`.
+**Demo ao vivo (versionado):** slides e cola em `portal/banca.html` e `portal/roteiro.html` — http://localhost:8880 após `docker compose up -d portal`.
 
 ## Demo e operação
 
@@ -15,20 +15,7 @@ Diagramas draw.io: [arquitetura/](arquitetura/) (índice em [arquitetura/README.
 | [QUICK_START.md](QUICK_START.md) | Subir Docker, URLs, troubleshooting |
 | [SERVICOS_DOCKER.md](SERVICOS_DOCKER.md) | O que é cada container |
 | [LOCAL_SPARK.md](LOCAL_SPARK.md) | Spark / notebook no Docker |
-
-## Banca
-
-| Documento | Conteúdo |
-|-----------|----------|
-| [APRESENTACAO_BANCA.md](APRESENTACAO_BANCA.md) | Roteiro 90 min |
-| [GUIA_APRESENTACAO_BANCA.md](GUIA_APRESENTACAO_BANCA.md) | Comandos terminal |
-| [ESTUDO_BANCA.md](ESTUDO_BANCA.md) | Plano de estudo focado |
-| [PLANO_ESTUDO.md](PLANO_ESTUDO.md) | Plano longo |
-| [apresentacao/slides-projetor.html](apresentacao/slides-projetor.html) | Slides (fonte; no Docker: `portal/banca.html`) |
-| [apresentacao/roteiro-verbal.html](apresentacao/roteiro-verbal.html) | Cola verbal (fonte; no Docker: `portal/roteiro.html`) |
-| [base_estudo/contexto_pedido_arquitetura.md](base_estudo/contexto_pedido_arquitetura.md) | Contexto do pedido / arquitetura |
-| [base_estudo/respostas_banca.md](base_estudo/respostas_banca.md) | Respostas preparadas |
-| [base_estudo/estrutura_completa.txt](base_estudo/estrutura_completa.txt) | Estrutura do repositório (texto) |
+| [MONGODB_COMPASS.md](MONGODB_COMPASS.md) | MongoDB e Compass |
 
 ## Arquitetura e cloud
 
@@ -41,7 +28,6 @@ Diagramas draw.io: [arquitetura/](arquitetura/) (índice em [arquitetura/README.
 | [TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md](TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md) | Deploy Azure |
 | [TERRAFORM_BANCA_MINIMO.md](TERRAFORM_BANCA_MINIMO.md) | Stack mínima Azure |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment |
-| [PRESENTATION.md](PRESENTATION.md) | Apresentação (legado) |
 
 ## Outros
 

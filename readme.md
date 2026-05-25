@@ -114,7 +114,7 @@ graph LR
 | [docs/cloud_comparison.md](docs/cloud_comparison.md) | Equivalência Azure ↔ AWS |
 | [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md) | Mapa serviço a serviço (demo local → Azure) |
 | [docs/arquitetura/README.md](docs/arquitetura/README.md) | Índice dos diagramas draw.io |
-| [docs/base_estudo/contexto_pedido_arquitetura.md](docs/base_estudo/contexto_pedido_arquitetura.md) | Contexto do pedido (batch, online, transversal) |
+| Material de estudo / apresentação (local) | Pasta [`banca/`](banca/) — **não versionada** (ver `.gitignore`) |
 
 **Diagramas draw.io** (`docs/arquitetura/`) — abrir em [app.diagrams.net](https://app.diagrams.net) → *File → Open from Device*:
 
@@ -198,6 +198,7 @@ datamaster/
 ├── notebooks/                # PySpark / DQ
 ├── data-generator-console/   # Simulador e fluxo via Docker socket
 ├── portal/                   # Páginas estáticas da demo local (:8880)
+├── banca/                    # Estudo e apresentação (somente local — .gitignore)
 ├── infrastructure/terraform/ # IaC Azure
 ├── config/grafana/           # Provisioning Grafana
 ├── sql/                      # Schema e seed Postgres

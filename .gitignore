@@ -82,7 +82,10 @@ models/
 *.joblib
 *.h5
 
-# Documentação — ignorar por padrão; liberar material de avaliação e arquitetura
+# Material pessoal de estudo e apresentação (não versionar)
+banca/
+
+# Documentação técnica — ignorar por padrão; liberar operação e arquitetura
 docs/**
 !docs/README.md
 !docs/QUICK_START.md
@@ -94,16 +97,10 @@ docs/**
 !docs/cloud_comparison.md
 !docs/CONTRIBUTING.md
 !docs/DEPLOYMENT.md
-!docs/APRESENTACAO_BANCA.md
-!docs/GUIA_APRESENTACAO_BANCA.md
-!docs/ESTUDO_BANCA.md
 !docs/TERRAFORM_BANCA_MINIMO.md
 !docs/TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md
 !docs/arquitetura/
 !docs/arquitetura/**
 !docs/examples/
 !docs/examples/**
-!docs/base_estudo/contexto_pedido_arquitetura.md
-!docs/base_estudo/respostas_banca.md
-!docs/base_estudo/estrutura_completa.txt
 
