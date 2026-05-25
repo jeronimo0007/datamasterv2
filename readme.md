@@ -105,7 +105,31 @@ graph LR
 - **Online:** console/dashboard → **API :8080** → consulta perfil no `POST /analyze` (Kafka sobe no compose como analogia a streaming; o caminho crítico da demo chama a API diretamente)
 - **Segurança / LGPD:** `POST /api/v1/lgpd/mask` (Java) e `src/utils/data_masker.py` (Python, jobs e testes)
 
-Diagramas detalhados (draw.io, Docker, Azure/AWS): [docs/arquitetura/](docs/arquitetura/) — índice em [docs/arquitetura/README.md](docs/arquitetura/README.md). Regeneração: `python3 scripts/generate_architecture_drawio.py`.
+### Documentação de arquitetura
+
+| Documento | Conteúdo |
+|-----------|----------|
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Arquitetura detalhada da plataforma |
+| [docs/PROJETO_ESTRUTURADO.md](docs/PROJETO_ESTRUTURADO.md) | Estrutura do repositório e camadas |
+| [docs/cloud_comparison.md](docs/cloud_comparison.md) | Equivalência Azure ↔ AWS |
+| [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md) | Mapa serviço a serviço (demo local → Azure) |
+| [docs/arquitetura/README.md](docs/arquitetura/README.md) | Índice dos diagramas draw.io |
+| [docs/base_estudo/contexto_pedido_arquitetura.md](docs/base_estudo/contexto_pedido_arquitetura.md) | Contexto do pedido (batch, online, transversal) |
+
+**Diagramas draw.io** (`docs/arquitetura/`) — abrir em [app.diagrams.net](https://app.diagrams.net) → *File → Open from Device*:
+
+| Arquivo | Conteúdo |
+|---------|----------|
+| [datamaster-00-visao-geral.drawio](docs/arquitetura/datamaster-00-visao-geral.drawio) | Visão geral batch + online (Lambda) |
+| [datamaster-01-batch.drawio](docs/arquitetura/datamaster-01-batch.drawio) | Batch: JSON → MongoDB `user_profiles` · Medallion |
+| [datamaster-02-online.drawio](docs/arquitetura/datamaster-02-online.drawio) | Online: console/dashboard → API :8080 → Mongo |
+| [datamaster-03-mapa.drawio](docs/arquitetura/datamaster-03-mapa.drawio) | Mapa de equivalência local ↔ Azure |
+| [datamaster-04-docker-compose.drawio](docs/arquitetura/datamaster-04-docker-compose.drawio) | Containers do `docker compose` e dependências |
+| [datamaster-azure-aws-local.drawio](docs/arquitetura/datamaster-azure-aws-local.drawio) | Azure, AWS e mesa local (abas no mesmo arquivo) |
+
+Regenerar diagramas a partir do código: `python3 scripts/generate_architecture_drawio.py`.
+
+Índice geral da pasta `docs/`: [docs/README.md](docs/README.md).
 
 ---
 
@@ -178,18 +202,8 @@ datamaster/
 ├── config/grafana/           # Provisioning Grafana
 ├── sql/                      # Schema e seed Postgres
 ├── docker-compose.yaml
-└── docs/                     # Documentação (índice em docs/README.md; ver .gitignore para exceções)
+└── docs/                     # Documentação — [docs/README.md](docs/README.md)
 ```
-
----
-
-## Documentação complementar
-
-Índice: [docs/README.md](docs/README.md) — quick start, arquitetura, operação Docker, estudo e diagramas em `docs/arquitetura/`.
-
-Rascunhos e scripts de apoio em `docs/base_estudo/` (demais arquivos) e duplicatas em `docs/apresentacao/` permanecem fora do Git (ver `.gitignore`).
-
-Material de **apresentação oral ao vivo** (slides, cola): `portal/banca.html` e `portal/roteiro.html` no portal :8880.
 
 ---
 
