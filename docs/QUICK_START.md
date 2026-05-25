@@ -38,11 +38,37 @@ source .venv/bin/activate
 pip install -r requirements-demo.txt
 ```
 
+- **`requirements-demo.txt`** — dashboard, scripts e venv da demo (também no `Dockerfile.dashboard`).
+- **`requirements.txt`** — stack **completa** (Azure, PySpark, DQ, MLflow); use só se for desenvolver/treinar fora do Compose mínimo.
+
 ---
 
-## 1. Subir tudo com Docker (recomendado)
+## 1. Fluxo completo (recomendado)
 
-Um único comando sobe **API Java**, **dashboard**, **console Node**, Kafka, bancos e observabilidade. Não precisa instalar Java, Node nem Python na máquina para usar a demo (só Docker Desktop).
+Um comando faz **tudo**: sobe a stack, gera JSON, perfis MongoDB, lake Medallion e valida a API.
+
+```bash
+cd datamaster
+bash scripts/run_demo.sh
+```
+
+Equivalente: `bash scripts/demo_full_stack.sh`.
+
+| Etapa | O que acontece |
+|-------|----------------|
+| Compose | API Java :8080, dashboard :8501, console :3333, Spark, Kafka, MongoDB, Grafana… |
+| Dados | `data/transactions.json` |
+| Batch | `user_profiles` no MongoDB |
+| Lake | `data/lake/` Bronze → Silver → Gold |
+| Check | `profile-stats` na API |
+
+Portal :8880 → botão **Executar fluxo completo** (mesmo fluxo via console :3333).
+
+---
+
+## 1b. Só subir Docker (sem popular dados)
+
+Se quiser apenas os containers, sem JSON/lake:
 
 ```bash
 cd datamaster

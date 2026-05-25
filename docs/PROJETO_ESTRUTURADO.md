@@ -116,8 +116,8 @@ fraud-detection/
 │   └── base_estudo/                  # Material de estudo / referência
 │
 ├── docker-compose.yaml               # Já existente
-├── requirements.txt                  # Já existente
-├── pyproject.toml                    # Já existente
+├── requirements-demo.txt             # Python mínimo — Docker dashboard + demo
+├── requirements.txt                  # Python completo — Azure, Spark, ML (dev)
 ├── README.md                         # Atualizado
 ├── .env.example                      # Novo
 ├── .gitignore                        # Novo

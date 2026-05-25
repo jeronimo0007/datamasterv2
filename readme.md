@@ -51,7 +51,26 @@ curl -s http://localhost:8080/health
 curl -s http://localhost:8080/api/v1/batch/profile-stats
 ```
 
-Alias do fluxo completo: `bash scripts/demo_full_stack.sh`
+Alias: `bash scripts/demo_full_stack.sh` (mesmo efeito).
+
+**O que o fluxo completo faz (em ordem):**
+
+1. `docker compose up -d --build` — API Java, dashboard, console, Spark, Kafka, bancos, Grafana…
+2. Gera `data/transactions.json` (histórico simulado)
+3. `batch_dataprep_mongo.py` — perfis em MongoDB `user_profiles`
+4. Job Spark — lake `data/lake/` (Bronze / Silver / Gold)
+5. Valida `GET /api/v1/batch/profile-stats` (perfis > 0)
+
+Depois: console :3333 ou dashboard :8501 para `analyze`, fraudes, LGPD. Detalhes: [docs/QUICK_START.md](docs/QUICK_START.md).
+
+### Dependências Python (`requirements-demo.txt` vs `requirements.txt`)
+
+| Arquivo | Uso |
+|---------|-----|
+| **`requirements-demo.txt`** | **Demo Docker e venv leve** — Streamlit, pandas, ML básico, requests. Usado em `Dockerfile.dashboard` e `scripts/setup.sh`. **É o que importa para a banca na mesa.** |
+| **`requirements.txt`** | **Desenvolvimento completo** — Azure SDKs, PySpark, Delta, Great Expectations, MLflow, testes. Para notebooks, treino e integração cloud **fora** do caminho mínimo do Compose. **Não** é instalado no container do dashboard. |
+
+A API de scoring na demo é **Java** (`api-java/`); os `requirements*.txt` servem ao **Python** (dashboard, scripts, Spark no host opcional).
 
 ---
 
