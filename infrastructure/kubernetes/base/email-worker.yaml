@@ -1,0 +1,110 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: email-worker
+  namespace: datamaster
+  labels:
+    app: email-worker
+spec:
+  ports:
+    - name: http
+      port: 8090
+      targetPort: 8090
+  selector:
+    app: email-worker
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: email-worker
+  namespace: datamaster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: email-worker
+  template:
+    metadata:
+      labels:
+        app: email-worker
+    spec:
+      enableServiceLinks: false
+      initContainers:
+        - name: wait-rabbitmq
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - until nc -z rabbitmq 5672; do echo waiting rabbitmq; sleep 3; done
+      containers:
+        - name: email-worker
+          image: docker.io/library/datamaster-email-worker:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8090
+          env:
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-credentials
+                  key: RABBITMQ_DEFAULT_USER
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-credentials
+                  key: RABBITMQ_DEFAULT_PASS
+            - name: FRAUD_EMAIL_ENABLED
+              value: "true"
+            - name: SMTP_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: datamaster-smtp-secrets
+                  key: SMTP_HOST
+                  optional: true
+            - name: SMTP_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: datamaster-smtp-secrets
+                  key: SMTP_PORT
+                  optional: true
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: datamaster-smtp-secrets
+                  key: SMTP_USER
+                  optional: true
+            - name: SMTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: datamaster-smtp-secrets
+                  key: SMTP_PASSWORD
+                  optional: true
+            - name: SMTP_FROM
+              valueFrom:
+                secretKeyRef:
+                  name: datamaster-smtp-secrets
+                  key: SMTP_FROM
+                  optional: true
+            - name: FRAUD_ALERT_TO
+              valueFrom:
+                secretKeyRef:
+                  name: datamaster-smtp-secrets
+                  key: FRAUD_ALERT_TO
+                  optional: true
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8090
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi

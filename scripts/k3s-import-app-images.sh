@@ -30,7 +30,7 @@ import_one() {
   fi
 }
 
-for img in datamaster-api datamaster-dashboard datamaster-portal datamaster-data-console; do
+for img in datamaster-api datamaster-dashboard datamaster-portal datamaster-data-console datamaster-email-worker; do
   import_one "$img"
 done
 

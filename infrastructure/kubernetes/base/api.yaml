@@ -30,6 +30,7 @@ spec:
       labels:
         app: api
     spec:
+      enableServiceLinks: false
       initContainers:
         - name: wait-mongodb
           image: busybox:1.36
@@ -37,6 +38,12 @@ spec:
             - sh
             - -c
             - until nc -z mongodb 27017; do echo waiting mongodb; sleep 2; done
+        - name: wait-rabbitmq
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - until nc -z rabbitmq 5672; do echo waiting rabbitmq; sleep 2; done
       containers:
         - name: api
           image: docker.io/library/datamaster-api:local
@@ -54,6 +61,22 @@ spec:
                   name: datamaster-app-secrets
                   key: DEEPSEEK_API_KEY
                   optional: true
+            - name: FRAUD_EMAIL_ENABLED
+              value: "true"
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USER
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-credentials
+                  key: RABBITMQ_DEFAULT_USER
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-credentials
+                  key: RABBITMQ_DEFAULT_PASS
           readinessProbe:
             httpGet:
               path: /health
