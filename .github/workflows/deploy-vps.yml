@@ -23,7 +23,15 @@ jobs:
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
           version: latest
-          targets: ${{ secrets.K8S_SSH_HOST }}
+          # Sem "targets": ping obrigatorio ao host falha mesmo com SSH ok (ICMP/ACL/MagicDNS).
+
+      - name: Testar DNS do VPS (nao bloqueia deploy)
+        continue-on-error: true
+        run: |
+          HOST="${{ secrets.K8S_SSH_HOST }}"
+          tailscale status || true
+          getent hosts "${HOST}" || true
+          tailscale ping -c 2 "${HOST}" || true
 
       - name: Deploy via SSH
         env:
