@@ -15,6 +15,7 @@ O caso de uso é **fraude em transações**; o artefato entregue é uma **plataf
 |----------|-----------|
 | **Execução local** | `docker compose` — API Java, dashboard, Spark, Kafka, MongoDB, Prometheus/Grafana |
 | **Alvo em nuvem** | Azure (Event Hubs, ADLS, Databricks, Cosmos, Key Vault, Monitor) — ver [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md) e Terraform em `infrastructure/terraform/` |
+| **Servidor K8s (homelab)** | Deploy na branch `vps` — [docs/CI_CD_BRANCHES.md](docs/CI_CD_BRANCHES.md) |
 
 ---
 

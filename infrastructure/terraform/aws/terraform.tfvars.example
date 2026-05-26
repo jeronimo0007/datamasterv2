@@ -1,0 +1,4 @@
+# Copie para terraform.tfvars na branch aws (nao commitar valores sensiveis).
+aws_region       = "sa-east-1"
+environment      = "dev"
+lake_bucket_name = "datamaster-lake-seunome-2026"

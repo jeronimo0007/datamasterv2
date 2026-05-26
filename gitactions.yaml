@@ -1,15 +1,5 @@
-# .github/workflows/deploy.yml
-name: Deploy to Azure
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - run: make deploy-prod
+# Legado — workflows em .github/workflows/
+#   deploy-vps.yml    -> branch vps (servidor K8s)
+#   deploy-azure.yml  -> branch azure
+#   deploy-aws.yml    -> branch aws
+# PR/push em main NAO faz deploy. Ver docs/CI_CD_BRANCHES.md

@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: portal
+  namespace: datamaster
+  labels:
+    app: portal
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: 30880
+  selector:
+    app: portal
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portal
+  namespace: datamaster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: portal
+  template:
+    metadata:
+      labels:
+        app: portal
+    spec:
+      containers:
+        - name: portal
+          image: datamaster-portal:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80

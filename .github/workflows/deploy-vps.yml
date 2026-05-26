@@ -1,0 +1,47 @@
+# Deploy no servidor Kubernetes — somente merge/push na branch `vps`.
+# PR para `main` nao dispara este workflow (apenas evento push na branch vps).
+name: Deploy → VPS (Kubernetes)
+
+on:
+  push:
+    branches: [vps]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.K8S_SSH_HOST }}
+          username: ${{ secrets.K8S_SSH_USER }}
+          password: ${{ secrets.K8S_SSH_PASSWORD }}
+          key: ${{ secrets.K8S_SSH_KEY }}
+          port: 22
+          script_stop: true
+          envs: GIT_REF,IMAGE_TAG,DEPLOY_DIR
+          env:
+            GIT_REF: vps
+            IMAGE_TAG: ${{ github.sha }}
+            DEPLOY_DIR: ${{ secrets.K8S_DEPLOY_DIR }}
+          script: |
+            set -euo pipefail
+            export DEPLOY_DIR="${DEPLOY_DIR:-/opt/datamaster}"
+            export GIT_REF="${GIT_REF:-vps}"
+            export IMAGE_TAG="${IMAGE_TAG:-}"
+            if [[ ! -x "${DEPLOY_DIR}/scripts/deploy-kubernetes-server.sh" ]]; then
+              echo "Repo nao encontrado em ${DEPLOY_DIR}. Rode scripts/bootstrap-kubernetes-server.sh no servidor."
+              exit 1
+            fi
+            bash "${DEPLOY_DIR}/scripts/deploy-kubernetes-server.sh"
+
+      - name: Resumo
+        run: |
+          echo "Deploy VPS concluido (branch vps, commit ${{ github.sha }})"
