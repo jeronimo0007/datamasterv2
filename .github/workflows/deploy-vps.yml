@@ -14,17 +14,12 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    # Secrets estao no Environment "TAILSCALE_AUTHKEY" (nao em Repository secrets).
+    # Alternativa: mover tudo para Settings → Secrets → Actions → Repository secrets
+    # e apague esta linha "environment:".
+    environment: TAILSCALE_AUTHKEY
     steps:
       - uses: actions/checkout@v4
-
-      - name: Verificar secret TAILSCALE_AUTHKEY
-        if: ${{ secrets.TAILSCALE_AUTHKEY == '' }}
-        run: |
-          echo "::error::Secret TAILSCALE_AUTHKEY ausente ou vazio."
-          echo "GitHub → Settings → Secrets → Actions → New secret → TAILSCALE_AUTHKEY"
-          echo "Valor: chave tskey-auth-... de https://login.tailscale.com/admin/settings/keys"
-          echo "(Ephemeral + Reusable + Pre-approved, sem tags)"
-          exit 1
 
       - name: Conectar Tailscale
         uses: tailscale/github-action@v3
