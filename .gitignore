@@ -75,6 +75,10 @@ data/
 *.csv
 *.parquet
 *.json
+# Excecoes: manifests Node e dashboards Grafana (necessarios no build/deploy)
+!data-generator-console/package.json
+!data-generator-console/package-lock.json
+!config/grafana/dashboards/*.json
 
 # ML Models
 models/
