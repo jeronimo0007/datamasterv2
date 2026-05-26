@@ -7,6 +7,8 @@ Deploy no VPS (k3s) com **todos** os serviços equivalentes ao `docker-compose.y
 | `base/` | Namespace, MongoDB, Postgres, Redis, Kafka, MinIO, Spark, Jupyter, Prometheus, Grafana, API, Dashboard, Portal, Data Console |
 | `overlays/homelab/` | Overlay para o servidor homelab |
 
+Antes do `kubectl kustomize`, o deploy roda `scripts/sync-k8s-config.sh` (copia SQL/Grafana para `base/config/` — exigencia do Kustomize).
+
 ## Aplicar
 
 ```bash

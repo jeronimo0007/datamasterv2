@@ -83,6 +83,9 @@ if [[ -n "${DEEPSEEK_API_KEY:-}" ]]; then
     --dry-run=client -o yaml | kubectl_cmd apply -f -
 fi
 
+echo "==> Sincronizar config/ do Kustomize (SQL, Grafana, Mongo init)"
+bash "${REPO_ABS}/scripts/sync-k8s-config.sh"
+
 echo "==> Aplicar manifests (Kustomize homelab)"
 tmp="$(mktemp)"
 kubectl_cmd kustomize "${REPO_ABS}/${KUSTOMIZE_OVERLAY}" \
