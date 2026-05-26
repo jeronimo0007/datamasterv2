@@ -1,0 +1,58 @@
+# Deploy automatico no servidor Kubernetes (Tailscale / homelab).
+# Secrets obrigatorios: K8S_SSH_HOST, K8S_SSH_USER e (K8S_SSH_PASSWORD ou K8S_SSH_KEY).
+name: Deploy → Kubernetes (servidor)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "api-java/**"
+      - "src/**"
+      - "portal/**"
+      - "Dockerfile.dashboard"
+      - "requirements-demo.txt"
+      - "scripts/**"
+      - "infrastructure/kubernetes/**"
+      - "docker-compose.yaml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: deploy-kubernetes-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (validacao do repo)
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.K8S_SSH_HOST }}
+          username: ${{ secrets.K8S_SSH_USER }}
+          password: ${{ secrets.K8S_SSH_PASSWORD }}
+          key: ${{ secrets.K8S_SSH_KEY }}
+          port: 22
+          script_stop: true
+          envs: GIT_REF,IMAGE_TAG,DEPLOY_DIR
+          env:
+            GIT_REF: main
+            IMAGE_TAG: ${{ github.sha }}
+            DEPLOY_DIR: ${{ secrets.K8S_DEPLOY_DIR || '/opt/datamaster' }}
+          script: |
+            set -euo pipefail
+            export DEPLOY_DIR="${DEPLOY_DIR:-/opt/datamaster}"
+            export GIT_REF="${GIT_REF:-main}"
+            export IMAGE_TAG="${IMAGE_TAG:-}"
+            if [[ ! -x "${DEPLOY_DIR}/scripts/deploy-kubernetes-server.sh" ]]; then
+              echo "Repo nao encontrado em ${DEPLOY_DIR}. Rode scripts/bootstrap-kubernetes-server.sh no servidor."
+              exit 1
+            fi
+            bash "${DEPLOY_DIR}/scripts/deploy-kubernetes-server.sh"
+
+      - name: Resumo
+        run: |
+          echo "Deploy enviado para ${{ secrets.K8S_SSH_HOST }}"
+          echo "API NodePort 30080 | Dashboard 30501 | Portal 30880"

@@ -1,15 +1,4 @@
-# .github/workflows/deploy.yml
-name: Deploy to Azure
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      - run: make deploy-prod
+# Legado: workflows oficiais estao em .github/workflows/
+#   deploy-kubernetes.yml  -> servidor K8s (SSH)
+#   deploy-azure.yml       -> Terraform Azure
+# Copie este arquivo para .github/workflows/ apenas se ainda nao tiver os novos.

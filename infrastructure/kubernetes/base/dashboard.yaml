@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dashboard
+  namespace: datamaster
+  labels:
+    app: dashboard
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8501
+      targetPort: 8501
+      nodePort: 30501
+  selector:
+    app: dashboard
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard
+  namespace: datamaster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard
+  template:
+    metadata:
+      labels:
+        app: dashboard
+    spec:
+      containers:
+        - name: dashboard
+          image: datamaster-dashboard:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8501
+          env:
+            - name: API_URL
+              value: http://api.datamaster.svc.cluster.local:8080
+            - name: DEEPSEEK_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: datamaster-app-secrets
+                  key: DEEPSEEK_API_KEY
+                  optional: true
