@@ -15,7 +15,7 @@ O caso de uso é **fraude em transações**; o artefato entregue é uma **plataf
 |----------|-----------|
 | **Execução local** | `docker compose` — API Java, dashboard, Spark, Kafka, MongoDB, Prometheus/Grafana |
 | **Alvo em nuvem** | Azure (Event Hubs, ADLS, Databricks, Cosmos, Key Vault, Monitor) — ver [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md) e Terraform em `infrastructure/terraform/` |
-| **Servidor K8s (homelab)** | Deploy na branch `vps` — [docs/CI_CD_BRANCHES.md](docs/CI_CD_BRANCHES.md) |
+| **VPS (homelab)** | Kubernetes (k3s) na branch `vps` — [docs/DEPLOY_K8S.md](docs/DEPLOY_K8S.md) |
 
 ---
 
@@ -23,11 +23,20 @@ O caso de uso é **fraude em transações**; o artefato entregue é uma **plataf
 
 - Docker Desktop (ou Docker Engine + Compose v2)
 - ~8 GB RAM livres para a stack completa
-- Opcional: `DEEPSEEK_API_KEY` no `.env` ou no `docker-compose` para o assistente de IA na API
+- Opcional: `DEEPSEEK_API_KEY` no `.env` — ver [docs/AMBIENTE_LOCAL.md](docs/AMBIENTE_LOCAL.md)
 
 ---
 
 ## Como executar
+
+**Local (manual):**
+
+```bash
+cp .env.example .env    # edite DEEPSEEK e, no Mac, DOCKER_HOST_WORKSPACE
+bash scripts/up-local.sh # ou: make up-local
+```
+
+Guia completo: **[docs/AMBIENTE_LOCAL.md](docs/AMBIENTE_LOCAL.md)** · VPS: **[docs/DEPLOY_VPS.md](docs/DEPLOY_VPS.md)**
 
 **Stack completa com dados de exemplo (recomendado para avaliar o fluxo):**
 
@@ -42,7 +51,7 @@ O script sobe os containers, gera `data/transactions.json`, materializa perfis e
 **Apenas subir os serviços (sem popular dados):**
 
 ```bash
-docker compose up -d --build
+docker compose up -d --build   # equivalente a scripts/up-local.sh
 ```
 
 **Validação rápida:**

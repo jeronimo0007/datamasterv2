@@ -1,12 +1,35 @@
-# Kubernetes — DataMaster (legado / MVP)
+# Kubernetes — DataMaster (stack completa)
 
-Deploy **completo** no VPS usa **Docker Compose** (`scripts/deploy-kubernetes-server.sh`), não estes manifests.
+Deploy no VPS (k3s) com **todos** os serviços equivalentes ao `docker-compose.yaml`.
 
 | Caminho | Uso |
 |---------|-----|
-| `base/` | MVP antigo: MongoDB, API, Dashboard, Portal |
-| `overlays/homelab/` | k3s (substituido por Compose no CI) |
+| `base/` | Namespace, MongoDB, Postgres, Redis, Kafka, MinIO, Spark, Jupyter, Prometheus, Grafana, API, Dashboard, Portal, Data Console |
+| `overlays/homelab/` | Overlay para o servidor homelab |
 
-Para testar o MVP em k3s manualmente: `kubectl apply -k infrastructure/kubernetes/overlays/homelab`
+## Aplicar
 
-Ver [docs/DEPLOY_KUBERNETES_SERVIDOR.md](../../docs/DEPLOY_KUBERNETES_SERVIDOR.md).
+```bash
+# Recomendado (build + import + apply):
+bash scripts/deploy-kubernetes-server.sh
+
+# Somente manifests (imagens ja no k3s):
+kubectl apply -k infrastructure/kubernetes/overlays/homelab
+```
+
+Documentação: [docs/DEPLOY_K8S.md](../../docs/DEPLOY_K8S.md).
+
+## NodePorts (homelab)
+
+| Serviço | Porta |
+|---------|-------|
+| API | 30080 |
+| Dashboard | 30501 |
+| Portal | 30880 |
+| Data console | 30333 |
+| Grafana | 30300 |
+| Prometheus | 30090 |
+| Spark UI | 30180 |
+| Jupyter | 30888 |
+| MinIO console | 30901 |
+| Kafka | 30902 |

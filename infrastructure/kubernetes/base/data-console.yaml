@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-console
+  namespace: datamaster
+  labels:
+    app: data-console
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 3333
+      targetPort: 3333
+      nodePort: 30333
+  selector:
+    app: data-console
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-console
+  namespace: datamaster
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-console
+  template:
+    metadata:
+      labels:
+        app: data-console
+    spec:
+      containers:
+        - name: data-console
+          image: datamaster-data-console:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3333
+          env:
+            - name: API_URL
+              value: http://api.datamaster.svc.cluster.local:8080
+            - name: PROJECT_ROOT
+              value: /workspace
+            - name: COMPOSE_PROJECT_NAME
+              value: datamaster
+          volumeMounts:
+            - name: workspace
+              mountPath: /workspace
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 100m
+            limits:
+              memory: 1Gi
+      volumes:
+        - name: workspace
+          hostPath:
+            path: /home/servidor/kubernets/datamasterv2
+            type: Directory
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket

@@ -24,6 +24,8 @@ Guia completo para rodar o **DataMaster** localmente. A **API principal é Java 
 
 ## Pré-requisitos
 
+Guia passo a passo (`.env`, Mac, VPS): **[AMBIENTE_LOCAL.md](AMBIENTE_LOCAL.md)**.
+
 - **Docker Desktop** (rodando — ícone da baleia estável no menu)
 - **Java 17+** e **Maven 3.8+** (API fora do Docker, opcional)
 - **Python 3.9+** (dashboard, scripts, `demo_loop` com `/batch`)
