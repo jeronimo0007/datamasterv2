@@ -30,6 +30,8 @@ spec:
       labels:
         app: kafka
     spec:
+      # Evita K8s injetar KAFKA_PORT=tcp://... (conflito com Service kafka)
+      enableServiceLinks: false
       initContainers:
         - name: wait-zookeeper
           image: busybox:1.36
