@@ -8,10 +8,7 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: internal
-      port: 29092
-      targetPort: 29092
-    - name: external
+    - name: plaintext
       port: 9092
       targetPort: 9092
       nodePort: 30902
@@ -40,13 +37,12 @@ spec:
           command:
             - sh
             - -c
-            - until nc -z zookeeper 2181; do echo waiting zookeeper; sleep 2; done
+            - until nc -z zookeeper 2181; do echo waiting zookeeper; sleep 3; done
       containers:
         - name: kafka
           image: confluentinc/cp-kafka:7.5.0
           imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 29092
             - containerPort: 9092
           env:
             - name: KAFKA_BROKER_ID
@@ -54,11 +50,11 @@ spec:
             - name: KAFKA_ZOOKEEPER_CONNECT
               value: zookeeper:2181
             - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
-              value: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+              value: PLAINTEXT:PLAINTEXT
             - name: KAFKA_LISTENERS
-              value: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+              value: PLAINTEXT://0.0.0.0:9092
             - name: KAFKA_ADVERTISED_LISTENERS
-              value: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092
+              value: PLAINTEXT://kafka:9092
             - name: KAFKA_INTER_BROKER_LISTENER_NAME
               value: PLAINTEXT
             - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
@@ -71,9 +67,14 @@ spec:
               value: "1"
             - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
               value: "true"
+          readinessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 30
+            periodSeconds: 10
           resources:
             requests:
-              memory: 512Mi
+              memory: 768Mi
               cpu: 200m
             limits:
-              memory: 1536Mi
+              memory: 2Gi

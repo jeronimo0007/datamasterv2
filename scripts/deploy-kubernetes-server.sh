@@ -88,8 +88,8 @@ kubectl_cmd kustomize "${REPO_ABS}/${KUSTOMIZE_OVERLAY}" \
 kubectl_cmd apply -f "$tmp"
 rm -f "$tmp"
 
-echo "==> hostPath do repo (${REPO_ABS}) em data-console e jupyter"
-for dep in data-console jupyter; do
+echo "==> hostPath do repo (${REPO_ABS}) em data-console"
+for dep in data-console; do
   kubectl_cmd patch deployment "$dep" -n datamaster --type=strategic -p "
 spec:
   template:
@@ -105,11 +105,6 @@ done
 echo "==> Job minio-init (recriar se ja existir)"
 kubectl_cmd delete job minio-init -n datamaster --ignore-not-found=true
 kubectl_cmd apply -f "${REPO_ABS}/infrastructure/kubernetes/base/minio-init-job.yaml"
-
-echo "==> Kafka advertised listeners (NodePort ${KAFKA_EXTERNAL_HOST}:30902)"
-kubectl_cmd set env deployment/kafka -n datamaster \
-  KAFKA_ADVERTISED_LISTENERS="PLAINTEXT://kafka:29092,PLAINTEXT_HOST://${KAFKA_EXTERNAL_HOST}:30902" \
-  --overwrite=true 2>/dev/null || true
 
 echo "==> Aguardar API (NodePort 30080)"
 for i in $(seq 1 60); do

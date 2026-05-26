@@ -33,25 +33,47 @@ spec:
       labels:
         app: spark-master
     spec:
+      hostname: spark-master
       containers:
         - name: spark
           image: bitnamilegacy/spark:3.5.5
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
             - containerPort: 7077
           env:
             - name: SPARK_MODE
               value: master
+            - name: SPARK_MASTER_HOST
+              value: spark-master
             - name: SPARK_RPC_AUTHENTICATION_ENABLED
               value: "no"
             - name: SPARK_RPC_ENCRYPTION_ENABLED
               value: "no"
+            - name: SPARK_LOCAL_DIRS
+              value: /tmp/spark
+          volumeMounts:
+            - name: spark-tmp
+              mountPath: /tmp/spark
+          readinessProbe:
+            tcpSocket:
+              port: 7077
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 7077
+            initialDelaySeconds: 60
+            periodSeconds: 20
           resources:
             requests:
-              memory: 512Mi
-              cpu: 200m
+              memory: 768Mi
+              cpu: 250m
             limits:
-              memory: 1Gi
+              memory: 1536Mi
+      volumes:
+        - name: spark-tmp
+          emptyDir: {}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -68,21 +90,38 @@ spec:
       labels:
         app: spark-worker
     spec:
+      initContainers:
+        - name: wait-spark-master
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - until nc -z spark-master 7077; do echo waiting spark-master; sleep 3; done
       containers:
         - name: spark
           image: bitnamilegacy/spark:3.5.5
+          imagePullPolicy: IfNotPresent
           env:
             - name: SPARK_MODE
               value: worker
             - name: SPARK_MASTER_URL
               value: spark://spark-master:7077
             - name: SPARK_WORKER_MEMORY
-              value: 2G
+              value: 1G
             - name: SPARK_WORKER_CORES
-              value: "2"
+              value: "1"
+            - name: SPARK_LOCAL_DIRS
+              value: /tmp/spark
+          volumeMounts:
+            - name: spark-tmp
+              mountPath: /tmp/spark
           resources:
             requests:
-              memory: 1Gi
-              cpu: 500m
+              memory: 512Mi
+              cpu: 250m
             limits:
-              memory: 2Gi
+              memory: 1536Mi
+      volumes:
+        - name: spark-tmp
+          emptyDir: {}

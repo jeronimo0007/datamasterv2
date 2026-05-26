@@ -38,11 +38,12 @@ spec:
             - sh
             - -c
             - |
-              for i in $(seq 1 90); do
+              for i in $(seq 1 120); do
                 nc -z spark-master 7077 && exit 0
-                sleep 2
+                sleep 3
               done
-              echo "spark-master:7077 nao respondeu"; exit 1
+              echo "AVISO: spark-master ainda nao respondeu; jupyter sobe mesmo assim"
+              exit 0
       containers:
         - name: jupyter
           image: quay.io/jupyter/pyspark-notebook:spark-3.5.0
@@ -56,16 +57,18 @@ spec:
               value: spark://spark-master:7077
             - name: PYSPARK_SUBMIT_ARGS
               value: "--master spark://spark-master:7077 pyspark-shell"
-            - name: CHOWN_HOME
+            - name: GRANT_SUDO
               value: "yes"
-            - name: CHOWN_HOME_OPTS
-              value: "-R"
-          command:
+          args:
             - start-notebook.sh
             - --NotebookApp.token=datamaster
             - --NotebookApp.password=
-          securityContext:
-            runAsUser: 0
+          readinessProbe:
+            httpGet:
+              path: /api
+              port: 8888
+            initialDelaySeconds: 20
+            periodSeconds: 10
           volumeMounts:
             - name: workspace
               mountPath: /home/jovyan/work
@@ -76,7 +79,6 @@ spec:
             limits:
               memory: 2Gi
       volumes:
+        # emptyDir evita crash por permissao no hostPath (repo fica no data-console)
         - name: workspace
-          hostPath:
-            path: /home/servidor/kubernets/datamasterv2
-            type: Directory
+          emptyDir: {}
