@@ -1,5 +1,5 @@
 # Deploy no servidor Kubernetes — branch `vps`.
-# Codigo no VPS: /home/servidor/kubernets/datamasterv2 (override: secret K8S_DEPLOY_DIR)
+# Codigo no VPS: /home/servidor/kubernets/datamasterv2
 name: Deploy → VPS (Kubernetes)
 
 on:
@@ -25,60 +25,59 @@ jobs:
           version: latest
           targets: ${{ secrets.K8S_SSH_HOST }}
 
-      - name: Preparar autenticacao SSH
+      - name: Deploy via SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.K8S_SSH_KEY }}
+          SSH_PASSWORD: ${{ secrets.K8S_SSH_PASSWORD }}
+          SSH_HOST: ${{ secrets.K8S_SSH_HOST }}
+          SSH_USER: ${{ secrets.K8S_SSH_USER }}
+          GIT_REF: vps
+          IMAGE_TAG: ${{ github.sha }}
+          DEPLOY_DIR: /home/servidor/kubernets/datamasterv2
         run: |
-          if [ -n "${SSH_PRIVATE_KEY}" ] && echo "${SSH_PRIVATE_KEY}" | grep -q "BEGIN.*PRIVATE KEY"; then
-            printf '%s\n' "${SSH_PRIVATE_KEY}" > "${RUNNER_TEMP}/deploy_key"
-            chmod 600 "${RUNNER_TEMP}/deploy_key"
-            echo "SSH_AUTH=key" >> "${GITHUB_ENV}"
-          else
-            echo "SSH_AUTH=password" >> "${GITHUB_ENV}"
+          set -euo pipefail
+          if [ -z "${SSH_HOST}" ] || [ -z "${SSH_USER}" ]; then
+            echo "::error::Defina K8S_SSH_HOST e K8S_SSH_USER no Environment TAILSCALE_AUTHKEY"
+            exit 1
           fi
 
-      - name: Deploy via SSH (chave)
-        if: env.SSH_AUTH == 'key'
-        env:
-          GIT_REF: vps
-          IMAGE_TAG: ${{ github.sha }}
-          DEPLOY_DIR: /home/servidor/kubernets/datamasterv2
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.K8S_SSH_HOST }}
-          username: ${{ secrets.K8S_SSH_USER }}
-          key_path: ${{ runner.temp }}/deploy_key
-          port: 22
-          script_stop: true
-          envs: GIT_REF,IMAGE_TAG,DEPLOY_DIR
-          script: |
-            set -euo pipefail
-            export DEPLOY_DIR="${DEPLOY_DIR:-/home/servidor/kubernets/datamasterv2}"
-            export GIT_REF="${GIT_REF:-vps}"
-            export IMAGE_TAG="${IMAGE_TAG:-}"
-            bash "${DEPLOY_DIR}/scripts/deploy-kubernetes-server.sh"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          SSH_OPTS=(-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 22)
 
-      - name: Deploy via SSH (senha)
-        if: env.SSH_AUTH == 'password'
-        env:
-          GIT_REF: vps
-          IMAGE_TAG: ${{ github.sha }}
-          DEPLOY_DIR: /home/servidor/kubernets/datamasterv2
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.K8S_SSH_HOST }}
-          username: ${{ secrets.K8S_SSH_USER }}
-          password: ${{ secrets.K8S_SSH_PASSWORD }}
-          port: 22
-          script_stop: true
-          envs: GIT_REF,IMAGE_TAG,DEPLOY_DIR
-          script: |
-            set -euo pipefail
-            export DEPLOY_DIR="${DEPLOY_DIR:-/home/servidor/kubernets/datamasterv2}"
-            export GIT_REF="${GIT_REF:-vps}"
-            export IMAGE_TAG="${IMAGE_TAG:-}"
-            bash "${DEPLOY_DIR}/scripts/deploy-kubernetes-server.sh"
+          USE_KEY=0
+          if [ -n "${SSH_PRIVATE_KEY}" ] && echo "${SSH_PRIVATE_KEY}" | grep -qE 'BEGIN (OPENSSH |RSA )?PRIVATE KEY'; then
+            printf '%s\n' "${SSH_PRIVATE_KEY}" > ~/.ssh/id_deploy
+            chmod 600 ~/.ssh/id_deploy
+            SSH_OPTS+=(-i ~/.ssh/id_deploy -o IdentitiesOnly=yes)
+            USE_KEY=1
+            echo "SSH: usando chave privada (K8S_SSH_KEY)"
+          elif [ -n "${SSH_PASSWORD}" ]; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq sshpass
+            echo "SSH: usando senha (K8S_SSH_PASSWORD)"
+          else
+            echo "::error::Configure no Environment TAILSCALE_AUTHKEY:"
+            echo "  - K8S_SSH_KEY = chave PRIVADA completa (-----BEGIN ... PRIVATE KEY-----)"
+            echo "  - OU K8S_SSH_PASSWORD = senha do usuario ${SSH_USER}"
+            exit 1
+          fi
+
+          REMOTE_CMD="set -euo pipefail
+          export DEPLOY_DIR='${DEPLOY_DIR}'
+          export GIT_REF='${GIT_REF}'
+          export IMAGE_TAG='${IMAGE_TAG}'
+          if [[ ! -x \"\${DEPLOY_DIR}/scripts/deploy-kubernetes-server.sh\" ]]; then
+            echo \"Script nao encontrado em \${DEPLOY_DIR}\"
+            exit 1
+          fi
+          bash \"\${DEPLOY_DIR}/scripts/deploy-kubernetes-server.sh\""
+
+          if [ "${USE_KEY}" -eq 1 ]; then
+            ssh "${SSH_OPTS[@]}" "${SSH_USER}@${SSH_HOST}" "${REMOTE_CMD}"
+          else
+            sshpass -p "${SSH_PASSWORD}" ssh "${SSH_OPTS[@]}" "${SSH_USER}@${SSH_HOST}" "${REMOTE_CMD}"
+          fi
 
       - name: Resumo
-        run: |
-          echo "Deploy VPS (auth=${SSH_AUTH:-?}, commit ${{ github.sha }})"
+        run: echo "Deploy VPS concluido (commit ${{ github.sha }})"
