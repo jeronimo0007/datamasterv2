@@ -39,8 +39,8 @@ spec:
             - until nc -z mongodb 27017; do echo waiting mongodb; sleep 2; done
       containers:
         - name: api
-          image: datamaster-api:latest
-          imagePullPolicy: Never
+          image: docker.io/library/datamaster-api:local
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
           env:

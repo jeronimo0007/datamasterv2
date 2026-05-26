@@ -40,15 +40,6 @@ kubectl_cmd() {
   sudo -n kubectl "$@"
 }
 
-k3s_ctr() {
-  if command -v k3s >/dev/null 2>&1; then
-    sudo -n k3s ctr "$@"
-  else
-    echo "ERRO: k3s nao encontrado" >&2
-    exit 1
-  fi
-}
-
 echo "==> Parar Docker Compose (evita conflito de portas com NodePorts)"
 if docker compose version >/dev/null 2>&1; then
   docker compose -f docker-compose.yaml -f docker-compose.vps.yaml down 2>/dev/null || true
@@ -70,12 +61,8 @@ docker build -f Dockerfile.dashboard -t "datamaster-dashboard:${IMAGE_TAG}" .
 docker build -f portal/Dockerfile -t "datamaster-portal:${IMAGE_TAG}" .  # contexto raiz (COPY portal/...)
 docker build -f data-generator-console/Dockerfile -t "datamaster-data-console:${IMAGE_TAG}" .
 
-echo "==> Importar imagens no k3s (tag ${IMAGE_TAG} + latest local)"
-for img in datamaster-api datamaster-dashboard datamaster-portal datamaster-data-console; do
-  docker tag "${img}:${IMAGE_TAG}" "${img}:latest"
-  docker save "${img}:${IMAGE_TAG}" | k3s_ctr images import -
-  docker save "${img}:latest" | k3s_ctr images import -
-done
+echo "==> Importar imagens no k3s (docker.io/library/... — nome que o kubelet usa)"
+IMAGE_TAG="${IMAGE_TAG}" bash "${REPO_ABS}/scripts/k3s-import-app-images.sh"
 
 kubectl_cmd create namespace datamaster --dry-run=client -o yaml | kubectl_cmd apply -f -
 
@@ -93,20 +80,13 @@ tmp="$(mktemp)"
 # Substitui tag das imagens custom no YAML gerado (nao altera prom/grafana :latest)
 kubectl_cmd kustomize "${REPO_ABS}/${KUSTOMIZE_OVERLAY}" \
   | sed \
-    -e "s|datamaster-api:latest|datamaster-api:${IMAGE_TAG}|g" \
-    -e "s|datamaster-dashboard:latest|datamaster-dashboard:${IMAGE_TAG}|g" \
-    -e "s|datamaster-portal:latest|datamaster-portal:${IMAGE_TAG}|g" \
-    -e "s|datamaster-data-console:latest|datamaster-data-console:${IMAGE_TAG}|g" \
+    -e "s|docker.io/library/datamaster-api:local|docker.io/library/datamaster-api:${IMAGE_TAG}|g" \
+    -e "s|docker.io/library/datamaster-dashboard:local|docker.io/library/datamaster-dashboard:${IMAGE_TAG}|g" \
+    -e "s|docker.io/library/datamaster-portal:local|docker.io/library/datamaster-portal:${IMAGE_TAG}|g" \
+    -e "s|docker.io/library/datamaster-data-console:local|docker.io/library/datamaster-data-console:${IMAGE_TAG}|g" \
   >"$tmp"
 kubectl_cmd apply -f "$tmp"
 rm -f "$tmp"
-
-echo "==> Garantir imagePullPolicy local (evita pull no Docker Hub)"
-for dep in api dashboard portal data-console; do
-  kubectl_cmd patch deployment "$dep" -n datamaster --type=json \
-    -p='[{"op":"replace","path":"/spec/template/spec/containers/0/imagePullPolicy","value":"Never"}]' \
-    2>/dev/null || true
-done
 
 echo "==> hostPath do repo (${REPO_ABS}) em data-console e jupyter"
 for dep in data-console jupyter; do

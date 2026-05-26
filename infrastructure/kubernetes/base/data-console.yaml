@@ -32,8 +32,8 @@ spec:
     spec:
       containers:
         - name: data-console
-          image: datamaster-data-console:latest
-          imagePullPolicy: Never
+          image: docker.io/library/datamaster-data-console:local
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3333
           env:
