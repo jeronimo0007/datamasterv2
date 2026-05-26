@@ -25,23 +25,24 @@ resources:
   - portal.yaml
   - data-console.yaml
 
+# Arquivos em config/ (copias locais — Kustomize nao permite paths fora de base/)
 configMapGenerator:
   - name: mongodb-init
     files:
       - init_mongo.js=config/init_mongo.js
   - name: postgres-init
     files:
-      - 01-schema.sql=../../../sql/schema.sql
-      - 02-seed_demo.sql=../../../sql/seed_demo.sql
+      - 01-schema.sql=config/01-schema.sql
+      - 02-seed_demo.sql=config/02-seed_demo.sql
   - name: grafana-datasources
     files:
-      - prometheus.yml=../../../config/grafana/provisioning/datasources/prometheus.yml
+      - prometheus.yml=config/grafana/provisioning/datasources/prometheus.yml
   - name: grafana-dashboards-provider
     files:
-      - dashboards.yml=../../../config/grafana/provisioning/dashboards/dashboards.yml
+      - dashboards.yml=config/grafana/provisioning/dashboards/dashboards.yml
   - name: grafana-dashboards-json
     files:
-      - datamaster-api.json=../../../config/grafana/dashboards/datamaster-api.json
+      - datamaster-api.json=config/grafana/dashboards/datamaster-api.json
 
 generatorOptions:
   disableNameSuffixHash: true
