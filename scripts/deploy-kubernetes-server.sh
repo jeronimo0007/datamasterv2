@@ -53,11 +53,16 @@ docker build -f portal/Dockerfile -t "datamaster-portal:${IMAGE_TAG}" -t datamas
 import_image() {
   local img="$1"
   local imported=0
+  local k3s_bin=""
 
   if command -v k3s >/dev/null 2>&1; then
-    if docker save "$img" | k3s ctr images import - 2>/dev/null; then
+    k3s_bin="$(command -v k3s)"
+    # root ou usuario com NOPASSWD no binario k3s (nao "k3s ctr" no sudoers)
+    if docker save "$img" | "${k3s_bin}" ctr images import - 2>/dev/null; then
       imported=1
-    elif docker save "$img" | sudo -n k3s ctr images import - 2>/dev/null; then
+    elif docker save "$img" | sudo -n "${k3s_bin}" ctr images import - 2>/dev/null; then
+      imported=1
+    elif docker save "$img" | sudo -n "${k3s_bin}" ctr -n k8s.io images import - 2>/dev/null; then
       imported=1
     fi
   elif command -v microk8s >/dev/null 2>&1; then
@@ -71,11 +76,10 @@ import_image() {
     return 0
   fi
 
-  echo "ERRO: nao foi possivel importar $img no k3s (sudo pediu senha ou sem permissao)." >&2
-  echo "No VPS, rode UMA vez como usuario do deploy ($(whoami)):" >&2
-  echo "  K3S=\$(command -v k3s)" >&2
-  echo "  echo \"\$(whoami) ALL=(ALL) NOPASSWD: \${K3S} ctr\" | sudo tee /etc/sudoers.d/k3s-datamaster" >&2
-  echo "  sudo chmod 440 /etc/sudoers.d/k3s-datamaster" >&2
+  echo "ERRO: nao foi possivel importar $img no k3s." >&2
+  echo "No VPS (usuario do K8S_SSH_USER), rode com sudo interativo:" >&2
+  echo "  bash scripts/setup-k3s-deploy-permissions.sh" >&2
+  echo "Ou use K8S_SSH_USER=root no GitHub (import sem sudo)." >&2
   return 1
 }
 
