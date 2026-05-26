@@ -4,17 +4,17 @@ kind: Kustomization
 resources:
   - ../../base
 
-# Tags atualizados pelo deploy-kubernetes-server.sh (IMAGE_TAG / git SHA).
+# Imagens custom: tag substituida no deploy (scripts/deploy-kubernetes-server.sh).
 images:
-  - name: datamaster-api
-    newName: datamaster-api
-    newTag: latest
-  - name: datamaster-dashboard
-    newName: datamaster-dashboard
-    newTag: latest
-  - name: datamaster-portal
-    newName: datamaster-portal
-    newTag: latest
-  - name: datamaster-data-console
-    newName: datamaster-data-console
-    newTag: latest
+  - name: docker.io/library/datamaster-api
+    newName: docker.io/library/datamaster-api
+    newTag: local
+  - name: docker.io/library/datamaster-dashboard
+    newName: docker.io/library/datamaster-dashboard
+    newTag: local
+  - name: docker.io/library/datamaster-portal
+    newName: docker.io/library/datamaster-portal
+    newTag: local
+  - name: docker.io/library/datamaster-data-console
+    newName: docker.io/library/datamaster-data-console
+    newTag: local

@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: portal
-          image: datamaster-portal:latest
-          imagePullPolicy: Never
+          image: docker.io/library/datamaster-portal:local
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80

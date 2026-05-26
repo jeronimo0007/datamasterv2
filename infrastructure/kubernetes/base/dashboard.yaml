@@ -32,8 +32,8 @@ spec:
     spec:
       containers:
         - name: dashboard
-          image: datamaster-dashboard:latest
-          imagePullPolicy: Never
+          image: docker.io/library/datamaster-dashboard:local
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8501
           env:
