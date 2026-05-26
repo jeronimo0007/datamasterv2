@@ -29,6 +29,8 @@ Diagramas draw.io: [arquitetura/](arquitetura/) (índice em [arquitetura/README.
 | [TERRAFORM_BANCA_MINIMO.md](TERRAFORM_BANCA_MINIMO.md) | Stack mínima Azure |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment |
 | [CI_CD_BRANCHES.md](CI_CD_BRANCHES.md) | Deploy por branch (`azure` / `aws` / `vps`, sem deploy na `main`) |
+| [GITHUB_ACTIONS_TAILSCALE.md](GITHUB_ACTIONS_TAILSCALE.md) | GitHub Actions acessar VPS via Tailscale |
+| [TAILSCALE_ACL_PASSO_A_PASSO.md](TAILSCALE_ACL_PASSO_A_PASSO.md) | ACL / tags Tailscale (modo fácil + passo a passo) |
 | [DEPLOY_KUBERNETES_SERVIDOR.md](DEPLOY_KUBERNETES_SERVIDOR.md) | Git → servidor K8s (Tailscale / k3s) |
 
 ## Outros
