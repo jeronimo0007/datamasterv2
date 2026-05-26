@@ -36,6 +36,7 @@ spec:
       initContainers:
         - name: wait-zookeeper
           image: busybox:1.36
+          imagePullPolicy: IfNotPresent
           command:
             - sh
             - -c
@@ -43,6 +44,7 @@ spec:
       containers:
         - name: kafka
           image: confluentinc/cp-kafka:7.5.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 29092
             - containerPort: 9092
@@ -74,4 +76,4 @@ spec:
               memory: 512Mi
               cpu: 200m
             limits:
-              memory: 1Gi
+              memory: 1536Mi
