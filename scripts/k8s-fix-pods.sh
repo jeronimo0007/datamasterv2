@@ -28,6 +28,7 @@ fix api datamaster-api
 fix dashboard datamaster-dashboard
 fix portal datamaster-portal
 fix data-console datamaster-data-console
+fix email-worker datamaster-email-worker
 
 kubectl_cmd rollout status deployment/api -n datamaster --timeout=180s || true
 kubectl_cmd get pods -n datamaster

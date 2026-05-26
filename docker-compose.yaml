@@ -22,8 +22,15 @@ services:
       - SPRING_PROFILES_ACTIVE=local
       - MONGODB_URI=mongodb://admin:admin123@mongodb:27017/fraud_detection?authSource=admin
       - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+      - FRAUD_EMAIL_ENABLED=${FRAUD_EMAIL_ENABLED:-true}
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER:-datamaster}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-datamaster}
     depends_on:
       mongodb:
+        condition: service_started
+      rabbitmq:
         condition: service_started
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health >/dev/null 2>&1 || exit 1"]
@@ -282,6 +289,52 @@ services:
       - "9090:9090"
     volumes:
       - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - fraud-network
+
+  # RabbitMQ — fila de alertas de fraude (e-mail assíncrono)
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: fraud-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-datamaster}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-datamaster}
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      - fraud-network
+
+  # Consumidor — lê fila e envia e-mail SMTP (nao bloqueia a API)
+  email-worker:
+    build:
+      context: ./email-worker
+      dockerfile: Dockerfile
+    container_name: fraud-email-worker
+    ports:
+      - "8090:8090"
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=${RABBITMQ_USER:-datamaster}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD:-datamaster}
+      - FRAUD_EMAIL_ENABLED=${FRAUD_EMAIL_ENABLED:-true}
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SMTP_FROM=${SMTP_FROM:-noreply@datamaster.local}
+      - SMTP_STARTTLS=${SMTP_STARTTLS:-true}
+      - FRAUD_ALERT_TO=${FRAUD_ALERT_TO:-admin@example.com}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     networks:
       - fraud-network
 

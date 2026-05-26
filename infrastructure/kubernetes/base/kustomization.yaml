@@ -8,9 +8,12 @@ resources:
   - mongodb-secret.yaml
   - postgres-secret.yaml
   - app-secrets.yaml
+  - smtp-secret.yaml
   - mongodb.yaml
   - postgres.yaml
   - redis.yaml
+  - rabbitmq.yaml
+  - email-worker.yaml
   - zookeeper.yaml
   - kafka.yaml
   - minio.yaml

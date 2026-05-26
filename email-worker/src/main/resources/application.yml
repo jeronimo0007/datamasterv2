@@ -1,0 +1,38 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: fraud-email-worker
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:datamaster}
+    password: ${RABBITMQ_PASSWORD:datamaster}
+    listener:
+      simple:
+        acknowledge-mode: auto
+        default-requeue-rejected: false
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: ${SMTP_STARTTLS:true}
+
+fraud:
+  email:
+    from: ${SMTP_FROM:noreply@datamaster.local}
+    to: ${FRAUD_ALERT_TO:admin@example.com}
+    enabled: ${FRAUD_EMAIL_ENABLED:true}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

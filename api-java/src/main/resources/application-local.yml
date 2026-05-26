@@ -8,6 +8,12 @@ spring:
     mongodb:
       uri: ${MONGODB_URI:mongodb://admin:admin123@mongodb:27017/fraud_detection?authSource=admin}
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:datamaster}
+    password: ${RABBITMQ_PASSWORD:datamaster}
+
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
@@ -23,3 +29,5 @@ fraud:
     api-key: ${DEEPSEEK_API_KEY:}
     base-url: https://api.deepseek.com
     model: deepseek-chat
+  email:
+    enabled: ${FRAUD_EMAIL_ENABLED:true}

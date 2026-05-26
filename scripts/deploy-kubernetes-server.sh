@@ -60,6 +60,7 @@ docker build -f api-java/Dockerfile -t "datamaster-api:${IMAGE_TAG}" api-java
 docker build -f Dockerfile.dashboard -t "datamaster-dashboard:${IMAGE_TAG}" .
 docker build -f portal/Dockerfile -t "datamaster-portal:${IMAGE_TAG}" .  # contexto raiz (COPY portal/...)
 docker build -f data-generator-console/Dockerfile -t "datamaster-data-console:${IMAGE_TAG}" .
+docker build -f email-worker/Dockerfile -t "datamaster-email-worker:${IMAGE_TAG}" email-worker
 
 echo "==> Importar imagens no k3s (docker.io/library/... — nome que o kubelet usa)"
 IMAGE_TAG="${IMAGE_TAG}" bash "${REPO_ABS}/scripts/k3s-import-app-images.sh"
@@ -69,6 +70,17 @@ kubectl_cmd create namespace datamaster --dry-run=client -o yaml | kubectl_cmd a
 if [[ -n "${DEEPSEEK_API_KEY:-}" ]]; then
   kubectl_cmd create secret generic datamaster-app-secrets -n datamaster \
     --from-literal=DEEPSEEK_API_KEY="${DEEPSEEK_API_KEY}" \
+    --dry-run=client -o yaml | kubectl_cmd apply -f -
+fi
+
+if [[ -n "${SMTP_HOST:-}" ]]; then
+  kubectl_cmd create secret generic datamaster-smtp-secrets -n datamaster \
+    --from-literal=SMTP_HOST="${SMTP_HOST}" \
+    --from-literal=SMTP_PORT="${SMTP_PORT:-587}" \
+    --from-literal=SMTP_USER="${SMTP_USER:-}" \
+    --from-literal=SMTP_PASSWORD="${SMTP_PASSWORD:-}" \
+    --from-literal=SMTP_FROM="${SMTP_FROM:-noreply@datamaster.local}" \
+    --from-literal=FRAUD_ALERT_TO="${FRAUD_ALERT_TO:-admin@example.com}" \
     --dry-run=client -o yaml | kubectl_cmd apply -f -
 fi
 
@@ -87,6 +99,7 @@ kubectl_cmd kustomize "${REPO_ABS}/${KUSTOMIZE_OVERLAY}" \
     -e "s|docker.io/library/datamaster-dashboard:local|docker.io/library/datamaster-dashboard:${IMAGE_TAG}|g" \
     -e "s|docker.io/library/datamaster-portal:local|docker.io/library/datamaster-portal:${IMAGE_TAG}|g" \
     -e "s|docker.io/library/datamaster-data-console:local|docker.io/library/datamaster-data-console:${IMAGE_TAG}|g" \
+    -e "s|docker.io/library/datamaster-email-worker:local|docker.io/library/datamaster-email-worker:${IMAGE_TAG}|g" \
   >"$tmp"
 kubectl_cmd apply -f "$tmp"
 rm -f "$tmp"
