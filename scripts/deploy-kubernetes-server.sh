@@ -3,7 +3,7 @@
 # Executado localmente ou via GitHub Actions (SSH).
 set -euo pipefail
 
-REPO_DIR="${DEPLOY_DIR:-/opt/datamaster}"
+REPO_DIR="${DEPLOY_DIR:-/home/servidor/kubernets/datamasterv2}"
 KUSTOMIZE_OVERLAY="${KUSTOMIZE_OVERLAY:-infrastructure/kubernetes/overlays/homelab}"
 GIT_REF="${GIT_REF:-vps}"
 IMAGE_TAG="${IMAGE_TAG:-}"

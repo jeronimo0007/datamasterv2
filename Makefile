@@ -1,7 +1,7 @@
 # Alvos de deploy — use variaveis de ambiente ou GitHub Secrets (nunca commit senha).
 .PHONY: deploy-prod deploy-k8s deploy-azure help
 
-DEPLOY_DIR ?= /opt/datamaster
+DEPLOY_DIR ?= /home/servidor/kubernets/datamasterv2
 K8S_SSH_HOST ?= servidor.tailb0be8.ts.net
 K8S_SSH_USER ?= root
 K8S_SSH_PORT ?= 22

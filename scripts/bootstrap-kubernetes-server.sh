@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Configuracao inicial do servidor (rode UMA vez como root ou com sudo).
-# Instala k3s, git, docker e clona o repositorio em /opt/datamaster.
+# Instala k3s, git, docker e clona o repositorio em /home/servidor/kubernets/datamasterv2.
 set -euo pipefail
 
-DEPLOY_DIR="${DEPLOY_DIR:-/opt/datamaster}"
+DEPLOY_DIR="${DEPLOY_DIR:-/home/servidor/kubernets/datamasterv2}"
 GIT_REPO_URL="${GIT_REPO_URL:-https://github.com/jeronimo0007/datamasterv2.git}"
 GIT_REF="${GIT_REF:-vps}"
 
