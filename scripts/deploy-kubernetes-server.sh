@@ -70,9 +70,11 @@ docker build -f Dockerfile.dashboard -t "datamaster-dashboard:${IMAGE_TAG}" .
 docker build -f portal/Dockerfile -t "datamaster-portal:${IMAGE_TAG}" .  # contexto raiz (COPY portal/...)
 docker build -f data-generator-console/Dockerfile -t "datamaster-data-console:${IMAGE_TAG}" .
 
-echo "==> Importar imagens no k3s"
+echo "==> Importar imagens no k3s (tag ${IMAGE_TAG} + latest local)"
 for img in datamaster-api datamaster-dashboard datamaster-portal datamaster-data-console; do
+  docker tag "${img}:${IMAGE_TAG}" "${img}:latest"
   docker save "${img}:${IMAGE_TAG}" | k3s_ctr images import -
+  docker save "${img}:latest" | k3s_ctr images import -
 done
 
 kubectl_cmd create namespace datamaster --dry-run=client -o yaml | kubectl_cmd apply -f -
@@ -88,10 +90,23 @@ bash "${REPO_ABS}/scripts/sync-k8s-config.sh"
 
 echo "==> Aplicar manifests (Kustomize homelab)"
 tmp="$(mktemp)"
+# Substitui tag das imagens custom no YAML gerado (nao altera prom/grafana :latest)
 kubectl_cmd kustomize "${REPO_ABS}/${KUSTOMIZE_OVERLAY}" \
-  | sed "s/newTag: latest/newTag: ${IMAGE_TAG}/g" >"$tmp"
+  | sed \
+    -e "s|datamaster-api:latest|datamaster-api:${IMAGE_TAG}|g" \
+    -e "s|datamaster-dashboard:latest|datamaster-dashboard:${IMAGE_TAG}|g" \
+    -e "s|datamaster-portal:latest|datamaster-portal:${IMAGE_TAG}|g" \
+    -e "s|datamaster-data-console:latest|datamaster-data-console:${IMAGE_TAG}|g" \
+  >"$tmp"
 kubectl_cmd apply -f "$tmp"
 rm -f "$tmp"
+
+echo "==> Garantir imagePullPolicy local (evita pull no Docker Hub)"
+for dep in api dashboard portal data-console; do
+  kubectl_cmd patch deployment "$dep" -n datamaster --type=json \
+    -p='[{"op":"replace","path":"/spec/template/spec/containers/0/imagePullPolicy","value":"Never"}]' \
+    2>/dev/null || true
+done
 
 echo "==> hostPath do repo (${REPO_ABS}) em data-console e jupyter"
 for dep in data-console jupyter; do
@@ -111,7 +126,7 @@ echo "==> Job minio-init (recriar se ja existir)"
 kubectl_cmd delete job minio-init -n datamaster --ignore-not-found=true
 kubectl_cmd apply -f "${REPO_ABS}/infrastructure/kubernetes/base/minio-init-job.yaml"
 
-echo "==> Kafka advertised listeners (acesso externo NodePort 30902)"
+echo "==> Kafka advertised listeners (NodePort ${KAFKA_EXTERNAL_HOST}:30902)"
 kubectl_cmd set env deployment/kafka -n datamaster \
   KAFKA_ADVERTISED_LISTENERS="PLAINTEXT://kafka:29092,PLAINTEXT_HOST://${KAFKA_EXTERNAL_HOST}:30902" \
   --overwrite=true 2>/dev/null || true

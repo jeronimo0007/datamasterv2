@@ -30,9 +30,23 @@ spec:
       labels:
         app: jupyter
     spec:
+      initContainers:
+        - name: wait-spark
+          image: busybox:1.36
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - |
+              for i in $(seq 1 90); do
+                nc -z spark-master 7077 && exit 0
+                sleep 2
+              done
+              echo "spark-master:7077 nao respondeu"; exit 1
       containers:
         - name: jupyter
           image: quay.io/jupyter/pyspark-notebook:spark-3.5.0
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8888
           env:
@@ -42,10 +56,16 @@ spec:
               value: spark://spark-master:7077
             - name: PYSPARK_SUBMIT_ARGS
               value: "--master spark://spark-master:7077 pyspark-shell"
+            - name: CHOWN_HOME
+              value: "yes"
+            - name: CHOWN_HOME_OPTS
+              value: "-R"
           command:
             - start-notebook.sh
             - --NotebookApp.token=datamaster
             - --NotebookApp.password=
+          securityContext:
+            runAsUser: 0
           volumeMounts:
             - name: workspace
               mountPath: /home/jovyan/work
