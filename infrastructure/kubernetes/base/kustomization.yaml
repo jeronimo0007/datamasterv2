@@ -15,7 +15,7 @@ resources:
 configMapGenerator:
   - name: mongodb-init
     files:
-      - init_mongo.js=../../../scripts/init_mongo.js
+      - init_mongo.js=config/init_mongo.js
 
 generatorOptions:
   disableNameSuffixHash: true

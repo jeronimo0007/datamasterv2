@@ -5,7 +5,7 @@ set -euo pipefail
 
 REPO_DIR="${DEPLOY_DIR:-/opt/datamaster}"
 KUSTOMIZE_OVERLAY="${KUSTOMIZE_OVERLAY:-infrastructure/kubernetes/overlays/homelab}"
-GIT_REF="${GIT_REF:-main}"
+GIT_REF="${GIT_REF:-vps}"
 IMAGE_TAG="${IMAGE_TAG:-}"
 
 cd "$REPO_DIR"
@@ -55,6 +55,13 @@ trap 'mv -f "${OVERLAY_PATH}.bak" "$OVERLAY_PATH"' EXIT
 
 sed -i "s/newTag: .*/newTag: ${IMAGE_TAG}/" "$OVERLAY_PATH" 2>/dev/null || \
   sed -i '' "s/newTag: .*/newTag: ${IMAGE_TAG}/" "$OVERLAY_PATH"
+
+# Kustomize nao permite arquivos fora de base/ — sincroniza init do Mongo
+INIT_SRC="${REPO_DIR}/scripts/init_mongo.js"
+INIT_DST="${REPO_DIR}/infrastructure/kubernetes/base/config/init_mongo.js"
+if [[ -f "$INIT_SRC" ]]; then
+  cp "$INIT_SRC" "$INIT_DST"
+fi
 
 echo "==> kubectl apply -k ${KUSTOMIZE_OVERLAY}"
 kubectl apply -k "${REPO_DIR}/${KUSTOMIZE_OVERLAY}"
