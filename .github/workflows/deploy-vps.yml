@@ -1,5 +1,5 @@
 # Deploy no servidor Kubernetes — branch `vps`.
-# Tailscale v3+ exige OAuth (client id + secret + tag) OU authkey preenchida no secret.
+# Tailscale: secret TAILSCALE_AUTHKEY (https://login.tailscale.com/admin/settings/keys)
 name: Deploy → VPS (Kubernetes)
 
 on:
@@ -17,14 +17,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # OAuth (recomendado Tailscale v3+). Secrets: TS_OAUTH_CLIENT_ID, TS_OAUTH_SECRET
-      # ACL minima: tagOwners "tag:ci" — ver docs/GITHUB_ACTIONS_TAILSCALE.md
+      - name: Verificar secret TAILSCALE_AUTHKEY
+        if: ${{ secrets.TAILSCALE_AUTHKEY == '' }}
+        run: |
+          echo "::error::Secret TAILSCALE_AUTHKEY ausente ou vazio."
+          echo "GitHub → Settings → Secrets → Actions → New secret → TAILSCALE_AUTHKEY"
+          echo "Valor: chave tskey-auth-... de https://login.tailscale.com/admin/settings/keys"
+          echo "(Ephemeral + Reusable + Pre-approved, sem tags)"
+          exit 1
+
       - name: Conectar Tailscale
         uses: tailscale/github-action@v3
         with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
           version: latest
           targets: ${{ secrets.K8S_SSH_HOST }}
 
