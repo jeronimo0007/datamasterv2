@@ -1,5 +1,5 @@
 # Deploy no servidor Kubernetes — branch `vps`.
-# Tailscale: secret TAILSCALE_AUTHKEY (https://login.tailscale.com/admin/settings/keys)
+# Codigo no VPS: /home/servidor/kubernets/datamasterv2 (override: secret K8S_DEPLOY_DIR)
 name: Deploy → VPS (Kubernetes)
 
 on:
@@ -14,9 +14,6 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Secrets estao no Environment "TAILSCALE_AUTHKEY" (nao em Repository secrets).
-    # Alternativa: mover tudo para Settings → Secrets → Actions → Repository secrets
-    # e apague esta linha "environment:".
     environment: TAILSCALE_AUTHKEY
     steps:
       - uses: actions/checkout@v4
@@ -28,39 +25,60 @@ jobs:
           version: latest
           targets: ${{ secrets.K8S_SSH_HOST }}
 
-      - name: Testar reachability (MagicDNS)
+      - name: Preparar autenticacao SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.K8S_SSH_KEY }}
         run: |
-          HOST="${{ secrets.K8S_SSH_HOST }}"
-          echo "Ping/resolve: ${HOST}"
-          tailscale status
-          getent hosts "${HOST}" || nslookup "${HOST}" || true
-          ping -c 2 "${HOST}" || true
+          if [ -n "${SSH_PRIVATE_KEY}" ] && echo "${SSH_PRIVATE_KEY}" | grep -q "BEGIN.*PRIVATE KEY"; then
+            printf '%s\n' "${SSH_PRIVATE_KEY}" > "${RUNNER_TEMP}/deploy_key"
+            chmod 600 "${RUNNER_TEMP}/deploy_key"
+            echo "SSH_AUTH=key" >> "${GITHUB_ENV}"
+          else
+            echo "SSH_AUTH=password" >> "${GITHUB_ENV}"
+          fi
 
-      - name: Deploy via SSH
+      - name: Deploy via SSH (chave)
+        if: env.SSH_AUTH == 'key'
         env:
           GIT_REF: vps
           IMAGE_TAG: ${{ github.sha }}
-          DEPLOY_DIR: ${{ secrets.K8S_DEPLOY_DIR }}
+          DEPLOY_DIR: /home/servidor/kubernets/datamasterv2
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.K8S_SSH_HOST }}
           username: ${{ secrets.K8S_SSH_USER }}
-          password: ${{ secrets.K8S_SSH_PASSWORD }}
-          key: ${{ secrets.K8S_SSH_KEY }}
+          key_path: ${{ runner.temp }}/deploy_key
           port: 22
           script_stop: true
           envs: GIT_REF,IMAGE_TAG,DEPLOY_DIR
           script: |
             set -euo pipefail
-            export DEPLOY_DIR="${DEPLOY_DIR:-/opt/datamaster}"
+            export DEPLOY_DIR="${DEPLOY_DIR:-/home/servidor/kubernets/datamasterv2}"
             export GIT_REF="${GIT_REF:-vps}"
             export IMAGE_TAG="${IMAGE_TAG:-}"
-            if [[ ! -x "${DEPLOY_DIR}/scripts/deploy-kubernetes-server.sh" ]]; then
-              echo "Repo nao encontrado em ${DEPLOY_DIR}. Rode scripts/bootstrap-kubernetes-server.sh no servidor."
-              exit 1
-            fi
+            bash "${DEPLOY_DIR}/scripts/deploy-kubernetes-server.sh"
+
+      - name: Deploy via SSH (senha)
+        if: env.SSH_AUTH == 'password'
+        env:
+          GIT_REF: vps
+          IMAGE_TAG: ${{ github.sha }}
+          DEPLOY_DIR: /home/servidor/kubernets/datamasterv2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.K8S_SSH_HOST }}
+          username: ${{ secrets.K8S_SSH_USER }}
+          password: ${{ secrets.K8S_SSH_PASSWORD }}
+          port: 22
+          script_stop: true
+          envs: GIT_REF,IMAGE_TAG,DEPLOY_DIR
+          script: |
+            set -euo pipefail
+            export DEPLOY_DIR="${DEPLOY_DIR:-/home/servidor/kubernets/datamasterv2}"
+            export GIT_REF="${GIT_REF:-vps}"
+            export IMAGE_TAG="${IMAGE_TAG:-}"
             bash "${DEPLOY_DIR}/scripts/deploy-kubernetes-server.sh"
 
       - name: Resumo
         run: |
-          echo "Deploy VPS concluido (branch vps, commit ${{ github.sha }})"
+          echo "Deploy VPS (auth=${SSH_AUTH:-?}, commit ${{ github.sha }})"
