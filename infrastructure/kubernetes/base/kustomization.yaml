@@ -6,16 +6,42 @@ namespace: datamaster
 resources:
   - namespace.yaml
   - mongodb-secret.yaml
-  - mongodb.yaml
+  - postgres-secret.yaml
   - app-secrets.yaml
+  - mongodb.yaml
+  - postgres.yaml
+  - redis.yaml
+  - zookeeper.yaml
+  - kafka.yaml
+  - minio.yaml
+  - minio-init-job.yaml
+  - spark.yaml
+  - jupyter.yaml
+  - prometheus-config.yaml
+  - prometheus.yaml
+  - grafana.yaml
   - api.yaml
   - dashboard.yaml
   - portal.yaml
+  - data-console.yaml
 
 configMapGenerator:
   - name: mongodb-init
     files:
       - init_mongo.js=config/init_mongo.js
+  - name: postgres-init
+    files:
+      - 01-schema.sql=../../../sql/schema.sql
+      - 02-seed_demo.sql=../../../sql/seed_demo.sql
+  - name: grafana-datasources
+    files:
+      - prometheus.yml=../../../config/grafana/provisioning/datasources/prometheus.yml
+  - name: grafana-dashboards-provider
+    files:
+      - dashboards.yml=../../../config/grafana/provisioning/dashboards/dashboards.yml
+  - name: grafana-dashboards-json
+    files:
+      - datamaster-api.json=../../../config/grafana/dashboards/datamaster-api.json
 
 generatorOptions:
   disableNameSuffixHash: true

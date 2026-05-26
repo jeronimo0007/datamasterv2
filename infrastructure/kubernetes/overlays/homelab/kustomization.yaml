@@ -4,7 +4,7 @@ kind: Kustomization
 resources:
   - ../../base
 
-# Tags atualizados pelo script deploy-kubernetes-server.sh (git SHA).
+# Tags atualizados pelo deploy-kubernetes-server.sh (IMAGE_TAG / git SHA).
 images:
   - name: datamaster-api
     newName: datamaster-api
@@ -14,4 +14,7 @@ images:
     newTag: latest
   - name: datamaster-portal
     newName: datamaster-portal
+    newTag: latest
+  - name: datamaster-data-console
+    newName: datamaster-data-console
     newTag: latest

@@ -12,6 +12,9 @@ Diagramas draw.io: [arquitetura/](arquitetura/) (índice em [arquitetura/README.
 
 | Documento | Conteúdo |
 |-----------|----------|
+| [AMBIENTE_LOCAL.md](AMBIENTE_LOCAL.md) | **Rodar na sua máquina** — `.env`, `up-local`, Mac/Linux |
+| [DEPLOY_VPS.md](DEPLOY_VPS.md) | **Rodar no VPS** — resumo, CI, Tailscale |
+| [DEPLOY_K8S.md](DEPLOY_K8S.md) | **Kubernetes completo** — todos os serviços, NodePorts |
 | [QUICK_START.md](QUICK_START.md) | Subir Docker, URLs, troubleshooting |
 | [SERVICOS_DOCKER.md](SERVICOS_DOCKER.md) | O que é cada container |
 | [LOCAL_SPARK.md](LOCAL_SPARK.md) | Spark / notebook no Docker |
@@ -31,7 +34,7 @@ Diagramas draw.io: [arquitetura/](arquitetura/) (índice em [arquitetura/README.
 | [CI_CD_BRANCHES.md](CI_CD_BRANCHES.md) | Deploy por branch (`azure` / `aws` / `vps`, sem deploy na `main`) |
 | [GITHUB_ACTIONS_TAILSCALE.md](GITHUB_ACTIONS_TAILSCALE.md) | GitHub Actions acessar VPS via Tailscale |
 | [TAILSCALE_ACL_PASSO_A_PASSO.md](TAILSCALE_ACL_PASSO_A_PASSO.md) | ACL / tags Tailscale (modo fácil + passo a passo) |
-| [DEPLOY_KUBERNETES_SERVIDOR.md](DEPLOY_KUBERNETES_SERVIDOR.md) | Git → servidor K8s (Tailscale / k3s) |
+| [DEPLOY_KUBERNETES_SERVIDOR.md](DEPLOY_KUBERNETES_SERVIDOR.md) | Índice → [DEPLOY_VPS.md](DEPLOY_VPS.md) |
 
 ## Outros
 
