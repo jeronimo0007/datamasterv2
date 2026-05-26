@@ -33,7 +33,6 @@ spec:
       labels:
         app: spark-master
     spec:
-      hostname: spark-master
       containers:
         - name: spark
           image: bitnamilegacy/spark:3.5.5
@@ -42,10 +41,16 @@ spec:
             - containerPort: 8080
             - containerPort: 7077
           env:
+            - name: BITNAMI_DEBUG
+              value: "true"
             - name: SPARK_MODE
               value: master
             - name: SPARK_MASTER_HOST
               value: spark-master
+            - name: SPARK_MASTER_PORT
+              value: "7077"
+            - name: SPARK_MASTER_WEBUI_PORT
+              value: "8080"
             - name: SPARK_RPC_AUTHENTICATION_ENABLED
               value: "no"
             - name: SPARK_RPC_ENCRYPTION_ENABLED
@@ -55,22 +60,21 @@ spec:
           volumeMounts:
             - name: spark-tmp
               mountPath: /tmp/spark
+          startupProbe:
+            tcpSocket:
+              port: 7077
+            failureThreshold: 36
+            periodSeconds: 5
           readinessProbe:
             tcpSocket:
               port: 7077
-            initialDelaySeconds: 25
             periodSeconds: 10
-          livenessProbe:
-            tcpSocket:
-              port: 7077
-            initialDelaySeconds: 60
-            periodSeconds: 20
           resources:
             requests:
-              memory: 768Mi
-              cpu: 250m
+              memory: 512Mi
+              cpu: 200m
             limits:
-              memory: 1536Mi
+              memory: 2Gi
       volumes:
         - name: spark-tmp
           emptyDir: {}
@@ -97,7 +101,12 @@ spec:
           command:
             - sh
             - -c
-            - until nc -z spark-master 7077; do echo waiting spark-master; sleep 3; done
+            - |
+              for i in $(seq 1 90); do
+                nc -z spark-master 7077 && exit 0
+                sleep 3
+              done
+              echo "spark-master timeout"; exit 1
       containers:
         - name: spark
           image: bitnamilegacy/spark:3.5.5
@@ -108,7 +117,7 @@ spec:
             - name: SPARK_MASTER_URL
               value: spark://spark-master:7077
             - name: SPARK_WORKER_MEMORY
-              value: 1G
+              value: 512m
             - name: SPARK_WORKER_CORES
               value: "1"
             - name: SPARK_LOCAL_DIRS
@@ -118,10 +127,10 @@ spec:
               mountPath: /tmp/spark
           resources:
             requests:
-              memory: 512Mi
-              cpu: 250m
+              memory: 384Mi
+              cpu: 150m
             limits:
-              memory: 1536Mi
+              memory: 1Gi
       volumes:
         - name: spark-tmp
           emptyDir: {}
