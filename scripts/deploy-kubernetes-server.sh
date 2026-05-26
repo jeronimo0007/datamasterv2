@@ -4,11 +4,16 @@
 set -euo pipefail
 
 REPO_DIR="${DEPLOY_DIR:-/home/servidor/kubernets/datamasterv2}"
+# Apos cd, REPO_ABS e usado no restante do script
 KUSTOMIZE_OVERLAY="${KUSTOMIZE_OVERLAY:-infrastructure/kubernetes/overlays/homelab}"
 GIT_REF="${GIT_REF:-vps}"
 IMAGE_TAG="${IMAGE_TAG:-}"
 
-cd "$REPO_DIR"
+REPO_ABS="$(cd "$REPO_DIR" && pwd)"
+cd "$REPO_ABS"
+
+# SSH pode entrar como usuario diferente do dono da pasta (ex.: root vs servidor).
+git config --global --add safe.directory "$REPO_ABS"
 
 if [[ -d .git ]]; then
   git fetch origin "$GIT_REF"
@@ -43,7 +48,7 @@ import_image "datamaster-api:${IMAGE_TAG}"
 import_image "datamaster-dashboard:${IMAGE_TAG}"
 import_image "datamaster-portal:${IMAGE_TAG}"
 
-OVERLAY_PATH="${REPO_DIR}/${KUSTOMIZE_OVERLAY}/kustomization.yaml"
+OVERLAY_PATH="${REPO_ABS}/${KUSTOMIZE_OVERLAY}/kustomization.yaml"
 if [[ ! -f "$OVERLAY_PATH" ]]; then
   echo "ERRO: overlay nao encontrado: $OVERLAY_PATH" >&2
   exit 1
@@ -57,14 +62,14 @@ sed -i "s/newTag: .*/newTag: ${IMAGE_TAG}/" "$OVERLAY_PATH" 2>/dev/null || \
   sed -i '' "s/newTag: .*/newTag: ${IMAGE_TAG}/" "$OVERLAY_PATH"
 
 # Kustomize nao permite arquivos fora de base/ — sincroniza init do Mongo
-INIT_SRC="${REPO_DIR}/scripts/init_mongo.js"
-INIT_DST="${REPO_DIR}/infrastructure/kubernetes/base/config/init_mongo.js"
+INIT_SRC="${REPO_ABS}/scripts/init_mongo.js"
+INIT_DST="${REPO_ABS}/infrastructure/kubernetes/base/config/init_mongo.js"
 if [[ -f "$INIT_SRC" ]]; then
   cp "$INIT_SRC" "$INIT_DST"
 fi
 
 echo "==> kubectl apply -k ${KUSTOMIZE_OVERLAY}"
-kubectl apply -k "${REPO_DIR}/${KUSTOMIZE_OVERLAY}"
+kubectl apply -k "${REPO_ABS}/${KUSTOMIZE_OVERLAY}"
 
 echo "==> Reiniciar deployments"
 kubectl rollout restart deployment/api deployment/dashboard deployment/portal -n datamaster
