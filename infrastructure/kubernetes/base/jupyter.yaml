@@ -38,15 +38,16 @@ spec:
             - sh
             - -c
             - |
-              for i in $(seq 1 120); do
+              for i in $(seq 1 90); do
                 nc -z spark-master 7077 && exit 0
                 sleep 3
               done
-              echo "AVISO: spark-master ainda nao respondeu; jupyter sobe mesmo assim"
+              echo "AVISO: spark-master lento; jupyter continua"
               exit 0
       containers:
         - name: jupyter
-          image: quay.io/jupyter/pyspark-notebook:spark-3.5.0
+          # Docker Hub (quay.io costuma falhar/ demorar no VPS)
+          image: jupyter/pyspark-notebook:spark-3.5.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8888
@@ -57,17 +58,18 @@ spec:
               value: spark://spark-master:7077
             - name: PYSPARK_SUBMIT_ARGS
               value: "--master spark://spark-master:7077 pyspark-shell"
-            - name: GRANT_SUDO
-              value: "yes"
           args:
             - start-notebook.sh
             - --NotebookApp.token=datamaster
             - --NotebookApp.password=
-          readinessProbe:
-            httpGet:
-              path: /api
+          startupProbe:
+            tcpSocket:
               port: 8888
-            initialDelaySeconds: 20
+            failureThreshold: 36
+            periodSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 8888
             periodSeconds: 10
           volumeMounts:
             - name: workspace
@@ -75,10 +77,9 @@ spec:
           resources:
             requests:
               memory: 512Mi
-              cpu: 200m
+              cpu: 150m
             limits:
               memory: 2Gi
       volumes:
-        # emptyDir evita crash por permissao no hostPath (repo fica no data-console)
         - name: workspace
           emptyDir: {}
