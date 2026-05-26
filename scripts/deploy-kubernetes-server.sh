@@ -75,6 +75,9 @@ fi
 echo "==> Sincronizar config/ do Kustomize (SQL, Grafana, Mongo init)"
 bash "${REPO_ABS}/scripts/sync-k8s-config.sh"
 
+echo "==> Limpar Service orphan jupyter-svc (conflito NodePort 30888)"
+kubectl_cmd delete svc jupyter-svc -n datamaster --ignore-not-found=true
+
 echo "==> Aplicar manifests (Kustomize homelab)"
 tmp="$(mktemp)"
 # Substitui tag das imagens custom no YAML gerado (nao altera prom/grafana :latest)
