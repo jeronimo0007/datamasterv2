@@ -1,0 +1,13 @@
+# Overlay para deploy no VPS (use com: docker compose -f docker-compose.yaml -f docker-compose.vps.yaml up -d)
+# Ajusta Kafka para acesso externo (Tailscale/IP do host).
+
+services:
+  kafka:
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://${KAFKA_EXTERNAL_HOST:-localhost}:9092
+
+  # Console precisa do socket Docker no host para spark-job / demo
+  data-console:
+    volumes:
+      - .:/workspace
+      - /var/run/docker.sock:/var/run/docker.sock

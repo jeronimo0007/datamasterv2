@@ -1,122 +1,80 @@
 #!/usr/bin/env bash
-# Deploy DataMaster no Kubernetes do servidor (k3s/microk8s/k8s).
-# Executado localmente ou via GitHub Actions (SSH).
+# Deploy DataMaster COMPLETO no VPS via Docker Compose (mesma stack do ambiente local).
+# Executado pelo GitHub Actions (SSH) ou manualmente no servidor.
 set -euo pipefail
 
 REPO_DIR="${DEPLOY_DIR:-/home/servidor/kubernets/datamasterv2}"
-# Apos cd, REPO_ABS e usado no restante do script
-KUSTOMIZE_OVERLAY="${KUSTOMIZE_OVERLAY:-infrastructure/kubernetes/overlays/homelab}"
 GIT_REF="${GIT_REF:-vps}"
-IMAGE_TAG="${IMAGE_TAG:-}"
+COMPOSE_FILES="-f docker-compose.yaml -f docker-compose.vps.yaml"
 
 REPO_ABS="$(cd "$REPO_DIR" && pwd)"
 cd "$REPO_ABS"
 
-# SSH pode entrar como usuario diferente do dono da pasta (ex.: root vs servidor).
 git config --global --add safe.directory "$REPO_ABS"
 
 if [[ -d .git ]]; then
   git fetch origin "$GIT_REF"
   git reset --hard "origin/${GIT_REF}"
 else
-  echo "ERRO: $REPO_DIR nao e um repositorio git." >&2
+  echo "ERRO: $REPO_ABS nao e um repositorio git." >&2
   exit 1
 fi
 
-if [[ -z "$IMAGE_TAG" ]]; then
-  IMAGE_TAG="$(git rev-parse --short HEAD)"
+if [[ -f .env ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source .env
+  set +a
 fi
 
-# kubeconfig do k3s (CI nao tem TTY para sudo pedir senha)
-if [[ -f /etc/rancher/k3s/k3s.yaml ]]; then
-  export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+# Kafka acessivel fora da rede Docker (opcional: export KAFKA_EXTERNAL_HOST no .env do VPS)
+if [[ -z "${KAFKA_EXTERNAL_HOST:-}" ]]; then
+  KAFKA_EXTERNAL_HOST="$(hostname -I 2>/dev/null | awk '{print $1}')"
+  export KAFKA_EXTERNAL_HOST
 fi
 
-kubectl_cmd() {
-  if kubectl "$@" 2>/dev/null; then
-    return 0
-  fi
-  if sudo -n kubectl "$@" 2>/dev/null; then
-    return 0
-  fi
-  echo "ERRO: kubectl falhou. Rode no VPS (uma vez):" >&2
-  echo "  sudo chmod 644 /etc/rancher/k3s/k3s.yaml" >&2
-  echo "  ou: echo '\$USER ALL=(ALL) NOPASSWD: /usr/local/bin/kubectl, /usr/bin/kubectl' | sudo tee /etc/sudoers.d/k8s-deploy" >&2
-  return 1
-}
+echo "==> Parar stack K8s minima (evita conflito de portas com Compose)"
+if command -v kubectl >/dev/null 2>&1; then
+  kubectl delete namespace datamaster --ignore-not-found=true --wait=false 2>/dev/null \
+    || sudo -n kubectl delete namespace datamaster --ignore-not-found=true --wait=false 2>/dev/null \
+    || true
+fi
 
-echo "==> Build imagens (tag: $IMAGE_TAG)"
-docker build -t "datamaster-api:${IMAGE_TAG}" -t datamaster-api:latest ./api-java
-docker build -f Dockerfile.dashboard -t "datamaster-dashboard:${IMAGE_TAG}" -t datamaster-dashboard:latest .
-docker build -f portal/Dockerfile -t "datamaster-portal:${IMAGE_TAG}" -t datamaster-portal:latest .
-
-import_image() {
-  local img="$1"
-  local imported=0
-  local k3s_bin=""
-
-  if command -v k3s >/dev/null 2>&1; then
-    k3s_bin="$(command -v k3s)"
-    # root ou usuario com NOPASSWD no binario k3s (nao "k3s ctr" no sudoers)
-    if docker save "$img" | "${k3s_bin}" ctr images import - 2>/dev/null; then
-      imported=1
-    elif docker save "$img" | sudo -n "${k3s_bin}" ctr images import - 2>/dev/null; then
-      imported=1
-    elif docker save "$img" | sudo -n "${k3s_bin}" ctr -n k8s.io images import - 2>/dev/null; then
-      imported=1
-    fi
-  elif command -v microk8s >/dev/null 2>&1; then
-    if docker save "$img" | microk8s ctr image import - 2>/dev/null; then
-      imported=1
-    fi
-  fi
-
-  if [[ "$imported" -eq 1 ]]; then
-    echo "    import OK: $img"
-    return 0
-  fi
-
-  echo "ERRO: nao foi possivel importar $img no k3s." >&2
-  echo "No VPS (usuario do K8S_SSH_USER), rode com sudo interativo:" >&2
-  echo "  bash scripts/setup-k3s-deploy-permissions.sh" >&2
-  echo "Ou use K8S_SSH_USER=root no GitHub (import sem sudo)." >&2
-  return 1
-}
-
-echo "==> Importar imagens no containerd do cluster"
-import_image "datamaster-api:${IMAGE_TAG}"
-import_image "datamaster-dashboard:${IMAGE_TAG}"
-import_image "datamaster-portal:${IMAGE_TAG}"
-
-OVERLAY_PATH="${REPO_ABS}/${KUSTOMIZE_OVERLAY}/kustomization.yaml"
-if [[ ! -f "$OVERLAY_PATH" ]]; then
-  echo "ERRO: overlay nao encontrado: $OVERLAY_PATH" >&2
+if ! docker compose version >/dev/null 2>&1; then
+  echo "ERRO: docker compose (v2) nao encontrado. Instale Docker Compose plugin." >&2
   exit 1
 fi
 
-# Tags efemeras so para este apply (git reset restaura o arquivo no proximo deploy).
-cp "$OVERLAY_PATH" "${OVERLAY_PATH}.bak"
-trap 'mv -f "${OVERLAY_PATH}.bak" "$OVERLAY_PATH"' EXIT
+echo "==> Subir stack completa (Compose)"
+# Sem profiles batch/spark-run — mesmo que 'docker compose up -d --build' local padrao
+docker compose ${COMPOSE_FILES} up -d --build --remove-orphans
 
-sed -i "s/newTag: .*/newTag: ${IMAGE_TAG}/" "$OVERLAY_PATH" 2>/dev/null || \
-  sed -i '' "s/newTag: .*/newTag: ${IMAGE_TAG}/" "$OVERLAY_PATH"
-
-# Kustomize nao permite arquivos fora de base/ — sincroniza init do Mongo
-INIT_SRC="${REPO_ABS}/scripts/init_mongo.js"
-INIT_DST="${REPO_ABS}/infrastructure/kubernetes/base/config/init_mongo.js"
-if [[ -f "$INIT_SRC" ]]; then
-  cp "$INIT_SRC" "$INIT_DST"
-fi
-
-echo "==> kubectl apply -k ${KUSTOMIZE_OVERLAY}"
-kubectl_cmd apply -k "${REPO_ABS}/${KUSTOMIZE_OVERLAY}"
-
-echo "==> Reiniciar deployments"
-kubectl_cmd rollout restart deployment/api deployment/dashboard deployment/portal -n datamaster
-kubectl_cmd rollout status deployment/api -n datamaster --timeout=180s
-kubectl_cmd rollout status deployment/dashboard -n datamaster --timeout=180s
-kubectl_cmd rollout status deployment/portal -n datamaster --timeout=180s
+echo "==> Aguardar API (health)"
+for i in $(seq 1 40); do
+  if curl -sf http://127.0.0.1:8080/health >/dev/null 2>&1; then
+    echo "API OK"
+    break
+  fi
+  if [[ "$i" -eq 40 ]]; then
+    echo "AVISO: API ainda nao respondeu em :8080 — veja: docker compose logs api"
+  fi
+  sleep 3
+done
 
 echo ""
-echo "Deploy concluido (tag ${IMAGE_TAG})."
-kubectl_cmd get svc -n datamaster
+echo "==> Servicos (docker compose ps)"
+docker compose ${COMPOSE_FILES} ps
+
+echo ""
+echo "Deploy Compose concluido (ref ${GIT_REF})."
+echo "Portas no host:"
+echo "  Portal      http://$(hostname -I | awk '{print $1}'):8880"
+echo "  API         http://$(hostname -I | awk '{print $1}'):8080"
+echo "  Dashboard   http://$(hostname -I | awk '{print $1}'):8501"
+echo "  Console     http://$(hostname -I | awk '{print $1}'):3333"
+echo "  Grafana     http://$(hostname -I | awk '{print $1}'):3000  (admin/admin)"
+echo "  Prometheus  http://$(hostname -I | awk '{print $1}'):9090"
+echo "  Spark UI    http://$(hostname -I | awk '{print $1}'):18080"
+echo "  Jupyter     http://$(hostname -I | awk '{print $1}'):8888  (token: datamaster)"
+echo "  MinIO       http://$(hostname -I | awk '{print $1}'):9001"
+echo "  Kafka       $(hostname -I | awk '{print $1}'):9092"
