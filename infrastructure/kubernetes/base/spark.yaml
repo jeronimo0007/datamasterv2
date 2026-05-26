@@ -47,8 +47,11 @@ spec:
               value: "true"
             - name: SPARK_MODE
               value: master
+            # Nao usar hostname "spark-master" (resolve p/ ClusterIP do Service → bind falha)
             - name: SPARK_MASTER_HOST
-              value: spark-master
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
             - name: SPARK_MASTER_PORT
               value: "7077"
             - name: SPARK_MASTER_WEBUI_PORT
