@@ -1,12 +1,12 @@
-# Kubernetes — DataMaster
+# Kubernetes — DataMaster (legado / MVP)
+
+Deploy **completo** no VPS usa **Docker Compose** (`scripts/deploy-kubernetes-server.sh`), não estes manifests.
 
 | Caminho | Uso |
 |---------|-----|
-| `base/` | Namespace, MongoDB, API, Dashboard, Portal |
-| `overlays/homelab/` | Deploy no servidor (k3s) |
+| `base/` | MVP antigo: MongoDB, API, Dashboard, Portal |
+| `overlays/homelab/` | k3s (substituido por Compose no CI) |
 
-```bash
-kubectl apply -k infrastructure/kubernetes/overlays/homelab
-```
+Para testar o MVP em k3s manualmente: `kubectl apply -k infrastructure/kubernetes/overlays/homelab`
 
-Deploy automatizado: `scripts/deploy-kubernetes-server.sh` e [docs/DEPLOY_KUBERNETES_SERVIDOR.md](../../docs/DEPLOY_KUBERNETES_SERVIDOR.md).
+Ver [docs/DEPLOY_KUBERNETES_SERVIDOR.md](../../docs/DEPLOY_KUBERNETES_SERVIDOR.md).
