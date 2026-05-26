@@ -20,7 +20,7 @@ deploy-k8s:
 	@test -n "$(K8S_SSH_HOST)" || (echo "Defina K8S_SSH_HOST"; exit 1)
 	@test -n "$(K8S_SSH_USER)" || (echo "Defina K8S_SSH_USER"; exit 1)
 	ssh -p $(K8S_SSH_PORT) $(K8S_SSH_USER)@$(K8S_SSH_HOST) \
-		"DEPLOY_DIR=$(DEPLOY_DIR) GIT_REF=main bash $(DEPLOY_DIR)/scripts/deploy-kubernetes-server.sh"
+		"DEPLOY_DIR=$(DEPLOY_DIR) GIT_REF=vps bash $(DEPLOY_DIR)/scripts/deploy-kubernetes-server.sh"
 
 deploy-azure:
 	cd $(TF_DIR) && terraform init -upgrade && terraform plan && terraform apply

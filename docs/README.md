@@ -28,6 +28,7 @@ Diagramas draw.io: [arquitetura/](arquitetura/) (índice em [arquitetura/README.
 | [TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md](TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md) | Deploy Azure |
 | [TERRAFORM_BANCA_MINIMO.md](TERRAFORM_BANCA_MINIMO.md) | Stack mínima Azure |
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment |
+| [CI_CD_BRANCHES.md](CI_CD_BRANCHES.md) | Deploy por branch (`azure` / `aws` / `vps`, sem deploy na `main`) |
 | [DEPLOY_KUBERNETES_SERVIDOR.md](DEPLOY_KUBERNETES_SERVIDOR.md) | Git → servidor K8s (Tailscale / k3s) |
 
 ## Outros

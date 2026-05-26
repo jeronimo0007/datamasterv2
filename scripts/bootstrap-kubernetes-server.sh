@@ -5,7 +5,7 @@ set -euo pipefail
 
 DEPLOY_DIR="${DEPLOY_DIR:-/opt/datamaster}"
 GIT_REPO_URL="${GIT_REPO_URL:-https://github.com/jeronimo0007/datamasterv2.git}"
-GIT_REF="${GIT_REF:-main}"
+GIT_REF="${GIT_REF:-vps}"
 
 if ! command -v curl >/dev/null 2>&1; then
   apt-get update && apt-get install -y curl git ca-certificates

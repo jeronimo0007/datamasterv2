@@ -1,0 +1,58 @@
+# Terraform AWS — somente merge/push na branch `aws`.
+name: Deploy → AWS (Terraform)
+
+on:
+  push:
+    branches: [aws]
+  workflow_dispatch:
+    inputs:
+      terraform_dir:
+        description: "Diretorio Terraform"
+        required: true
+        default: infrastructure/terraform/aws
+
+concurrency:
+  group: deploy-aws
+  cancel-in-progress: false
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      TF_DIR: ${{ github.event.inputs.terraform_dir || 'infrastructure/terraform/aws' }}
+      AWS_DEFAULT_REGION: sa-east-1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: sa-east-1
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Validar configuracao Terraform
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          if [[ ! -f terraform.tfvars && -z "${{ secrets.AWS_LAKE_BUCKET_NAME }}" ]]; then
+            echo "Crie terraform.tfvars na branch aws ou defina o secret AWS_LAKE_BUCKET_NAME"
+            exit 1
+          fi
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        working-directory: ${{ env.TF_DIR }}
+        env:
+          TF_VAR_lake_bucket_name: ${{ secrets.AWS_LAKE_BUCKET_NAME }}
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TF_DIR }}
+        env:
+          TF_VAR_lake_bucket_name: ${{ secrets.AWS_LAKE_BUCKET_NAME }}
+        run: terraform apply -input=false -auto-approve tfplan

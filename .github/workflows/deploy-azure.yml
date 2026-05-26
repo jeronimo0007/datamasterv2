@@ -1,18 +1,19 @@
-# Infra Azure via Terraform (manual ou push em infrastructure/terraform).
-# Para API em Container Apps, use docs/examples/github-actions-deploy-api-azure.yml
-name: Terraform → Azure
+# Terraform Azure — somente merge/push na branch `azure`.
+name: Deploy → Azure (Terraform)
 
 on:
+  push:
+    branches: [azure]
   workflow_dispatch:
     inputs:
       terraform_dir:
         description: "Diretorio Terraform"
         required: true
         default: infrastructure/terraform/apresentacao
-  push:
-    branches: [main]
-    paths:
-      - "infrastructure/terraform/**"
+
+concurrency:
+  group: deploy-azure
+  cancel-in-progress: false
 
 jobs:
   terraform:
@@ -43,6 +44,5 @@ jobs:
         run: terraform plan -input=false -out=tfplan
 
       - name: Terraform Apply
-        if: github.event_name == 'workflow_dispatch'
         working-directory: ${{ env.TF_DIR }}
         run: terraform apply -input=false -auto-approve tfplan

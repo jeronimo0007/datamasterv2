@@ -1,4 +1,5 @@
-# Legado: workflows oficiais estao em .github/workflows/
-#   deploy-kubernetes.yml  -> servidor K8s (SSH)
-#   deploy-azure.yml       -> Terraform Azure
-# Copie este arquivo para .github/workflows/ apenas se ainda nao tiver os novos.
+# Legado — workflows em .github/workflows/
+#   deploy-vps.yml    -> branch vps (servidor K8s)
+#   deploy-azure.yml  -> branch azure
+#   deploy-aws.yml    -> branch aws
+# PR/push em main NAO faz deploy. Ver docs/CI_CD_BRANCHES.md
