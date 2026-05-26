@@ -1,5 +1,5 @@
-# Deploy no servidor Kubernetes — somente merge/push na branch `vps`.
-# PR para `main` nao dispara este workflow (apenas evento push na branch vps).
+# Deploy no servidor Kubernetes — branch `vps`.
+# O runner do GitHub entra na tailnet via Tailscale antes do SSH.
 name: Deploy → VPS (Kubernetes)
 
 on:
@@ -16,6 +16,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Conecta o runner Ubuntu à sua rede Tailscale (obrigatório para alcançar *.ts.net).
+      - name: Conectar Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          # oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          # oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          # Modo simples (homelab): use auth key SEM tags — secret TAILSCALE_AUTHKEY
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+          # Modo restrito (ACL com tags): descomente a linha abaixo e configure ACL (ver docs)
+          # tags: tag:github-ci
+          version: latest
+
+      - name: Testar reachability (MagicDNS)
+        run: |
+          HOST="${{ secrets.K8S_SSH_HOST }}"
+          echo "Ping/resolve: ${HOST}"
+          tailscale status
+          getent hosts "${HOST}" || nslookup "${HOST}" || true
+          ping -c 2 "${HOST}" || true
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.2.0
