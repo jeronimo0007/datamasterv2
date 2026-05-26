@@ -18,6 +18,9 @@ Depois de conectar, abra o banco **`fraud_detection`**.
 |-----------|----------|
 | `user_profiles` | Perfis agregados por usuário (histórico, scores, flags) |
 | `batch_runs` | Metadados de execuções do pipeline batch |
+| `transaction_history` | Cada `POST /analyze` — PII em claro (ambiente demo); API lista mascarado; `cosmos_sync_status` para réplica |
+
+> Na API, `GET /transactions` devolve **CPF e cartão mascarados**. No Compass você vê o documento completo (somente ambiente local).
 
 ## Se o init falhou na primeira subida (`EISDIR`)
 

@@ -36,6 +36,7 @@ public class LocalDemoApiController {
     private final UserProfileRepository userProfileRepository;
     private final UserProfileAnomalyService profileAnomaly;
     private final DeepSeekChatService chatService;
+    private final TransactionHistoryService transactionHistory;
 
     @GetMapping("/")
     public Map<String, Object> root() {
@@ -85,12 +86,12 @@ public class LocalDemoApiController {
                                     ? 1
                                     : 0));
 
-            String userId = body.userId() != null ? body.userId() : "anonymous";
+            String profileUserId = resolveProfileUserId(body);
             Map<String, Object> profileContext =
                     userProfileRepository
-                            .findByUserId(userId)
+                            .findByUserId(profileUserId)
                             .map(p -> profileAnomaly.analyzeAgainstProfile(p, txData))
-                            .orElseGet(() -> profileAnomaly.noProfile(userId));
+                            .orElseGet(() -> profileAnomaly.noProfile(profileUserId));
             double boost = ((Number) profileContext.get("anomaly_score_boost")).doubleValue();
             txData.put("profile_anomaly_boost", boost);
 
@@ -102,7 +103,16 @@ public class LocalDemoApiController {
                     body.transactionId() != null ? body.transactionId() : UUID.randomUUID().toString();
             Map<String, Object> record = new LinkedHashMap<>();
             record.put("transaction_id", txId);
-            record.put("user_id", body.userId() != null ? body.userId() : "anonymous");
+            record.put("profile_user_id", profileUserId);
+            if (body.holderDocument() != null && !body.holderDocument().isBlank()) {
+                record.put("holder_document", body.holderDocument().trim());
+            }
+            if (body.cardNumber() != null && !body.cardNumber().isBlank()) {
+                record.put("card_number", body.cardNumber().trim());
+            }
+            if (body.cardHolderName() != null && !body.cardHolderName().isBlank()) {
+                record.put("card_holder_name", body.cardHolderName().trim());
+            }
             record.put("amount", body.amount());
             record.put("merchant_category", body.merchantCategory());
             record.put("payment_method", body.paymentMethod());
@@ -116,7 +126,9 @@ public class LocalDemoApiController {
             record.put("timestamp", now.toInstant().toString());
             record.put("anomaly_reasons", profileContext.get("anomaly_reasons"));
             record.put("profile_found", profileContext.get("profile_found"));
+            record.put("cosmos_sync_status", TransactionHistoryService.COSMOS_PENDING);
             state.addTransaction(record);
+            transactionHistory.persist(record);
 
             if (Boolean.TRUE.equals(result.get("is_fraud"))) {
                 Map<String, Object> alert = new LinkedHashMap<>();
@@ -162,10 +174,17 @@ public class LocalDemoApiController {
     public Map<String, Object> listTransactions(
             @RequestParam(defaultValue = "50") int limit,
             @RequestParam(defaultValue = "all") String filter) {
-        List<Map<String, Object>> list = state.listTransactions(filter, limit);
+        List<Map<String, Object>> list =
+                state.listTransactions(filter, limit).stream()
+                        .map(transactionHistory::toPublicView)
+                        .toList();
         return Map.of(
                 "total",
                 state.getTransactions().size(),
+                "history_mongodb",
+                transactionHistory.countHistory(),
+                "history_cosmos_pending",
+                transactionHistory.countPendingCosmosSync(),
                 "filter",
                 filter,
                 "returned",
@@ -194,9 +213,14 @@ public class LocalDemoApiController {
     @GetMapping("/api/v1/batch/profile-stats")
     public Map<String, Object> batchProfileStats() {
         long count = userProfileRepository.count();
+        long historyCount = transactionHistory.countHistory();
         return Map.of(
                 "mongodb_profiles_loaded",
                 count,
+                "transaction_history_count",
+                historyCount,
+                "transaction_history_cosmos_pending",
+                transactionHistory.countPendingCosmosSync(),
                 "batch_ready",
                 count > 0,
                 "hint",
@@ -215,13 +239,17 @@ public class LocalDemoApiController {
                                             new ResponseStatusException(
                                                     HttpStatus.NOT_FOUND,
                                                     "Transação não encontrada"));
-            return chatService.analyzeTransactionRelease(tx, body.message());
+            return chatService.analyzeTransactionRelease(
+                    transactionHistory.toPublicView(tx), body.message());
         }
         if (body.message() == null || body.message().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "message obrigatório");
         }
         int limit = body.contextLimit() != null && body.contextLimit() > 0 ? body.contextLimit() : 15;
-        List<Map<String, Object>> fraudCtx = state.fraudTransactionsForChat(limit);
+        List<Map<String, Object>> fraudCtx =
+                state.fraudTransactionsForChat(limit).stream()
+                        .map(transactionHistory::toPublicView)
+                        .toList();
         return chatService.analyzeFraudContext(body.message(), fraudCtx);
     }
 
@@ -481,6 +509,10 @@ public class LocalDemoApiController {
             @JsonProperty("is_weekend") Integer isWeekend,
             @JsonProperty("is_international") Integer isInternational,
             @JsonProperty("transaction_id") String transactionId,
+            @JsonProperty("holder_document") String holderDocument,
+            @JsonProperty("card_number") String cardNumber,
+            @JsonProperty("card_holder_name") String cardHolderName,
+            @JsonProperty("profile_user_id") String profileUserId,
             @JsonProperty("user_id") String userId) {
 
         public TransactionAnalyzeRequest {
@@ -497,5 +529,16 @@ public class LocalDemoApiController {
                 paymentMethod = "PIX";
             }
         }
+    }
+
+    /** Perfil batch (Mongo user_profiles); legado: user_id no JSON. */
+    private static String resolveProfileUserId(TransactionAnalyzeRequest body) {
+        if (body.profileUserId() != null && !body.profileUserId().isBlank()) {
+            return body.profileUserId().trim();
+        }
+        if (body.userId() != null && !body.userId().isBlank()) {
+            return body.userId().trim();
+        }
+        return "anonymous";
     }
 }

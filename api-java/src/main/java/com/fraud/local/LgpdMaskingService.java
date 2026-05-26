@@ -78,6 +78,15 @@ public class LgpdMaskingService {
         return sb.toString();
     }
 
+    /** Exibição em listas: somente os 4 últimos dígitos visíveis. */
+    String cardLast4Display(String card) {
+        String clean = card.replaceAll("[^0-9]", "");
+        if (clean.length() < 4) {
+            return "****";
+        }
+        return "**** " + clean.substring(clean.length() - 4);
+    }
+
     String maskCard(String card) {
         String clean = card.replaceAll("[^0-9]", "");
         if (clean.length() < 4) {

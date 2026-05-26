@@ -206,7 +206,13 @@ st.sidebar.markdown("---")
 st.sidebar.header("Enviar transacao de teste")
 with st.sidebar.form("send_transaction"):
     amount = st.number_input("Valor (R$)", min_value=0.0, value=500.0, step=100.0)
-    user_id = st.text_input("User ID", value="user_1001")
+    holder_document = st.text_input("CPF (documento)", value="123.456.789-00")
+    card_number = st.text_input("Cartao", value="1234 5678 9012 3456")
+    profile_user_id = st.text_input(
+        "Perfil batch (user_id)",
+        value="user_1001",
+        help="Consulta user_profiles no Mongo; nao aparece mascarado na tabela.",
+    )
     category = st.selectbox(
         "Categoria",
         ["Alimentacao", "Eletronicos", "Vestuario", "Servicos", "Viagem", "Entretenimento"],
@@ -226,7 +232,9 @@ with st.sidebar.form("send_transaction"):
             "hour": hour,
             "is_weekend": int(is_weekend),
             "is_international": int(user_country != merchant_country),
-            "user_id": user_id,
+            "holder_document": holder_document,
+            "card_number": card_number,
+            "profile_user_id": profile_user_id,
         }
         r = fetch_data("/api/v1/transactions/analyze", method="POST", json_body=payload)
         if r and "fraud_score" in r:
@@ -410,17 +418,24 @@ reforcam risco; meio de pagamento e categoria afinam o score; fim de semana e si
             c
             for c in [
                 "transaction_id",
-                "user_id",
+                "holder_document",
+                "card_last4",
                 "amount",
                 "merchant_category",
+                "payment_method",
                 "fraud_score",
                 "is_fraud",
                 "review_status",
+                "cosmos_sync_status",
                 "anomaly_reasons",
                 "recommended_action",
             ]
             if c in df.columns
         ]
+        st.caption(
+            "**Documento (CPF)** mascarado e **cartao** só com os 4 ultimos digitos (`**** 3456`) — API LGPD. "
+            "Historico completo no Mongo (`transaction_history`) para fila Cosmos."
+        )
         table_df = df[display_cols]
         all_tx_ids = [str(r.get("transaction_id")) for r in rows if r.get("transaction_id")]
         if all_tx_ids and st.session_state.get("release_tx_select") not in all_tx_ids:
@@ -538,7 +553,17 @@ elif section == SECTION_BATCH:
         """
     )
     if batch_stats:
-        st.json(batch_stats)
+        h1, h2 = st.columns(2)
+        h1.metric("Perfis batch", batch_stats.get("mongodb_profiles_loaded", 0))
+        h2.metric(
+            "Historico transacoes (Mongo)",
+            batch_stats.get("transaction_history_count", 0),
+        )
+        pending = batch_stats.get("transaction_history_cosmos_pending", 0)
+        if pending:
+            st.caption(f"{pending} registro(s) com `cosmos_sync_status=PENDING` (replicação alvo).")
+        with st.expander("Detalhe batch-stats"):
+            st.json(batch_stats)
     st.code(
         "docker compose run --rm batch-prep\n"
         "# ou:\n"

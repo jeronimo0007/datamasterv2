@@ -125,10 +125,20 @@ public class DeepSeekChatService {
     }
 
     private static String formatTransactionLine(Map<String, Object> tx) {
+        String doc =
+                tx.get("holder_document") != null
+                        ? String.valueOf(tx.get("holder_document"))
+                        : "—";
+        String card =
+                tx.get("card_last4") != null
+                        ? String.valueOf(tx.get("card_last4"))
+                        : "—";
         return "- id="
                 + tx.get("transaction_id")
-                + " | user="
-                + tx.get("user_id")
+                + " | doc="
+                + doc
+                + " | cartao="
+                + card
                 + " | R$ "
                 + tx.get("amount")
                 + " | "
