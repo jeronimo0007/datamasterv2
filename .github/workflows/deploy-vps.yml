@@ -38,6 +38,10 @@ jobs:
           ping -c 2 "${HOST}" || true
 
       - name: Deploy via SSH
+        env:
+          GIT_REF: vps
+          IMAGE_TAG: ${{ github.sha }}
+          DEPLOY_DIR: ${{ secrets.K8S_DEPLOY_DIR }}
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.K8S_SSH_HOST }}
@@ -47,10 +51,6 @@ jobs:
           port: 22
           script_stop: true
           envs: GIT_REF,IMAGE_TAG,DEPLOY_DIR
-          env:
-            GIT_REF: vps
-            IMAGE_TAG: ${{ github.sha }}
-            DEPLOY_DIR: ${{ secrets.K8S_DEPLOY_DIR }}
           script: |
             set -euo pipefail
             export DEPLOY_DIR="${DEPLOY_DIR:-/opt/datamaster}"
