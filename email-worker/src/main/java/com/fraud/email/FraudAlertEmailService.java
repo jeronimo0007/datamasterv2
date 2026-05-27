@@ -1,7 +1,7 @@
 package com.fraud.email;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class FraudAlertEmailService {
 
-    private final JavaMailSender mailSender;
+    @Autowired(required = false)
+    private JavaMailSender mailSender;
 
     @Value("${fraud.email.from}")
     private String from;
@@ -32,7 +32,7 @@ public class FraudAlertEmailService {
             log.debug("E-mail desabilitado (FRAUD_EMAIL_ENABLED=false)");
             return;
         }
-        if (!StringUtils.hasText(smtpHost)) {
+        if (!StringUtils.hasText(smtpHost) || mailSender == null) {
             log.warn(
                     "SMTP_HOST nao configurado — alerta tx={} nao enviado por e-mail",
                     msg.getTransactionId());

@@ -96,12 +96,17 @@ spec:
                   name: datamaster-smtp-secrets
                   key: FRAUD_ALERT_TO
                   optional: true
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8090
+            failureThreshold: 30
+            periodSeconds: 5
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: 8090
-            initialDelaySeconds: 30
-            periodSeconds: 15
+            periodSeconds: 10
           resources:
             requests:
               memory: 256Mi
