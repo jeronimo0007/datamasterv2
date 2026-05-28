@@ -13,9 +13,9 @@ O caso de uso é **fraude em transações**; o artefato entregue é uma **plataf
 
 | Ambiente | Descrição |
 |----------|-----------|
-| **Execução local** | `docker compose` — API Java, dashboard, Spark, Kafka, MongoDB, Prometheus/Grafana |
-| **Alvo em nuvem** | Azure (Event Hubs, ADLS, Databricks, Cosmos, Key Vault, Monitor) — ver [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md) e Terraform em `infrastructure/terraform/` |
-| **VPS (homelab)** | Kubernetes (k3s) na branch `vps` — [docs/DEPLOY_K8S.md](docs/DEPLOY_K8S.md) |
+| **Execução local** | `docker compose` — stack completa (API, dashboard, Spark, Kafka, **RabbitMQ**, MongoDB, Prometheus/Grafana, …) |
+| **VPS (homelab)** | Kubernetes (k3s) na branch `vps` — [docs/DEPLOY_K8S.md](docs/DEPLOY_K8S.md) · resumo [docs/DEPLOY_VPS.md](docs/DEPLOY_VPS.md) |
+| **Alvo em nuvem** | Azure / AWS (referência e Terraform) — [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md) · `infrastructure/terraform/` |
 
 ---
 
@@ -23,7 +23,7 @@ O caso de uso é **fraude em transações**; o artefato entregue é uma **plataf
 
 - Docker Desktop (ou Docker Engine + Compose v2)
 - ~8 GB RAM livres para a stack completa
-- Opcional: `DEEPSEEK_API_KEY` no `.env` — ver [docs/AMBIENTE_LOCAL.md](docs/AMBIENTE_LOCAL.md)
+- Opcional: `DEEPSEEK_API_KEY` no `.env`
 
 ---
 
@@ -65,7 +65,7 @@ Alias: `bash scripts/demo_full_stack.sh` (mesmo efeito).
 
 **O que o fluxo completo faz (em ordem):**
 
-1. `docker compose up -d --build` — API Java, dashboard, console, Spark, Kafka, bancos, Grafana…
+1. `docker compose up -d --build` — stack completa (API, dashboard, console, Spark, Kafka, RabbitMQ, email-worker, bancos, Grafana…)
 2. Gera `data/transactions.json` (histórico simulado)
 3. `batch_dataprep_mongo.py` — perfis em MongoDB `user_profiles`
 4. Job Spark — lake `data/lake/` (Bronze / Silver / Gold)
@@ -73,18 +73,7 @@ Alias: `bash scripts/demo_full_stack.sh` (mesmo efeito).
 
 Depois: console :3333 ou dashboard :8501 para `analyze`, fraudes, LGPD. Detalhes: [docs/QUICK_START.md](docs/QUICK_START.md).
 
-### Dependências Python (`requirements-demo.txt` vs `requirements.txt`)
-
-| Arquivo | Uso |
-|---------|-----|
-| **`requirements-demo.txt`** | **Demo Docker e venv leve** — Streamlit, pandas, ML básico, requests. Usado em `Dockerfile.dashboard` e `scripts/setup.sh`. **É o que importa para a banca na mesa.** |
-| **`requirements.txt`** | **Desenvolvimento completo** — Azure SDKs, PySpark, Delta, Great Expectations, MLflow, testes. Para notebooks, treino e integração cloud **fora** do caminho mínimo do Compose. **Não** é instalado no container do dashboard. |
-
-A API de scoring na demo é **Java** (`api-java/`); os `requirements*.txt` servem ao **Python** (dashboard, scripts, Spark no host opcional).
-
----
-
-## Serviços (demo local)
+## Serviços (stack local)
 
 | Serviço | URL | Função |
 |---------|-----|--------|
@@ -95,8 +84,10 @@ A API de scoring na demo é **Java** (`api-java/`); os `requirements*.txt` serve
 | Spark UI | http://localhost:18080 | Jobs batch |
 | Jupyter | http://localhost:8888/?token=datamaster | Notebooks PySpark |
 | Prometheus / Grafana | http://localhost:9090 · http://localhost:3000 | Métricas (Grafana: `admin` / `admin`) |
+| RabbitMQ (UI) | http://localhost:15672 | Fila `fraud.alert.email` (`datamaster` / `datamaster`) |
+| Email worker (health) | http://localhost:8090/actuator/health | Consumidor SMTP assíncrono |
 
-Credenciais dos demais serviços (MongoDB, MinIO, Postgres): ver portal :8880 ou [docs/QUICK_START.md](docs/QUICK_START.md).
+Credenciais dos demais serviços (MongoDB, MinIO, Postgres): ver portal :8880 ou [docs/QUICK_START.md](docs/QUICK_START.md). Alertas por e-mail: [docs/FRAUD_EMAIL_RABBITMQ.md](docs/FRAUD_EMAIL_RABBITMQ.md).
 
 ---
 
@@ -141,7 +132,7 @@ graph LR
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Arquitetura detalhada da plataforma |
 | [docs/PROJETO_ESTRUTURADO.md](docs/PROJETO_ESTRUTURADO.md) | Estrutura do repositório e camadas |
 | [docs/cloud_comparison.md](docs/cloud_comparison.md) | Equivalência Azure ↔ AWS |
-| [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md) | Mapa serviço a serviço (demo local → Azure) |
+| [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md) | Mapa serviço a serviço (local · **VPS k3s** · Azure · AWS) |
 | [docs/arquitetura/README.md](docs/arquitetura/README.md) | Índice dos diagramas draw.io |
 | Documentação por domínio | [docs/INDICE_DOMINIOS.md](docs/INDICE_DOMINIOS.md) — **dados** · **observabilidade** · **online** |
 | Estudo / apresentação (versionado) | [docs/banca/ESTUDO_BANCA.md](docs/banca/ESTUDO_BANCA.md) · [docs/banca/APRESENTACAO_BANCA.md](docs/banca/APRESENTACAO_BANCA.md) |
@@ -215,8 +206,9 @@ cp terraform.tfvars.example terraform.tfvars
 terraform apply
 ```
 
-- Mapa serviço a serviço: [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md)
-- Ambientes adicionais: `infrastructure/terraform/environments/dev/` · mínimo: `banca-minimo/`
+- Mapa local · VPS · cloud: [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md)
+- Deploy VPS: [docs/DEPLOY_K8S.md](docs/DEPLOY_K8S.md)
+- Terraform Azure (apresentação): `infrastructure/terraform/apresentacao/` · mínimo: `banca-minimo/`
 
 ---
 
