@@ -1,55 +1,50 @@
 # Documentação DataMaster
 
-Índice da pasta `docs/` — operação Docker, arquitetura técnica, cloud e diagramas.
+Documentação organizada **por categoria**. Slides e cola verbal da banca ficam em `portal/` (versionados); material pessoal de estudo em `banca/` na raiz (**não versionado**).
 
-**Documentação por domínio:** [INDICE_DOMINIOS.md](INDICE_DOMINIOS.md) — agrupa material de **dados**, **observabilidade** e **online**.
+## Categorias
 
-Diagramas draw.io: [arquitetura/](arquitetura/) (índice em [arquitetura/README.md](arquitetura/README.md)). Regenerar: `python3 scripts/generate_architecture_drawio.py` na raiz do projeto.
+| Pasta | Conteúdo |
+|-------|----------|
+| [operacao/](operacao/) | Docker local, quick start, cada serviço do Compose |
+| [deploy/](deploy/) | VPS, Kubernetes (k3s), CI, Tailscale |
+| [dados/](dados/) | Spark, lake, MongoDB, batch |
+| [online/](online/) | API, Kafka, RabbitMQ, e-mail de fraude |
+| [observabilidade/](observabilidade/) | Prometheus, Grafana, health |
+| [arquitetura/](arquitetura/) | Diagramas draw.io, arquitetura detalhada |
+| [cloud/](cloud/) | Azure, AWS, Terraform |
+| [contribuicao/](contribuicao/) | Como contribuir |
+| [examples/](examples/) | Workflows CI de referência |
 
-**Estudo e apresentação:** [banca/ESTUDO_BANCA.md](banca/ESTUDO_BANCA.md) · [banca/APRESENTACAO_BANCA.md](banca/APRESENTACAO_BANCA.md) (versionados). Cópia local opcional em [`../banca/`](../banca/) (`.gitignore`).
+## Começar rápido
 
-**Demo ao vivo (versionado):** slides e cola em `portal/banca.html` e `portal/roteiro.html` — http://localhost:8880 após `docker compose up -d portal`.
+| Objetivo | Documento |
+|----------|-----------|
+| Subir na sua máquina | [operacao/QUICK_START.md](operacao/QUICK_START.md) |
+| `.env` e scripts locais | [operacao/AMBIENTE_LOCAL.md](operacao/AMBIENTE_LOCAL.md) |
+| Deploy no VPS (k3s) | [deploy/DEPLOY_K8S.md](deploy/DEPLOY_K8S.md) |
+| Mapa local · VPS · cloud | [../infrastructure/MAPA_LOCAL_AZURE.md](../infrastructure/MAPA_LOCAL_AZURE.md) |
 
-## Por domínio
+## Domínios (visão de plataforma)
+
+```text
+  DADOS ──► ONLINE ──► OBSERVABILIDADE
+ (batch)   (API/filas)  (métricas)
+```
 
 | Domínio | Índice |
 |---------|--------|
-| Dados (batch, lake, Mongo, Spark) | [dados/README.md](dados/README.md) |
-| Observabilidade (Prometheus, Grafana) | [observabilidade/README.md](observabilidade/README.md) |
-| Online (API, Kafka, **RabbitMQ**, e-mail) | [online/README.md](online/README.md) |
+| Dados | [dados/README.md](dados/README.md) |
+| Online | [online/README.md](online/README.md) |
+| Observabilidade | [observabilidade/README.md](observabilidade/README.md) |
 
-## Demo e operação
+## Apresentação (banca)
 
-| Documento | Conteúdo |
-|-----------|----------|
-| [AMBIENTE_LOCAL.md](AMBIENTE_LOCAL.md) | **Rodar na sua máquina** — `.env`, `up-local`, Mac/Linux |
-| [DEPLOY_VPS.md](DEPLOY_VPS.md) | **Rodar no VPS** — resumo, CI, Tailscale |
-| [DEPLOY_K8S.md](DEPLOY_K8S.md) | **Kubernetes completo** — todos os serviços, NodePorts |
-| [QUICK_START.md](QUICK_START.md) | Subir Docker, URLs, troubleshooting |
-| [SERVICOS_DOCKER.md](SERVICOS_DOCKER.md) | O que é cada container |
-| [FRAUD_EMAIL_RABBITMQ.md](FRAUD_EMAIL_RABBITMQ.md) | Alerta de fraude por fila + SMTP |
-| [LOCAL_SPARK.md](LOCAL_SPARK.md) | Spark / notebook no Docker |
-| [MONGODB_COMPASS.md](MONGODB_COMPASS.md) | MongoDB e Compass |
+| Recurso | Onde |
+|---------|------|
+| Slides | `portal/banca.html` |
+| Cola verbal | `portal/roteiro.html` |
+| Hub demo | http://localhost:8880 (`portal/index.html`) |
+| Diagramas | [arquitetura/](arquitetura/) — regenerar: `python3 scripts/generate_architecture_drawio.py` |
 
-## Arquitetura e cloud
-
-| Documento | Conteúdo |
-|-----------|----------|
-| [arquitetura/README.md](arquitetura/README.md) | Diagramas draw.io (local, Azure, AWS, Docker Compose) |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Arquitetura detalhada |
-| [PROJETO_ESTRUTURADO.md](PROJETO_ESTRUTURADO.md) | Estrutura do repositório |
-| [cloud_comparison.md](cloud_comparison.md) | Azure vs AWS |
-| [TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md](TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md) | Deploy Azure |
-| [TERRAFORM_BANCA_MINIMO.md](TERRAFORM_BANCA_MINIMO.md) | Stack mínima Azure |
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Deployment |
-| [CI_CD_BRANCHES.md](CI_CD_BRANCHES.md) | Deploy por branch (`azure` / `aws` / `vps`, sem deploy na `main`) |
-| [GITHUB_ACTIONS_TAILSCALE.md](GITHUB_ACTIONS_TAILSCALE.md) | GitHub Actions acessar VPS via Tailscale |
-| [TAILSCALE_ACL_PASSO_A_PASSO.md](TAILSCALE_ACL_PASSO_A_PASSO.md) | ACL / tags Tailscale (modo fácil + passo a passo) |
-| [DEPLOY_KUBERNETES_SERVIDOR.md](DEPLOY_KUBERNETES_SERVIDOR.md) | Índice → [DEPLOY_VPS.md](DEPLOY_VPS.md) |
-
-## Outros
-
-| Documento | Conteúdo |
-|-----------|----------|
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribuição |
-| [examples/](examples/) | Exemplos CI/CD |
+Estudo e rascunhos: pasta **`banca/`** na raiz do projeto (`.gitignore`).

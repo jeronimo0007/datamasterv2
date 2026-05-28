@@ -36,11 +36,11 @@
 
 ### 4. Documentação Completa
 - ✅ **README.md** - Documentação principal com todos os requisitos
-- ✅ **docs/QUICK_START.md** — Guia rápido de início
-- ✅ **docs/ARCHITECTURE.md** - Arquitetura detalhada
-- ✅ **docs/DEPLOYMENT.md** - Guia de deployment
-- ✅ **docs/PRESENTATION.md** - Guia para apresentação
-- ✅ **docs/CONTRIBUTING.md** - Guia de contribuição
+- ✅ **docs/operacao/QUICK_START.md** — Guia rápido de início
+- ✅ **docs/arquitetura/ARCHITECTURE.md** — Arquitetura detalhada
+- ✅ **docs/deploy/DEPLOYMENT.md** — Guia de deployment
+- ✅ **portal/banca.html** — Apresentação (slides)
+- ✅ **docs/contribuicao/CONTRIBUTING.md** — Guia de contribuição
 
 ### 5. Scripts e Configurações
 - ✅ **setup.sh** e **setup.ps1** - Scripts de setup
@@ -247,7 +247,7 @@ terraform apply
 
 ## 🎓 Para a Apresentação
 
-Consulte `docs/PRESENTATION.md` para:
+Consulte `portal/banca.html` e [../README.md](../README.md) para:
 - Estrutura da apresentação (90 minutos)
 - Pontos-chave para destacar
 - Dicas e recursos visuais

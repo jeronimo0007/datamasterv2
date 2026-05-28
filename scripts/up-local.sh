@@ -17,4 +17,4 @@ fi
 
 docker compose up -d --build --remove-orphans
 echo ""
-echo "Local: http://localhost:8880 (portal) | API :8080 | docs/AMBIENTE_LOCAL.md"
+echo "Local: http://localhost:8880 (portal) | API :8080 | docs/operacao/AMBIENTE_LOCAL.md"

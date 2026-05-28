@@ -24,7 +24,7 @@ Use na banca e na operação para explicar que **o desenho é o mesmo**; só mud
 | ML treino | `models/` (Python) | hostPath / notebooks | Azure ML (opcional TF) | SageMaker |
 | IaC / deploy | docker-compose.yaml | Kustomize `overlays/homelab` · branch **`vps`** | `terraform/apresentacao` | Terraform AWS |
 
-Deploy VPS: **[docs/DEPLOY_K8S.md](../docs/DEPLOY_K8S.md)**.
+Deploy VPS: **[docs/deploy/DEPLOY_K8S.md](../docs/deploy/DEPLOY_K8S.md)**.
 
 ## Fluxo igual na mesa, no VPS e na nuvem
 

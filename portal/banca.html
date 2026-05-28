@@ -1044,7 +1044,7 @@ flowchart TB
             <li><strong>Dataprep:</strong> <code>scripts/batch_dataprep_mongo.py</code> — média, desvio, P95, categorias típicas, % internacional.</li>
             <li><strong>Serving store:</strong> MongoDB <code>user_profiles</code> — na Azure, <strong>Cosmos DB</strong> (API MongoDB) com mesma ideia.</li>
             <li><strong>Online:</strong> API consulta perfil e aplica <code>profile_anomaly_boost</code> ao score de fraude.</li>
-            <li><strong>Alerta assíncrono:</strong> se <code>is_fraud</code>, API publica em <strong>RabbitMQ</strong> (<code>fraud.alert.email</code>); <strong>email-worker</strong> envia SMTP sem bloquear o HTTP — doc <code>docs/FRAUD_EMAIL_RABBITMQ.md</code>.</li>
+            <li><strong>Alerta assíncrono:</strong> se <code>is_fraud</code>, API publica em <strong>RabbitMQ</strong> (<code>fraud.alert.email</code>); <strong>email-worker</strong> envia SMTP sem bloquear o HTTP — doc <code>docs/online/FRAUD_EMAIL_RABBITMQ.md</code>.</li>
           </ul>
           <ul class="clean card-panel" style="margin:0;">
             <li><strong>Spark Medallion</strong> (paralelo): lake Bronze→Silver→Gold para analítico e retreino.</li>

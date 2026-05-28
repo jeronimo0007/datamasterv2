@@ -88,23 +88,5 @@ models/
 
 # Material pessoal de estudo e apresentação (não versionar)
 banca/
-
-# Documentação técnica — ignorar por padrão; liberar operação e arquitetura
-docs/**
-!docs/README.md
-!docs/QUICK_START.md
-!docs/SERVICOS_DOCKER.md
-!docs/MONGODB_COMPASS.md
-!docs/LOCAL_SPARK.md
-!docs/ARCHITECTURE.md
-!docs/PROJETO_ESTRUTURADO.md
-!docs/cloud_comparison.md
-!docs/CONTRIBUTING.md
-!docs/DEPLOYMENT.md
-!docs/TERRAFORM_BANCA_MINIMO.md
-!docs/TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md
-!docs/arquitetura/
-!docs/arquitetura/**
-!docs/examples/
-!docs/examples/**
+docs/banca/
 

@@ -1,6 +1,6 @@
 # Terraform — banca mínimo (Azure)
 
-Comandos resumidos. Guia completo (local): `docs/TERRAFORM_BANCA_MINIMO.md`.
+Comandos resumidos. Guia completo: `docs/cloud/TERRAFORM_BANCA_MINIMO.md`.
 
 ```bash
 az login

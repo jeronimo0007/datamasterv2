@@ -351,7 +351,7 @@
   | `infrastructure/terraform/environments/dev/container_api.tf.example` | Opcional: ACR + Log Analytics + Container Apps Env + Container App |
   | `docs/examples/github-actions-deploy-api-azure.yml` | Copiar para `.github/workflows/` |
   | `Dockerfile.api` | Imagem da API FastAPI |
-  | `docs/DEPLOYMENT.md` | Referência legada; este tutorial complementa com CA + Actions |
+  | [../deploy/DEPLOYMENT.md](../deploy/DEPLOYMENT.md) | Referência legada; este tutorial complementa com CA + Actions |
 
   ---
 

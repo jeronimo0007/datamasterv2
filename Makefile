@@ -10,12 +10,12 @@ COMPOSE_VPS = docker compose -f docker-compose.yaml -f docker-compose.vps.yaml
 
 help:
 	@echo "Targets:"
-	@echo "  up-local      - docker compose local (docs/AMBIENTE_LOCAL.md)"
+	@echo "  up-local      - docker compose local (docs/operacao/AMBIENTE_LOCAL.md)"
 	@echo "  up-vps        - compose com overlay VPS (no servidor)"
 	@echo "  deploy-prod   - SSH + deploy K8s remoto (branch vps)"
 	@echo "  deploy-k8s    - alias de deploy-prod"
 	@echo "  deploy-azure  - terraform plan/apply (requer az login)"
-	@echo "Docs: docs/AMBIENTE_LOCAL.md | docs/DEPLOY_VPS.md"
+	@echo "Docs: docs/README.md | docs/operacao/ | docs/deploy/"
 
 up-local:
 	bash scripts/up-local.sh

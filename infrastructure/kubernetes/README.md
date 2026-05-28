@@ -19,7 +19,7 @@ bash scripts/deploy-kubernetes-server.sh
 kubectl apply -k infrastructure/kubernetes/overlays/homelab
 ```
 
-Documentação: [docs/DEPLOY_K8S.md](../../docs/DEPLOY_K8S.md).
+Documentação: [docs/deploy/DEPLOY_K8S.md](../../docs/deploy/DEPLOY_K8S.md).
 
 ## NodePorts (homelab)
 

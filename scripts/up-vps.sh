@@ -20,4 +20,4 @@ fi
 
 docker compose ${COMPOSE_FILES} up -d --build --remove-orphans
 echo ""
-echo "VPS: veja portas em docs/DEPLOY_VPS.md"
+echo "VPS: veja portas em docs/deploy/DEPLOY_K8S.md"

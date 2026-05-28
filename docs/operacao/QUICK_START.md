@@ -24,7 +24,7 @@ Guia completo para rodar o **DataMaster** localmente. A **API principal é Java 
 
 ## Pré-requisitos
 
-Guia passo a passo (`.env`, Mac, VPS): **[AMBIENTE_LOCAL.md](AMBIENTE_LOCAL.md)**.
+Guia passo a passo (`.env`, Mac, VPS): **[AMBIENTE_LOCAL.md](AMBIENTE_LOCAL.md)** · índice: [../README.md](../README.md).
 
 - **Docker Desktop** (rodando — ícone da baleia estável no menu)
 - **Java 17+** e **Maven 3.8+** (API fora do Docker, opcional)
@@ -488,7 +488,7 @@ docker compose logs dashboard --tail 40
 
 - Infra na nuvem: `infrastructure/terraform/environments/dev` (modo econômico: `enable_analytics_stack = false`)
 - API mínima na banca: `infrastructure/terraform/banca-minimo`
-- Tutorial completo: `docs/TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md`
+- Tutorial completo: [../cloud/TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md](../cloud/TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md)
 
 ---
 
@@ -496,7 +496,7 @@ docker compose logs dashboard --tail 40
 
 | Documento | Conteúdo |
 |-----------|----------|
-| `docs/GUIA_APRESENTACAO_BANCA.md` | Roteiro terminal a terminal na banca |
-| `docs/TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md` | Deploy Azure + CI |
+| `portal/banca.html` · `portal/roteiro.html` | Slides e cola verbal na banca |
+| [../cloud/TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md](../cloud/TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md) | Deploy Azure + CI |
 | `api-java/` | Código da API Java |
 | `data-generator-console/` | Painel Node do gerador |

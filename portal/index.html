@@ -355,7 +355,7 @@
           <tr><td>RabbitMQ UI</td><td><a href="http://localhost:15672" target="_blank" rel="noopener" style="color:var(--accent);"><code>:15672</code></a></td><td><code>datamaster</code></td><td><code>datamaster</code></td></tr>
         </tbody>
       </table>
-      <p class="creds-none" style="margin-top: 0.75rem;">API (:8080), Dashboard (:8501), Console (:3333), Spark UI (:18080), Prometheus (:9090) e email-worker health (:8090) não exigem login nesta demo. SMTP: configure no <code>.env</code> (ver <code>docs/FRAUD_EMAIL_RABBITMQ.md</code>).</p>
+      <p class="creds-none" style="margin-top: 0.75rem;">API (:8080), Dashboard (:8501), Console (:3333), Spark UI (:18080), Prometheus (:9090) e email-worker health (:8090) não exigem login nesta demo. SMTP: configure no <code>.env</code> (ver <code>docs/online/FRAUD_EMAIL_RABBITMQ.md</code>).</p>
     </div>
 
     <section>
@@ -556,7 +556,7 @@ docker compose up -d grafana</code></pre>
       </div>
       <p style="color:var(--muted);font-size:0.88rem;margin-top:0.75rem;">
         Scoring demo: Java <code>1.0.0-java-balanced</code> · fraude se score ≥ <strong>0,74</strong> (~5–15% em lote típico).
-        Docs por domínio: <code>docs/INDICE_DOMINIOS.md</code> (dados · observabilidade · online).
+        Documentação: <code>docs/README.md</code> (dados · online · observabilidade · deploy).
       </p>
     </section>
 
@@ -693,7 +693,7 @@ curl -s http://localhost:8080/api/v1/batch/profile-stats</code></pre>
   </script>
 
     <footer>
-      Documentação: <code>docs/QUICK_START.md</code> · Portal: <code>http://localhost:8880</code>
+      Documentação: <code>docs/operacao/QUICK_START.md</code> · Portal: <code>http://localhost:8880</code>
     </footer>
   </div>
 </body>

@@ -38,7 +38,7 @@ Swagger/curl  ──────────────────►       �
 
 **Kafka :9092** sobe no Compose para narrativa de **Event Hubs** / streaming; console e painel chamam a **API direto**.
 
-**RabbitMQ** — fila `fraud.alert.email` quando `is_fraud`; ver [FRAUD_EMAIL_RABBITMQ.md](../FRAUD_EMAIL_RABBITMQ.md). Índice por domínio: [INDICE_DOMINIOS.md](../INDICE_DOMINIOS.md).
+**RabbitMQ** — fila `fraud.alert.email` quando `is_fraud`; ver [../online/FRAUD_EMAIL_RABBITMQ.md](../online/FRAUD_EMAIL_RABBITMQ.md). Índice: [../README.md](../README.md).
 
 ## Fluxo batch (demo)
 

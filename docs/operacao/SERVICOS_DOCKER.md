@@ -182,7 +182,7 @@ docker compose down
 ## Documentação relacionada
 
 - [QUICK_START.md](QUICK_START.md) — URLs e passo a passo  
-- [INDICE_DOMINIOS.md](INDICE_DOMINIOS.md) — docs agrupadas: dados · observabilidade · online  
-- [FRAUD_EMAIL_RABBITMQ.md](FRAUD_EMAIL_RABBITMQ.md) — RabbitMQ + e-mail de fraude  
-- [banca/ESTUDO_BANCA.md](banca/ESTUDO_BANCA.md) — plano de estudo  
-- [banca/APRESENTACAO_BANCA.md](banca/APRESENTACAO_BANCA.md) — roteiro da apresentação  
+- [../README.md](../README.md) — índice por categoria  
+- [../online/FRAUD_EMAIL_RABBITMQ.md](../online/FRAUD_EMAIL_RABBITMQ.md) — RabbitMQ + e-mail  
+- [../dados/README.md](../dados/README.md) · [../online/README.md](../online/README.md) · [../observabilidade/README.md](../observabilidade/README.md)  
+- Apresentação: `portal/banca.html` · estudo pessoal: pasta `banca/` (não versionada)  

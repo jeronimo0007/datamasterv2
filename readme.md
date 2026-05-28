@@ -14,7 +14,7 @@ O caso de uso é **fraude em transações**; o artefato entregue é uma **plataf
 | Ambiente | Descrição |
 |----------|-----------|
 | **Execução local** | `docker compose` — stack completa (API, dashboard, Spark, Kafka, **RabbitMQ**, MongoDB, Prometheus/Grafana, …) |
-| **VPS (homelab)** | Kubernetes (k3s) na branch `vps` — [docs/DEPLOY_K8S.md](docs/DEPLOY_K8S.md) · resumo [docs/DEPLOY_VPS.md](docs/DEPLOY_VPS.md) |
+| **VPS (homelab)** | Kubernetes (k3s) na branch `vps` — [docs/deploy/DEPLOY_K8S.md](docs/deploy/DEPLOY_K8S.md) |
 | **Alvo em nuvem** | Azure / AWS (referência e Terraform) — [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md) · `infrastructure/terraform/` |
 
 ---
@@ -23,7 +23,7 @@ O caso de uso é **fraude em transações**; o artefato entregue é uma **plataf
 
 - Docker Desktop (ou Docker Engine + Compose v2)
 - ~8 GB RAM livres para a stack completa
-- Opcional: `DEEPSEEK_API_KEY` no `.env`
+- Opcional: `DEEPSEEK_API_KEY` no `.env` — ver [docs/operacao/AMBIENTE_LOCAL.md](docs/operacao/AMBIENTE_LOCAL.md)
 
 ---
 
@@ -36,7 +36,7 @@ cp .env.example .env    # edite DEEPSEEK e, no Mac, DOCKER_HOST_WORKSPACE
 bash scripts/up-local.sh # ou: make up-local
 ```
 
-Guia completo: **[docs/AMBIENTE_LOCAL.md](docs/AMBIENTE_LOCAL.md)** · VPS: **[docs/DEPLOY_VPS.md](docs/DEPLOY_VPS.md)**
+Guia completo: **[docs/operacao/AMBIENTE_LOCAL.md](docs/operacao/AMBIENTE_LOCAL.md)** · VPS: **[docs/deploy/DEPLOY_K8S.md](docs/deploy/DEPLOY_K8S.md)**
 
 **Stack completa com dados de exemplo (recomendado para avaliar o fluxo):**
 
@@ -71,7 +71,7 @@ Alias: `bash scripts/demo_full_stack.sh` (mesmo efeito).
 4. Job Spark — lake `data/lake/` (Bronze / Silver / Gold)
 5. Valida `GET /api/v1/batch/profile-stats` (perfis > 0)
 
-Depois: console :3333 ou dashboard :8501 para `analyze`, fraudes, LGPD. Detalhes: [docs/QUICK_START.md](docs/QUICK_START.md).
+Depois: console :3333 ou dashboard :8501 para `analyze`, fraudes, LGPD. Detalhes: [docs/operacao/QUICK_START.md](docs/operacao/QUICK_START.md).
 
 ## Serviços (stack local)
 
@@ -87,7 +87,7 @@ Depois: console :3333 ou dashboard :8501 para `analyze`, fraudes, LGPD. Detalhes
 | RabbitMQ (UI) | http://localhost:15672 | Fila `fraud.alert.email` (`datamaster` / `datamaster`) |
 | Email worker (health) | http://localhost:8090/actuator/health | Consumidor SMTP assíncrono |
 
-Credenciais dos demais serviços (MongoDB, MinIO, Postgres): ver portal :8880 ou [docs/QUICK_START.md](docs/QUICK_START.md). Alertas por e-mail: [docs/FRAUD_EMAIL_RABBITMQ.md](docs/FRAUD_EMAIL_RABBITMQ.md).
+Credenciais dos demais serviços (MongoDB, MinIO, Postgres): ver portal :8880 ou [docs/operacao/QUICK_START.md](docs/operacao/QUICK_START.md). Alertas por e-mail: [docs/online/FRAUD_EMAIL_RABBITMQ.md](docs/online/FRAUD_EMAIL_RABBITMQ.md).
 
 ---
 
@@ -122,21 +122,21 @@ graph LR
 **Recorte implementado no Docker (avaliação local):**
 
 - **Batch:** histórico → `batch_dataprep_mongo.py` → MongoDB `user_profiles` · Spark → `data/lake/` (Medallion)
-- **Online:** console/dashboard → **API :8080** → consulta perfil no `POST /analyze` (Kafka sobe no compose como analogia a streaming; o caminho crítico da demo chama a API diretamente). **Alerta de fraude:** API → **RabbitMQ** → **email-worker** (SMTP assíncrono) — ver [docs/FRAUD_EMAIL_RABBITMQ.md](docs/FRAUD_EMAIL_RABBITMQ.md)
+- **Online:** console/dashboard → **API :8080** → consulta perfil no `POST /analyze` (Kafka sobe no compose como analogia a streaming; o caminho crítico da demo chama a API diretamente). **Alerta de fraude:** API → **RabbitMQ** → **email-worker** (SMTP assíncrono) — ver [docs/online/FRAUD_EMAIL_RABBITMQ.md](docs/online/FRAUD_EMAIL_RABBITMQ.md)
 - **Segurança / LGPD:** `POST /api/v1/lgpd/mask` (Java) e `src/utils/data_masker.py` (Python, jobs e testes)
 
 ### Documentação de arquitetura
 
 | Documento | Conteúdo |
 |-----------|----------|
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Arquitetura detalhada da plataforma |
-| [docs/PROJETO_ESTRUTURADO.md](docs/PROJETO_ESTRUTURADO.md) | Estrutura do repositório e camadas |
-| [docs/cloud_comparison.md](docs/cloud_comparison.md) | Equivalência Azure ↔ AWS |
+| [docs/arquitetura/ARCHITECTURE.md](docs/arquitetura/ARCHITECTURE.md) | Arquitetura detalhada da plataforma |
+| [docs/arquitetura/PROJETO_ESTRUTURADO.md](docs/arquitetura/PROJETO_ESTRUTURADO.md) | Estrutura do repositório e camadas |
+| [docs/cloud/cloud_comparison.md](docs/cloud/cloud_comparison.md) | Equivalência Azure ↔ AWS |
 | [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md) | Mapa serviço a serviço (local · **VPS k3s** · Azure · AWS) |
-| [docs/arquitetura/README.md](docs/arquitetura/README.md) | Índice dos diagramas draw.io |
-| Documentação por domínio | [docs/INDICE_DOMINIOS.md](docs/INDICE_DOMINIOS.md) — **dados** · **observabilidade** · **online** |
-| Estudo / apresentação (versionado) | [docs/banca/ESTUDO_BANCA.md](docs/banca/ESTUDO_BANCA.md) · [docs/banca/APRESENTACAO_BANCA.md](docs/banca/APRESENTACAO_BANCA.md) |
-| Material local opcional | Pasta [`banca/`](banca/) — **não versionada** (ver `.gitignore`) |
+| [docs/README.md](docs/README.md) | Índice da documentação por categoria |
+| Dados · Online · Observabilidade | [docs/dados/](docs/dados/) · [docs/online/](docs/online/) · [docs/observabilidade/](docs/observabilidade/) |
+| Apresentação (slides) | `portal/banca.html` · `portal/roteiro.html` |
+| Estudo pessoal (local) | Pasta [`banca/`](banca/) — **não versionada** |
 
 **Diagramas draw.io** (`docs/arquitetura/`) — abrir em [app.diagrams.net](https://app.diagrams.net) → *File → Open from Device*:
 
@@ -207,7 +207,7 @@ terraform apply
 ```
 
 - Mapa local · VPS · cloud: [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md)
-- Deploy VPS: [docs/DEPLOY_K8S.md](docs/DEPLOY_K8S.md)
+- Deploy VPS: [docs/deploy/DEPLOY_K8S.md](docs/deploy/DEPLOY_K8S.md)
 - Terraform Azure (apresentação): `infrastructure/terraform/apresentacao/` · mínimo: `banca-minimo/`
 
 ---
@@ -222,12 +222,12 @@ datamaster/
 ├── notebooks/                # PySpark / DQ
 ├── data-generator-console/   # Simulador e fluxo via Docker socket
 ├── portal/                   # Páginas estáticas da demo local (:8880)
-├── banca/                    # Estudo e apresentação (somente local — .gitignore)
+├── banca/                    # Estudo pessoal (somente local — .gitignore)
 ├── infrastructure/terraform/ # IaC Azure
 ├── config/grafana/           # Provisioning Grafana
 ├── sql/                      # Schema e seed Postgres
 ├── docker-compose.yaml
-└── docs/                     # Documentação — [docs/README.md](docs/README.md)
+└── docs/                     # [docs/README.md](docs/README.md) — operacao · deploy · dados · online · …
 ```
 
 ---
