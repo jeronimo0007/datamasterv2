@@ -152,4 +152,4 @@ O runner já está na rede; SSH pode ser `localhost` ou IP `100.x.x.x` do Tailsc
 ## Referências
 
 - [Tailscale + GitHub Actions](https://tailscale.com/kb/1276/github-action)
-- [deploy-vps.yml](../.github/workflows/deploy-vps.yml)
+- [deploy-vps.yml](../../.github/workflows/deploy-vps.yml)

@@ -10,7 +10,7 @@ Stack **completa** no servidor com **k3s**, equivalente ao `docker-compose.yaml`
 - Branch **`vps`** — deploy via GitHub Actions ou manual
 - `.env` na raiz do repo no servidor (opcional: `DEEPSEEK_API_KEY`, SMTP, RabbitMQ)
 
-Copie [.env.vps.example](../.env.vps.example) → `.env`.
+Copie [.env.vps.example](../../.env.vps.example) → `.env`.
 
 ## Deploy automático (CI)
 
@@ -58,8 +58,8 @@ kubectl logs -n datamaster deploy/api --tail=50
 kubectl rollout restart deployment/email-worker -n datamaster
 ```
 
-Manifests: `infrastructure/kubernetes/` — ver [infrastructure/kubernetes/README.md](../infrastructure/kubernetes/README.md).
+Manifests: [`infrastructure/kubernetes/`](../../infrastructure/kubernetes/) — ver [README do Kubernetes](../../infrastructure/kubernetes/README.md).
 
-Mapa de equivalência com Docker local e Azure: [infrastructure/MAPA_LOCAL_AZURE.md](../infrastructure/MAPA_LOCAL_AZURE.md).
+Mapa de equivalência (local · VPS · Azure · AWS): [MAPA_LOCAL_AZURE.md](../../infrastructure/MAPA_LOCAL_AZURE.md).
 
 Resumo CI e Tailscale: [DEPLOY_VPS.md](DEPLOY_VPS.md).
