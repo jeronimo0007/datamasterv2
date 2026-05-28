@@ -842,7 +842,7 @@ flowchart TB
             </div>
           </div>
           <div class="diagram" style="margin-top:0.85rem;font-size:0.76rem;"><strong>Par AWS (fala):</strong> Data Factory ↔ Glue/Step Functions · Event Hubs ↔ Kinesis/MSK · Databricks ↔ EMR · ADLS ↔ S3 · Synapse ↔ Redshift/Athena · Purview ↔ Lake Formation+Glue Catalog · AML ↔ SageMaker · Key Vault ↔ Secrets Manager+KMS · Cosmos ↔ DynamoDB · Monitor ↔ CloudWatch · App Insights ↔ X-Ray · API em containers ↔ EKS/ECS/Fargate.</div>
-          <div class="diagram" style="margin-top:0.45rem;font-size:0.78rem;"><strong>Local = mesmo desenho:</strong> <code>run_demo.sh</code> / fluxo completo no portal → <strong>MongoDB user_profiles</strong> + lake Medallion · console/dashboard → <strong>API Java</strong> :8080 (scoring <code>1.0.0-java-balanced</code>, fraude ≥ <strong>0,74</strong>) · <strong>Kafka</strong> (narrativa Event Hubs) · <strong>Streamlit</strong> (filtro, liberar, opinião IA, DeepSeek) · <strong>Prometheus/Grafana</strong>. Terraform: <code>apresentacao/</code>.</div>
+          <div class="diagram" style="margin-top:0.45rem;font-size:0.78rem;"><strong>Local = mesmo desenho:</strong> <code>run_demo.sh</code> / fluxo completo no portal → <strong>MongoDB user_profiles</strong> + lake Medallion · console/dashboard → <strong>API Java</strong> :8080 (scoring <code>1.0.0-java-balanced</code>, fraude ≥ <strong>0,74</strong>) · <strong>Kafka</strong> (narrativa Event Hubs) · <strong>RabbitMQ + email-worker</strong> (alerta por e-mail assíncrono) · <strong>Streamlit</strong> (filtro, liberar, opinião IA, DeepSeek) · <strong>Prometheus/Grafana</strong>. Terraform: <code>apresentacao/</code>.</div>
         </div>
         <div class="pill-row">
           <span class="pill">Demos ao vivo</span>
@@ -1044,6 +1044,7 @@ flowchart TB
             <li><strong>Dataprep:</strong> <code>scripts/batch_dataprep_mongo.py</code> — média, desvio, P95, categorias típicas, % internacional.</li>
             <li><strong>Serving store:</strong> MongoDB <code>user_profiles</code> — na Azure, <strong>Cosmos DB</strong> (API MongoDB) com mesma ideia.</li>
             <li><strong>Online:</strong> API consulta perfil e aplica <code>profile_anomaly_boost</code> ao score de fraude.</li>
+            <li><strong>Alerta assíncrono:</strong> se <code>is_fraud</code>, API publica em <strong>RabbitMQ</strong> (<code>fraud.alert.email</code>); <strong>email-worker</strong> envia SMTP sem bloquear o HTTP — doc <code>docs/FRAUD_EMAIL_RABBITMQ.md</code>.</li>
           </ul>
           <ul class="clean card-panel" style="margin:0;">
             <li><strong>Spark Medallion</strong> (paralelo): lake Bronze→Silver→Gold para analítico e retreino.</li>
@@ -1059,6 +1060,7 @@ flowchart TB
             <li><code>curl -s http://localhost:8080/api/v1/batch/profile-stats | python3 -m json.tool</code></li>
             <li>Analyze com perfil: <code style="word-break:break-all;">curl -s -X POST http://localhost:8080/api/v1/transactions/analyze -H "Content-Type: application/json" -d '{"amount":50000,"merchant_category":"Viagem","user_country":"BR","merchant_country":"US","payment_method":"CREDIT_CARD","hour":3,"is_weekend":1,"is_international":1,"user_id":"user_1001"}'</code></li>
             <li>Dashboard :8501 — gráficos + modelo, filtro fraudes, <strong>Liberar</strong>, <strong>Opinião da IA</strong>, chat DeepSeek</li>
+            <li>(Opc.) RabbitMQ UI <a href="http://localhost:15672" target="_blank" rel="noopener" style="color:var(--accent);">:15672</a> — após analyze com fraude, ver fila e <code>docker logs fraud-email-worker</code></li>
           </ul>
         </div>
       </div>
@@ -1210,6 +1212,7 @@ print(m.mask_cpf('123.456.789-00'))
               <li><strong>T5</strong> — <code>POST …/analyze</code> com <code>user_id</code> (perfil histórico)</li>
               <li><strong>T6</strong> — Analyze suspeito + <code>anomaly_reasons</code> no JSON</li>
               <li><strong>T7</strong> — <code>POST …/transactions/batch</code> (carga na API)</li>
+              <li><strong>T4c</strong> — <a href="http://localhost:15672" target="_blank" rel="noopener" style="color:var(--accent);">RabbitMQ :15672</a> + e-mail assíncrono (fraude → fila → worker)</li>
             </ul>
           </div>
           <div class="card-panel" style="margin:0;">

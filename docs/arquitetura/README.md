@@ -31,11 +31,14 @@ Na **mesa**, o canal **não passa pelo Kafka** no caminho crítico:
 
 ```
 Console :3333  ──POST /analyze──►  API :8080  ──►  MongoDB (perfil batch)
-Dashboard :8501 ──GET/POST──────►       │
-Swagger/curl  ──────────────────►       └──►  Streamlit (filtro, liberar, opinião IA)
+Dashboard :8501 ──GET/POST──────►       │ is_fraud
+Swagger/curl  ──────────────────►       ├──►  RabbitMQ ──► email-worker (SMTP)
+                                        └──►  Streamlit (filtro, liberar, opinião IA)
 ```
 
 **Kafka :9092** sobe no Compose para narrativa de **Event Hubs** / streaming; console e painel chamam a **API direto**.
+
+**RabbitMQ** — fila `fraud.alert.email` quando `is_fraud`; ver [FRAUD_EMAIL_RABBITMQ.md](../FRAUD_EMAIL_RABBITMQ.md). Índice por domínio: [INDICE_DOMINIOS.md](../INDICE_DOMINIOS.md).
 
 ## Fluxo batch (demo)
 

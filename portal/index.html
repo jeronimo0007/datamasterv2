@@ -352,9 +352,10 @@
           <tr><td>Jupyter</td><td><code>:8888</code></td><td>—</td><td><code>datamaster</code> (token)</td></tr>
           <tr><td>MongoDB</td><td><code>:27017</code></td><td><code>admin</code></td><td><code>admin123</code></td></tr>
           <tr><td>PostgreSQL</td><td><code>:5432</code></td><td><code>admin</code></td><td><code>admin123</code></td></tr>
+          <tr><td>RabbitMQ UI</td><td><a href="http://localhost:15672" target="_blank" rel="noopener" style="color:var(--accent);"><code>:15672</code></a></td><td><code>datamaster</code></td><td><code>datamaster</code></td></tr>
         </tbody>
       </table>
-      <p class="creds-none" style="margin-top: 0.75rem;">API (:8080), Dashboard (:8501), Console (:3333), Spark UI (:18080) e Prometheus (:9090) não exigem login nesta demo.</p>
+      <p class="creds-none" style="margin-top: 0.75rem;">API (:8080), Dashboard (:8501), Console (:3333), Spark UI (:18080), Prometheus (:9090) e email-worker health (:8090) não exigem login nesta demo. SMTP: configure no <code>.env</code> (ver <code>docs/FRAUD_EMAIL_RABBITMQ.md</code>).</p>
     </div>
 
     <section>
@@ -466,6 +467,27 @@ docker compose up -d grafana</code></pre>
     </section>
 
     <section>
+      <h2><i class="bi bi-envelope-exclamation"></i> Alertas (RabbitMQ)</h2>
+      <div class="grid">
+        <a class="card" href="http://localhost:15672" target="_blank" rel="noopener">
+          <div class="card-icon data"><i class="bi bi-diagram-2"></i></div>
+          <h3>RabbitMQ</h3>
+          <span class="url">localhost:15672</span>
+          <span class="login">datamaster / datamaster</span>
+          <p class="desc">Fila <code>fraud.alert.email</code> — API publica quando detecta fraude; worker envia e-mail.</p>
+          <span class="arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+        <a class="card" href="http://localhost:8090/actuator/health" target="_blank" rel="noopener">
+          <div class="card-icon api"><i class="bi bi-heart-pulse"></i></div>
+          <h3>Email worker</h3>
+          <span class="url">localhost:8090</span>
+          <p class="desc">Health do consumidor SMTP assíncrono.</p>
+          <span class="arrow"><i class="bi bi-arrow-up-right"></i></span>
+        </a>
+      </div>
+    </section>
+
+    <section>
       <h2><i class="bi bi-bar-chart-line"></i> Observabilidade &amp; infra</h2>
       <div class="grid">
         <a class="card" href="http://localhost:9090" target="_blank" rel="noopener">
@@ -534,6 +556,7 @@ docker compose up -d grafana</code></pre>
       </div>
       <p style="color:var(--muted);font-size:0.88rem;margin-top:0.75rem;">
         Scoring demo: Java <code>1.0.0-java-balanced</code> · fraude se score ≥ <strong>0,74</strong> (~5–15% em lote típico).
+        Docs por domínio: <code>docs/INDICE_DOMINIOS.md</code> (dados · observabilidade · online).
       </p>
     </section>
 

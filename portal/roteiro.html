@@ -271,6 +271,7 @@
         <div class="card">
           <ul class="fala">
             <li>“Dado sai das <strong>fontes</strong> e entra no barramento — na Azure é <strong>Event Hubs</strong>; eu cito Kinesis ou MSK; na minha mesa o <strong>Kafka</strong> do Docker só ilustra o mesmo padrão.”</li>
+            <li>“Quando a API marca <strong>fraude</strong>, eu não mando e-mail na mesma thread — eu publico no <strong>RabbitMQ</strong> e um <strong>worker</strong> manda SMTP. É o mesmo padrão de fila + consumidor que eu usaria com Service Bus ou SQS.”</li>
             <li>“Eu processo com <strong>Spark em Databricks</strong> (ou EMR na outra nuvem) e guardo em <strong>lake em camadas Bronze, Silver, Gold</strong>.”</li>
             <li>“O modelo treina, mas quem fecha o negócio é a <strong>API</strong>; e observabilidade eu penso <strong>atravessando tudo</strong> — métrica, log, trilha quando precisar.”</li>
             <li>“Eu tenho <strong>Terraform</strong> no repositório porque infra declarativa é parte da história, mesmo quando eu subo rápido com Compose.”</li>
@@ -388,7 +389,7 @@
             <li>“Eu mostro <strong>/health</strong>, <strong>Swagger</strong>, depois <code>bash scripts/run_demo.sh</code> ou o botão <strong>fluxo completo</strong> no portal e confirmo <code>profile-stats</code>.”</li>
             <li>“Eu mando <strong>analyze</strong> com <code>user_id</code>, mostro <strong>anomaly_reasons</strong>, filtro fraudes no Streamlit, <strong>libero</strong> com <strong>opinião da IA</strong> e, se tiver chave, o <strong>chat DeepSeek</strong>.”</li>
             <li>“Antes de encerrar ou se perguntarem LGPD: aba <strong>LGPD / mascaramento</strong> no :8501 — mascaramento ao vivo na API.”</li>
-            <li>“Se der tempo eu mostro Kafka, notebook, Prometheus — sempre dizendo o <strong>par Azure</strong> de cada peça.”</li>
+            <li>“Se der tempo eu mostro <strong>RabbitMQ na :15672</strong> depois de um analyze com fraude, Kafka, notebook, Prometheus — sempre dizendo o <strong>par Azure</strong> de cada peça.”</li>
           </ul>
           <p class="frase">“Se quebrar alguma coisa, eu não panico: eu fico só na <strong>API</strong> e num <strong>POST no Swagger</strong> — o resto vira opcional.”</p>
         </div>

@@ -131,7 +131,7 @@ graph LR
 **Recorte implementado no Docker (avaliação local):**
 
 - **Batch:** histórico → `batch_dataprep_mongo.py` → MongoDB `user_profiles` · Spark → `data/lake/` (Medallion)
-- **Online:** console/dashboard → **API :8080** → consulta perfil no `POST /analyze` (Kafka sobe no compose como analogia a streaming; o caminho crítico da demo chama a API diretamente)
+- **Online:** console/dashboard → **API :8080** → consulta perfil no `POST /analyze` (Kafka sobe no compose como analogia a streaming; o caminho crítico da demo chama a API diretamente). **Alerta de fraude:** API → **RabbitMQ** → **email-worker** (SMTP assíncrono) — ver [docs/FRAUD_EMAIL_RABBITMQ.md](docs/FRAUD_EMAIL_RABBITMQ.md)
 - **Segurança / LGPD:** `POST /api/v1/lgpd/mask` (Java) e `src/utils/data_masker.py` (Python, jobs e testes)
 
 ### Documentação de arquitetura
@@ -143,7 +143,9 @@ graph LR
 | [docs/cloud_comparison.md](docs/cloud_comparison.md) | Equivalência Azure ↔ AWS |
 | [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md) | Mapa serviço a serviço (demo local → Azure) |
 | [docs/arquitetura/README.md](docs/arquitetura/README.md) | Índice dos diagramas draw.io |
-| Material de estudo / apresentação (local) | Pasta [`banca/`](banca/) — **não versionada** (ver `.gitignore`) |
+| Documentação por domínio | [docs/INDICE_DOMINIOS.md](docs/INDICE_DOMINIOS.md) — **dados** · **observabilidade** · **online** |
+| Estudo / apresentação (versionado) | [docs/banca/ESTUDO_BANCA.md](docs/banca/ESTUDO_BANCA.md) · [docs/banca/APRESENTACAO_BANCA.md](docs/banca/APRESENTACAO_BANCA.md) |
+| Material local opcional | Pasta [`banca/`](banca/) — **não versionada** (ver `.gitignore`) |
 
 **Diagramas draw.io** (`docs/arquitetura/`) — abrir em [app.diagrams.net](https://app.diagrams.net) → *File → Open from Device*:
 
@@ -172,6 +174,7 @@ Regenerar diagramas a partir do código: `python3 scripts/generate_architecture_
 | Lake batch | PySpark — `scripts/spark_local_pipeline.py` |
 | Perfis online | `scripts/batch_dataprep_mongo.py` · serviço `batch-prep` |
 | Streaming (referência) | Kafka + Zookeeper |
+| Alertas assíncronos | RabbitMQ + email-worker (fila `fraud.alert.email`) |
 | Persistência | MongoDB (perfis), Postgres (schema demo), MinIO, Redis |
 | Observabilidade | Prometheus + Grafana provisionados em `config/grafana/` |
 | ML (treino / artefatos) | Python — `src/ml_models/`, notebooks em `notebooks/` |

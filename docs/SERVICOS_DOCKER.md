@@ -44,12 +44,19 @@ docker compose --profile spark-run run --rm spark-job
 
 ---
 
-## Mensageria (streaming)
+## Mensageria (streaming e alertas)
 
 | Serviço | Imagem | Porta | O que é | Como explicar na banca |
 |---------|--------|-------|---------|------------------------|
 | **zookeeper** | `confluentinc/cp-zookeeper:7.5.0` | **2181** (interno) | Coordenação do Kafka (modo Zookeeper) | *“Infra de suporte ao broker; em produção costuma ser serviço gerenciado.”* |
 | **kafka** | `confluentinc/cp-kafka:7.5.0` | **9092** (host), **29092** (rede Docker) | Fila de eventos: tópicos, partições, consumer groups | *“Ingestão streaming. Azure: Event Hubs; AWS: Kinesis / MSK.”* |
+| **rabbitmq** | `rabbitmq:3.13-management-alpine` | **5672** (AMQP), **15672** (UI) | Fila `fraud.alert.email` — alerta de fraude por e-mail | *“Desacoplamento: API publica; worker envia SMTP sem bloquear o HTTP. Azure: Service Bus; AWS: SQS.”* |
+| **email-worker** | `datamaster-email-worker` (build) | **8090** | Consumidor Spring Boot + JavaMail | *“Worker assíncrono — health em `/actuator/health`. Ver [FRAUD_EMAIL_RABBITMQ.md](FRAUD_EMAIL_RABBITMQ.md).”* |
+
+**RabbitMQ — teste rápido**
+
+- UI: http://localhost:15672 (`datamaster` / `datamaster` por padrão)
+- Após `analyze` com fraude: fila `fraud.alert.email` e `docker logs fraud-email-worker --tail 30`
 
 **Teste rápido**
 
@@ -106,7 +113,8 @@ Postgres (schema + seed na primeira subida do volume):
 
 ```text
 [data-console] ──JSON──► [api] ◄──HTTP── [dashboard]
-                              │
+                              │ is_fraud
+                              ├──► [rabbitmq] ──► [email-worker] ──► SMTP
          [kafka] ◄── streaming (padrão Event Hubs)
          [spark]  ◄── batch Medallion ◄── data/transactions.json
          [postgres | mongo | redis | minio] ◄── persistência / lake
@@ -122,6 +130,7 @@ Postgres (schema + seed na primeira subida do volume):
 2. **api** (8080) — health + Swagger  
 3. **dashboard** (8501) + **data-console** (3333)  
 4. **kafka** (+ zookeeper) — streaming  
+4b. **rabbitmq** (UI **15672**) + **email-worker** — alerta assíncrono (opcional)  
 5. **spark-master** (UI em **18080**) + worker — batch  
 6. **prometheus** (9090) + **grafana** (3000)  
 7. **postgres / mongo / redis / minio** — camada de dados (desenho produção)  
@@ -138,6 +147,8 @@ Postgres (schema + seed na primeira subida do volume):
 | dashboard | Painel Streamlit |
 | data-console | Gerador/simulador de transações |
 | kafka | Fila de eventos (streaming) |
+| rabbitmq | Fila de alerta de fraude (e-mail) |
+| email-worker | Consumidor SMTP assíncrono |
 | zookeeper | Suporte ao Kafka |
 | spark-master / worker | Processamento batch distribuído |
 | jupyter | Notebook PySpark |
@@ -171,5 +182,7 @@ docker compose down
 ## Documentação relacionada
 
 - [QUICK_START.md](QUICK_START.md) — URLs e passo a passo  
-- [ESTUDO_BANCA.md](ESTUDO_BANCA.md) — plano de estudo  
-- [APRESENTACAO_BANCA.md](APRESENTACAO_BANCA.md) — roteiro da apresentação  
+- [INDICE_DOMINIOS.md](INDICE_DOMINIOS.md) — docs agrupadas: dados · observabilidade · online  
+- [FRAUD_EMAIL_RABBITMQ.md](FRAUD_EMAIL_RABBITMQ.md) — RabbitMQ + e-mail de fraude  
+- [banca/ESTUDO_BANCA.md](banca/ESTUDO_BANCA.md) — plano de estudo  
+- [banca/APRESENTACAO_BANCA.md](banca/APRESENTACAO_BANCA.md) — roteiro da apresentação  
