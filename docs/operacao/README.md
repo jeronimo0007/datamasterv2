@@ -7,5 +7,6 @@ Docker Compose, ambiente de desenvolvimento e referência dos containers.
 | [QUICK_START.md](QUICK_START.md) | Subir stack, URLs, troubleshooting |
 | [AMBIENTE_LOCAL.md](AMBIENTE_LOCAL.md) | `.env`, Mac/Linux, `up-local.sh` |
 | [SERVICOS_DOCKER.md](SERVICOS_DOCKER.md) | O que é cada container e como explicar na banca |
+| [CHECKLIST_DEMO_BANCA.md](CHECKLIST_DEMO_BANCA.md) | **Testar antes da apresentação** (T0–T12) |
 
 [← Índice geral](../README.md)

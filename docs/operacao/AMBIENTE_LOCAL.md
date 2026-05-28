@@ -147,4 +147,4 @@ docker compose down -v
 | Kafka externo | `localhost:9092` (padrão) | `KAFKA_EXTERNAL_HOST` = IP Tailscale |
 | Deploy | manual na máquina | branch `vps` + CI ou script no servidor |
 
-Ver [DEPLOY_VPS.md](DEPLOY_VPS.md).
+Ver [deploy no VPS (Kubernetes)](../deploy/DEPLOY_K8S.md) · [checklist da banca](CHECKLIST_DEMO_BANCA.md).

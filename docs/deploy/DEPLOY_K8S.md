@@ -62,4 +62,6 @@ Manifests: [`infrastructure/kubernetes/`](../../infrastructure/kubernetes/) — 
 
 Mapa de equivalência (local · VPS · Azure · AWS): [MAPA_LOCAL_AZURE.md](../../infrastructure/MAPA_LOCAL_AZURE.md).
 
+Checklist da apresentação (Compose): [CHECKLIST_DEMO_BANCA.md](../operacao/CHECKLIST_DEMO_BANCA.md).
+
 Resumo CI e Tailscale: [DEPLOY_VPS.md](DEPLOY_VPS.md).
