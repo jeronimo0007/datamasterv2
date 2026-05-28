@@ -14,7 +14,7 @@ Copie [.env.vps.example](../.env.vps.example) → `.env`.
 
 ## Deploy automático (CI)
 
-Push na branch `vps` dispara [.github/workflows/deploy-vps.yml](../.github/workflows/deploy-vps.yml) (SSH via Tailscale).
+Push na branch `vps` dispara [.github/workflows/deploy-vps.yml](../../github/workflows/deploy-vps.yml) (SSH via Tailscale).
 
 Secrets: `K8S_SSH_HOST`, `K8S_SSH_KEY` ou `K8S_SSH_PASSWORD`, `TAILSCALE_AUTHKEY`.
 
