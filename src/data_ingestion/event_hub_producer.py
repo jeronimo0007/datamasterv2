@@ -126,7 +126,7 @@ def generate_sample_transaction() -> Dict[str, Any]:
         'timestamp': datetime.utcnow().isoformat(),
         'user_country': 'BR',
         'merchant_country': random.choice(['BR', 'US', 'GB']),
-        'payment_method': random.choice(['CREDIT_CARD', 'DEBIT_CARD', 'PIX']),
+        'payment_method': random.choice(['CREDIT_CARD', 'CREDIT_CARD', 'DEBIT_CARD']),
         'device_id': str(uuid.uuid4()),
         'ip_address': f"{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}"
     }

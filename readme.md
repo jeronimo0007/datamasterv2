@@ -36,7 +36,7 @@ cp .env.example .env    # edite DEEPSEEK e, no Mac, DOCKER_HOST_WORKSPACE
 bash scripts/up-local.sh # ou: make up-local
 ```
 
-Guia completo: **[docs/operacao/AMBIENTE_LOCAL.md](docs/operacao/AMBIENTE_LOCAL.md)** · VPS: **[docs/deploy/DEPLOY_K8S.md](docs/deploy/DEPLOY_K8S.md)**
+Guia completo: **[docs/operacao/AMBIENTE_LOCAL.md](docs/operacao/AMBIENTE_LOCAL.md)** · **Banca (tour de cada componente):** [docs/operacao/ROTEIRO_TOUR_COMPONENTES.md](docs/operacao/ROTEIRO_TOUR_COMPONENTES.md) · VPS: **[docs/deploy/DEPLOY_K8S.md](docs/deploy/DEPLOY_K8S.md)**
 
 **Stack completa com dados de exemplo (recomendado para avaliar o fluxo):**
 
@@ -98,7 +98,7 @@ Credenciais dos demais serviços (MongoDB, MinIO, Postgres): ver portal :8880 ou
 ```mermaid
 graph LR
     subgraph fontes [Fontes]
-        A[Core / PIX / Arquivos]
+        A[Core / Cartão / Arquivos]
     end
     subgraph ingestao [Ingestão]
         B[Event Hubs ou Kafka]
@@ -119,11 +119,29 @@ graph LR
     A --> B --> C --> D --> E --> F --> G --> H --> I
 ```
 
-**Recorte implementado no Docker (avaliação local):**
+**Stack completa (local, VPS e Azure — mesmo desenho):**
 
 - **Batch:** histórico → `batch_dataprep_mongo.py` → MongoDB `user_profiles` · Spark → `data/lake/` (Medallion)
 - **Online:** console/dashboard → **API :8080** → consulta perfil no `POST /analyze` (Kafka sobe no compose como analogia a streaming; o caminho crítico da demo chama a API diretamente). **Alerta de fraude:** API → **RabbitMQ** → **email-worker** (SMTP assíncrono) — ver [docs/online/FRAUD_EMAIL_RABBITMQ.md](docs/online/FRAUD_EMAIL_RABBITMQ.md)
 - **Segurança / LGPD:** `POST /api/v1/lgpd/mask` (Java) e `src/utils/data_masker.py` (Python, jobs e testes)
+
+### Diagramas de arquitetura
+
+**Processamento batch (Medallion · estilo Azure):**
+
+![Batch — Ingest · Store · Process · Serve](docs/arquitetura/datamaster-01-batch-medallion.png)
+
+**Online em tempo real (microserviços · API Gateway em roadmap):**
+
+![Online — LB / API Gateway / API Java](docs/arquitetura/datamaster-02-online-gateway.png)
+
+**Visão geral e mapa nuvem:**
+
+![Visão geral — batch + online](docs/arquitetura/datamaster-00-visao-geral.png)
+
+![Mapa Azure · AWS · Local](docs/arquitetura/datamaster-03-mapa.png)
+
+Arquivos editáveis (draw.io): `docs/arquitetura/*.drawio` · regenerar: `python3 scripts/generate_architecture_drawio.py`
 
 ### Documentação de arquitetura
 
@@ -142,9 +160,11 @@ graph LR
 
 | Arquivo | Conteúdo |
 |---------|----------|
+| [datamaster-01-batch-medallion.drawio](docs/arquitetura/datamaster-01-batch-medallion.drawio) | Batch Medallion (Ingest · Store · Process · Serve) |
+| [datamaster-02-online-gateway.drawio](docs/arquitetura/datamaster-02-online-gateway.drawio) | Online: LB/GW apagados · caminho demo → API :8080 |
 | [datamaster-00-visao-geral.drawio](docs/arquitetura/datamaster-00-visao-geral.drawio) | Visão geral batch + online (Lambda) |
-| [datamaster-01-batch.drawio](docs/arquitetura/datamaster-01-batch.drawio) | Batch: JSON → MongoDB `user_profiles` · Medallion |
-| [datamaster-02-online.drawio](docs/arquitetura/datamaster-02-online.drawio) | Online: console/dashboard → API :8080 → Mongo |
+| [datamaster-01-batch.drawio](docs/arquitetura/datamaster-01-batch.drawio) | Batch linear: JSON → MongoDB · Medallion |
+| [datamaster-02-online.drawio](docs/arquitetura/datamaster-02-online.drawio) | Online: fluxo horizontal console → API |
 | [datamaster-03-mapa.drawio](docs/arquitetura/datamaster-03-mapa.drawio) | Mapa de equivalência local ↔ Azure |
 | [datamaster-04-docker-compose.drawio](docs/arquitetura/datamaster-04-docker-compose.drawio) | Containers do `docker compose` e dependências |
 | [datamaster-azure-aws-local.drawio](docs/arquitetura/datamaster-azure-aws-local.drawio) | Azure, AWS e mesa local (abas no mesmo arquivo) |
@@ -208,7 +228,8 @@ terraform apply
 
 - Mapa local · VPS · cloud: [infrastructure/MAPA_LOCAL_AZURE.md](infrastructure/MAPA_LOCAL_AZURE.md)
 - Deploy VPS: [docs/deploy/DEPLOY_K8S.md](docs/deploy/DEPLOY_K8S.md)
-- Terraform Azure (apresentação): `infrastructure/terraform/apresentacao/` · mínimo: `banca-minimo/`
+- Terraform Azure (apresentação): `infrastructure/terraform/apresentacao/`
+- Pré-banca (VPS + Azure em paralelo): `bash scripts/pre-banca-paralelo.sh`
 
 ---
 

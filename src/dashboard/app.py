@@ -57,8 +57,8 @@ FEATURE_DETAILS = {
         "efeito": "Fora do horario comercial (antes das 6h ou apos 22h) adiciona ~8% ao score.",
     },
     "payment_method_encoded": {
-        "resumo": "Meio de pagamento (PIX, debito, credito, etc.).",
-        "efeito": "Cartao de credito em compras suspeitas soma ~8%; PIX costuma ser mais neutro na demo.",
+        "resumo": "Meio de pagamento (credito, debito, etc.).",
+        "efeito": "Cartao de credito em compras suspeitas soma ~8%; debito costuma ser mais neutro na demo.",
     },
     "merchant_category_encoded": {
         "resumo": "Segmento do comercio (eletronicos, alimentacao, viagens…).",
@@ -217,7 +217,7 @@ with st.sidebar.form("send_transaction"):
         "Categoria",
         ["Alimentacao", "Eletronicos", "Vestuario", "Servicos", "Viagem", "Entretenimento"],
     )
-    payment = st.selectbox("Pagamento", ["PIX", "CREDIT_CARD", "DEBIT_CARD", "BOLETO"])
+    payment = st.selectbox("Pagamento", ["CREDIT_CARD", "DEBIT_CARD"])
     user_country = st.selectbox("Pais Usuario", ["BR", "US", "GB", "FR"])
     merchant_country = st.selectbox("Pais Comerciante", ["BR", "US", "GB", "FR"])
     hour = st.slider("Hora", 0, 23, 14)
@@ -414,29 +414,34 @@ reforcam risco; meio de pagamento e categoria afinam o score; fim de semana e si
     rows = (tx_data or {}).get("transactions", [])
     if rows:
         df = pd.DataFrame(rows)
+        for col in ("holder_document", "card_last4"):
+            if col not in df.columns:
+                df[col] = "—"
         display_cols = [
-            c
-            for c in [
-                "transaction_id",
-                "holder_document",
-                "card_last4",
-                "amount",
-                "merchant_category",
-                "payment_method",
-                "fraud_score",
-                "is_fraud",
-                "review_status",
-                "cosmos_sync_status",
-                "anomaly_reasons",
-                "recommended_action",
-            ]
-            if c in df.columns
+            "transaction_id",
+            "holder_document",
+            "card_last4",
+            "amount",
+            "merchant_category",
+            "payment_method",
+            "fraud_score",
+            "is_fraud",
+            "review_status",
+            "cosmos_sync_status",
+            "anomaly_reasons",
+            "recommended_action",
         ]
+        display_cols = [c for c in display_cols if c in df.columns]
         st.caption(
-            "**Documento (CPF)** mascarado e **cartao** só com os 4 ultimos digitos (`**** 3456`) — API LGPD. "
-            "Historico completo no Mongo (`transaction_history`) para fila Cosmos."
+            "Politica: score abaixo de 60% libera automatico; entre 60% e 75% vai para revisao; "
+            "acima de 75% bloqueio. CPF/cartao mascarados (LGPD)."
         )
-        table_df = df[display_cols]
+        table_df = df[display_cols].rename(
+            columns={
+                "holder_document": "cpf_mascarado",
+                "card_last4": "cartao_ult4",
+            }
+        )
         all_tx_ids = [str(r.get("transaction_id")) for r in rows if r.get("transaction_id")]
         if all_tx_ids and st.session_state.get("release_tx_select") not in all_tx_ids:
             st.session_state["release_tx_select"] = all_tx_ids[0]
@@ -470,8 +475,11 @@ reforcam risco; meio de pagamento e categoria afinam o score; fim de semana e si
                 (r for r in rows if str(r.get("transaction_id")) == sel),
                 None,
             )
+            action = str(sel_row.get("recommended_action", "")).upper() if sel_row else ""
             can_release = bool(
-                sel_row and sel_row.get("review_status") != "RELEASED"
+                sel_row
+                and sel_row.get("review_status") != "RELEASED"
+                and action == "REVIEW"
             )
             if sel_row:
                 c1, c2, c3 = st.columns(3)
@@ -481,6 +489,10 @@ reforcam risco; meio de pagamento e categoria afinam o score; fim de semana e si
                 reasons = sel_row.get("anomaly_reasons") or []
                 if reasons:
                     st.caption("Motivos: " + "; ".join(str(x) for x in reasons[:3]))
+                if action == "BLOCK":
+                    st.warning("Score acima de 75% — transacao **bloqueada** (sem liberacao manual).")
+                elif sel_row.get("review_status") == "RELEASED":
+                    st.info("Score abaixo de 60% — **liberada automaticamente**.")
 
             btn_release, btn_ai = st.columns(2)
             with btn_release:
@@ -740,12 +752,11 @@ elif section == SECTION_CHARTS:
             fig = go.Figure(
                 data=[
                     go.Bar(
-                        x=["Baixo", "Medio", "Alto", "Critico"],
+                        x=["< 60% lib.", "60–75% rev.", "> 75% bloq."],
                         y=[
-                            sd.get("low_0_30", 0),
-                            sd.get("medium_30_50", 0),
-                            sd.get("high_50_80", 0),
-                            sd.get("critical_80_100", 0),
+                            sd.get("approved_below_60", sd.get("low_0_30", 0)),
+                            sd.get("review_60_75", sd.get("high_50_80", 0)),
+                            sd.get("blocked_above_75", sd.get("critical_80_100", 0)),
                         ],
                     )
                 ]

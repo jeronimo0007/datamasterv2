@@ -11,7 +11,7 @@ Use na banca e na operação para explicar que **o desenho é o mesmo**; só mud
 | Streaming | Kafka :9092 | NodePort **30902** | Event Hubs | Kinesis / MSK |
 | Fila alerta e-mail | RabbitMQ :5672, UI **:15672** | NodePort **30672** / **31672** | Service Bus (+ Logic App) | SQS (+ Lambda) |
 | Worker e-mail | email-worker :8090 | Deployment `email-worker` | Function / Container App | Lambda / ECS task |
-| Processamento | spark-master/worker | Spark no cluster, UI **30180** | Databricks (opcional TF) | EMR / Glue Spark |
+| Processamento | spark-master/worker | Spark no cluster, UI **30180** | **Databricks** + Synapse (TF padrão) | EMR / Glue Spark |
 | Lake Medallion | `data/lake/` + MinIO | MinIO + hostPath/console | ADLS `bronze/silver/gold` | S3 prefixes |
 | OLTP | Postgres :5432 | Service interno | PostgreSQL Flexible | RDS |
 | NoSQL / perfis batch | Mongo :27017 · `user_profiles` | Mongo no cluster | Cosmos DB (API Mongo) | DocumentDB |

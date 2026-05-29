@@ -1,12 +1,11 @@
-# Terraform — banca mínimo (Azure)
+# Deprecado — use a stack completa
 
-Comandos resumidos. Guia completo: `docs/cloud/TERRAFORM_BANCA_MINIMO.md`.
+Este diretório era uma stack **mínima** (só API em Container Apps). A apresentação passou a usar sempre a **stack completa**:
 
-```bash
-az login
-cd infrastructure/terraform/banca-minimo
-terraform init -upgrade
-terraform apply
-```
+| Ambiente | Caminho |
+|----------|---------|
+| **Azure (banca)** | [`../apresentacao/`](../apresentacao/) |
+| **VPS homelab** | `bash scripts/deploy-kubernetes-server.sh` — [docs/deploy/DEPLOY_K8S.md](../../../docs/deploy/DEPLOY_K8S.md) |
+| **Local (demo ao vivo)** | `docker compose up -d --build` |
 
-API Java: build `api-java/`, push ACR, atualizar Container App na porta **8080**.
+Não use `banca-minimo` para a banca. Mantido no repo apenas por referência histórica.

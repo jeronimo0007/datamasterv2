@@ -10,8 +10,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class LocalFraudScoringService {
 
-    /** Alvo demo: ~5–15% de fraudes em lotes tipicos (JSON + batch). */
-    private static final double FRAUD_THRESHOLD = 0.74;
+    /** Score &lt; 60%: libera automatico. 60–75%: fila de revisao. &gt; 75%: bloqueio. */
+    public static final double THRESHOLD_AUTO_RELEASE_MAX = 0.60;
+    public static final double THRESHOLD_BLOCK_MIN = 0.75;
+
     private static final String MODEL_VERSION = "1.0.0-java-balanced";
 
     private static final List<String> FEATURE_NAMES =
@@ -30,7 +32,7 @@ public class LocalFraudScoringService {
         int isWeekend = toInt(tx.get("is_weekend"), 0);
         int isInternational = toInt(tx.get("is_international"), 0);
         String paymentMethod =
-                String.valueOf(tx.getOrDefault("payment_method", "PIX")).toUpperCase(Locale.ROOT);
+                String.valueOf(tx.getOrDefault("payment_method", "CREDIT_CARD")).toUpperCase(Locale.ROOT);
         String category = normalizeCategory(String.valueOf(tx.getOrDefault("merchant_category", "Outros")));
 
         double score = 0.07;
@@ -83,27 +85,32 @@ public class LocalFraudScoringService {
 
         String riskLevel;
         String action;
-        if (score >= 0.8) {
-            riskLevel = "CRITICAL";
-            action = "BLOCK";
-        } else if (score >= 0.5) {
+        String reviewStatus;
+        boolean isFraud;
+
+        if (score < THRESHOLD_AUTO_RELEASE_MAX) {
+            riskLevel = score >= 0.3 ? "MEDIUM" : "LOW";
+            action = "APPROVE";
+            reviewStatus = InMemoryDemoState.REVIEW_RELEASED;
+            isFraud = false;
+        } else if (score <= THRESHOLD_BLOCK_MIN) {
             riskLevel = "HIGH";
             action = "REVIEW";
-        } else if (score >= 0.3) {
-            riskLevel = "MEDIUM";
-            action = "MONITOR";
+            reviewStatus = InMemoryDemoState.REVIEW_OPEN;
+            isFraud = true;
         } else {
-            riskLevel = "LOW";
-            action = "APPROVE";
+            riskLevel = "CRITICAL";
+            action = "BLOCK";
+            reviewStatus = InMemoryDemoState.REVIEW_OPEN;
+            isFraud = true;
         }
-
-        boolean isFraud = score >= FRAUD_THRESHOLD;
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("fraud_score", round4(score));
         result.put("is_fraud", isFraud);
         result.put("risk_level", riskLevel);
         result.put("recommended_action", action);
+        result.put("review_status", reviewStatus);
         result.put("model_version", MODEL_VERSION);
         result.put("prediction_timestamp", Instant.now().toString());
         result.put("features_used", FEATURE_NAMES);

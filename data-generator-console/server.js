@@ -128,10 +128,14 @@ function mapToAnalyzePayload(t) {
   } catch {
     /* ignore */
   }
+  const payment =
+    t.payment_method && String(t.payment_method).toUpperCase() !== 'PIX'
+      ? t.payment_method
+      : 'CREDIT_CARD';
   return {
     amount: t.amount,
     merchant_category: t.merchant_category,
-    payment_method: t.payment_method,
+    payment_method: payment,
     user_country: t.user_country,
     merchant_country: t.merchant_country,
     hour,
@@ -140,6 +144,9 @@ function mapToAnalyzePayload(t) {
       t.user_country !== t.merchant_country ? 1 : 0,
     transaction_id: t.transaction_id,
     user_id: t.user_id,
+    holder_document: t.holder_document,
+    card_number: t.card_number,
+    card_holder_name: t.card_holder_name,
   };
 }
 

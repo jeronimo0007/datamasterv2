@@ -8,13 +8,9 @@ resource_group_name  = "rg-fraud-apresentacao"
 db_admin_username = "fraudadmin"
 db_admin_password = "ALTERE_SENHA_FORTE_AQUI"
 
-# Stack econômica (igual demo Docker: EH + ADLS + API + Cosmos + PG + Monitor)
-enable_analytics_stack             = false
-analytics_high_cost_acknowledged   = false
-
-# Slide completo com Databricks + Synapse + Azure ML (custo alto)
-# enable_analytics_stack           = true
-# analytics_high_cost_acknowledged = true
+# Stack completa (Databricks + Synapse + Azure ML + EH + ADLS + API + Cosmos + PG + Monitor)
+enable_analytics_stack           = true
+analytics_high_cost_acknowledged = true
 
 # Após build e push da API Java:
 # api_container_image = "meuacr.azurecr.io/fraud-api:latest"

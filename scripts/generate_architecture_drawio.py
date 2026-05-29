@@ -18,10 +18,18 @@ COMBINED = OUT_DIR / "datamaster-azure-aws-local.drawio"
 AZURE, AZURE_BG = "#0078D4", "#E8F4FC"
 AWS, AWS_BG = "#232F3E", "#FFF4E5"
 LOCAL, LOCAL_BG = "#107C10", "#E8F5E9"
+GREEN_STEP = "#107C10"
 BATCH_HDR, BATCH_BG, BATCH_BORDER = "#B8860B", "#FFFBEB", "#D4A017"
 ONLINE_HDR, ONLINE_BG, ONLINE_BORDER = "#0078D4", "#F0F7FC", "#5EA0EF"
 STORE, STORE_BORDER = "#E1DFDD", "#8A8886"
 ARROW = "#323130"
+FADED = (
+    "rounded=1;whiteSpace=wrap;html=1;fillColor=#F3F2F1;strokeColor=#C8C6C4;"
+    "strokeWidth=1;dashed=1;dashPattern=8 6;opacity=40;fontFamily=Segoe UI;"
+    "fontSize=11;align=center;verticalAlign=middle;fontColor=#A19F9D;"
+)
+FADED_EDGE = f"strokeColor=#C8C6C4;strokeWidth=1;dashed=1;dashPattern=8 6;opacity=40;"
+DEMO_EDGE = f"strokeColor={LOCAL};strokeWidth=3;endArrow=blockThin;endFill=1;"
 
 
 def esc(s: str) -> str:
@@ -64,6 +72,32 @@ class G:
             f"        </mxCell>\n"
         )
 
+    def e_style(
+        self,
+        pid: str,
+        src: str,
+        tgt: str,
+        label: str = "",
+        extra_style: str = "",
+        point_xy: tuple[float, float] | None = None,
+    ) -> None:
+        """Aresta com estilo extra (fecha o atributo style corretamente)."""
+        lbl = f'value="{esc(label)}" ' if label else ""
+        geom = '          <mxGeometry relative="1" as="geometry"/>'
+        if point_xy:
+            geom = (
+                f'          <mxGeometry relative="1" as="geometry">'
+                f'<Array as="points"><mxPoint x="{point_xy[0]}" y="{point_xy[1]}"/></Array></mxGeometry>'
+            )
+        self.cells.append(
+            f'        <mxCell id="{self.nid()}" {lbl}style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;'
+            f"{extra_style}"
+            f'fontFamily=Segoe UI;labelBackgroundColor=#FFFFFF;" '
+            f'edge="1" parent="{pid}" source="{src}" target="{tgt}">\n'
+            f"{geom}\n"
+            f"        </mxCell>\n"
+        )
+
     def hdr(self, pid: str, title: str, sub: str, x: float, y: float, w: float, color: str) -> None:
         self.c(
             pid,
@@ -87,6 +121,75 @@ class G:
             st = "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#605E5C;strokeWidth=2;"
         st += "fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;"
         return self.c(pid, label, x, y, w, h, st, key)
+
+    def step_green(
+        self,
+        pid: str,
+        num: str,
+        title: str,
+        desc: str,
+        x: float,
+        y: float,
+        w: float,
+        h: float,
+        kind: str = "proc",
+        key: str | None = None,
+        stroke: str = "#605E5C",
+    ) -> str:
+        """Passo numerado verde (referência Azure Data Factory baseline)."""
+        badge = ""
+        if num:
+            badge = (
+                f'<div style="background:{GREEN_STEP};color:#fff;border-radius:50%;width:20px;height:20px;'
+                f'line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px">{num}</div><br>'
+            )
+        label = f"{badge}<b>{title}</b><br><font style=\"font-size:10px;color:#555\">{desc}</font>"
+        if kind == "store":
+            st = f"shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;fillColor={STORE};strokeColor={STORE_BORDER};strokeWidth=2;whiteSpace=wrap;html=1;"
+        elif kind == "start":
+            st = "ellipse;whiteSpace=wrap;html=1;fillColor=#F3F2F1;strokeColor=#A19F9D;strokeWidth=2;"
+        elif kind == "lake_hdr":
+            st = f"rounded=1;whiteSpace=wrap;html=1;fillColor={STORE};strokeColor={STORE_BORDER};strokeWidth=1;"
+        elif kind == "landing":
+            st = "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4CE;strokeColor=#D4A017;strokeWidth=1;"
+        elif kind == "spark":
+            st = "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF3621;strokeWidth=2;"
+        elif kind == "dataprep":
+            st = "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8764B8;strokeWidth=2;"
+        elif kind == "api":
+            st = f"rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor={AZURE};strokeWidth=2;"
+        elif kind == "dash":
+            st = "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F59E0B;strokeWidth=2;"
+        elif kind == "gov":
+            st = f"rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor={STORE_BORDER};strokeWidth=1;"
+        else:
+            st = f"rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor={stroke};strokeWidth=2;"
+        st += "fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;"
+        return self.c(pid, label, x, y, w, h, st, key)
+
+    def zone(self, pid: str, label: str, x: float, y: float, w: float, h: float, key: str) -> str:
+        zid = self.c(
+            pid,
+            "",
+            x,
+            y,
+            w,
+            h,
+            "rounded=0;fillColor=#FAFAFA;strokeColor=#C8C6C4;strokeWidth=1;",
+            key,
+        )
+        self.c(
+            zid,
+            f"<b>{label}</b>",
+            8,
+            6,
+            w - 16,
+            18,
+            "text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;"
+            "fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#323130;",
+            f"{key}_lbl",
+        )
+        return zid
 
     def flow_row(self, pid: str, y: float, steps: list[tuple[str, str, str, str]], bw: float = 150, bh: float = 88, gap: float = 24) -> list[str]:
         ids = []
@@ -307,6 +410,192 @@ def build_batch() -> str:
     return g.wrap_diagram("01-Batch", pw, ph)
 
 
+def build_batch_medallion() -> str:
+    """Estilo Azure: Ingest · Store · Process · Serve · Monitor and govern."""
+    g = G()
+    pw, ph = 1200, 680
+    root, layer = g.nid(), g.nid()
+    g.cells = [
+        '        <mxCell id="0"/>\n',
+        f'        <mxCell id="{root}" parent="0"/>\n',
+        f'        <mxCell id="{layer}" parent="{root}"/>\n',
+    ]
+
+    g.c(
+        layer,
+        "<b>DataMaster</b> · processamento batch (local · Azure · AWS)",
+        16,
+        12,
+        pw - 32,
+        32,
+        "text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;"
+        "fontFamily=Segoe UI;fontSize=14;fontStyle=1;fontColor=#323130;",
+        "title",
+    )
+    g.c(
+        layer,
+        "",
+        12,
+        8,
+        pw - 24,
+        ph - 16,
+        "rounded=0;fillColor=none;strokeColor=#605E5C;strokeWidth=2;dashed=1;dashPattern=10 6;",
+        "outer",
+    )
+
+    # --- INGEST ---
+    iz = g.zone(layer, "Ingest", 24, 52, 180, 420, "ingest")
+    src = g.step_green(iz, "1", "Fonte histórica", "Core · APIs\narquivos", 22, 36, 136, 72, "start", "ing_src")
+    orch = g.step_green(
+        iz,
+        "",
+        "Orquestração",
+        "ADF · Glue\nConsole :3333\ngenerate_data.py",
+        22,
+        128,
+        136,
+        80,
+        "proc",
+        "ing_orch",
+        stroke=AZURE,
+    )
+    json_l = g.step_green(
+        iz,
+        "",
+        "data/transactions.json",
+        "landing · export batch",
+        22,
+        228,
+        136,
+        56,
+        "landing",
+        "ing_json",
+    )
+    g.e(iz, src, orch)
+    g.e(iz, orch, json_l)
+
+    # --- STORE ---
+    sz = g.zone(layer, "Store", 220, 52, 540, 288, "store")
+    g.c(
+        sz,
+        "<b>Data Lake Storage</b><br><font style=\"font-size:10px;color:#555\">ADLS Gen2 · S3 · data/lake/ · MinIO</font>"
+        "<br><font style=\"font-size:9px;color:#0078D4\">Delta Lake / Parquet · Medallion Architecture</font>",
+        16,
+        28,
+        508,
+        52,
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#E1DFDD;strokeColor=#8A8886;strokeWidth=1;"
+        "fontFamily=Segoe UI;fontSize=11;align=center;verticalAlign=middle;",
+        "lake_hdr",
+    )
+    bronze = g.step_green(
+        sz, "2", "Bronze", "bruto · JSON", 36, 96, 130, 80, "store", "st_bronze"
+    )
+    silver = g.step_green(
+        sz, "3", "Silver", "limpo · DQ", 196, 96, 130, 80, "store", "st_silver"
+    )
+    gold = g.step_green(
+        sz, "4", "Gold", "features ML", 356, 96, 130, 80, "store", "st_gold"
+    )
+    g.e(sz, bronze, silver)
+    g.e(sz, silver, gold)
+
+    # --- PROCESS ---
+    pz = g.zone(layer, "Process", 220, 352, 540, 120, "process")
+    spark = g.step_green(
+        pz,
+        "",
+        "Apache Spark",
+        "Databricks · EMR · Glue\nspark_local_pipeline.py",
+        20,
+        32,
+        220,
+        72,
+        "spark",
+        "proc_spark",
+    )
+    dataprep = g.step_green(
+        pz,
+        "4",
+        "Dataprep perfis",
+        "batch_dataprep_mongo.py\nmédia · P95 · user_id",
+        280,
+        32,
+        240,
+        72,
+        "dataprep",
+        "proc_dataprep",
+    )
+    g.e(layer, spark, bronze, "", dashed=True)
+    g.e(layer, spark, silver, "", dashed=True)
+    g.e(layer, spark, gold, "", dashed=True)
+
+    # --- SERVE ---
+    vz = g.zone(layer, "Serve", 780, 52, 396, 420, "serve")
+    mongo = g.step_green(
+        vz, "5", "MongoDB", "user_profiles\nCosmos DB · DocumentDB", 118, 36, 160, 80, "store", "srv_mongo"
+    )
+    api = g.step_green(
+        vz,
+        "",
+        "API Java",
+        "POST /analyze · profile boost\n:8080 · Container Apps / EKS",
+        118,
+        136,
+        160,
+        72,
+        "api",
+        "srv_api",
+    )
+    dash = g.step_green(
+        vz,
+        "",
+        "Dashboard",
+        "Streamlit :8501 · Power BI\nfiltro · liberar · IA",
+        118,
+        228,
+        160,
+        72,
+        "dash",
+        "srv_dash",
+    )
+    g.e(vz, mongo, api)
+    g.e(vz, api, dash)
+
+    # --- CROSS ZONE ---
+    g.e(layer, json_l, bronze)
+    g.e(layer, dataprep, mongo)
+    g.e(layer, gold, mongo, "", dashed=True)
+
+    # --- MONITOR AND GOVERN ---
+    gz = g.zone(layer, "Monitor and govern", 24, 488, pw - 48, 120, "govern")
+    gov_items = [
+        ("6", "Data Quality", "dq_latest.json\nGreat Expectations"),
+        ("", "Monitor", "Prometheus · Grafana\nAzure Monitor · CW"),
+        ("", "Key Vault", "Secrets Manager\nKMS · strings lake"),
+        ("", "Purview", "linhagem · catálogo\nLake Formation · Glue"),
+        ("", "DevOps", "CI/CD · GitHub Actions\nTerraform apply"),
+        ("", "Entra ID", "RBAC · IAM\nmanaged identity"),
+        ("", "FinOps", "Cost Management\ncusto por camada"),
+    ]
+    gx = 16
+    for i, (num, title, desc) in enumerate(gov_items):
+        g.step_green(gz, num, title, desc, gx + i * 148, 28, 132, 72, "gov", f"gov_{i}")
+        gx += 0
+
+    g.c(
+        layer,
+        "Demo: bash scripts/run_demo.sh · portal :8880 · slide 7 banca.html",
+        24,
+        ph - 36,
+        pw - 48,
+        24,
+        "text;html=1;strokeColor=none;fillColor=none;align=left;fontFamily=Segoe UI;fontSize=9;fontColor=#605E5C;",
+    )
+
+    return g.wrap_diagram("01-Batch-Medallion-Azure", pw, ph)
+
+
 def build_online() -> str:
     g = G()
     pw, ph = 1600, 720
@@ -323,6 +612,346 @@ def build_online() -> str:
     g.c(layer, "Console :3333 e Dashboard :8501 → API :8080 (HTTP)  ·  Kafka não está no caminho da demo", 24, 500, pw - 48, 32,
         "rounded=0;fillColor=#F3F2F1;fontFamily=Segoe UI;fontSize=10;align=center;fontColor=#666;")
     return g.wrap_diagram("02-Online", pw, ph)
+
+
+def build_online_gateway() -> str:
+    """Estilo microserviços: LB + API Gateway apagados; demo = HTTP direto na API."""
+    g = G()
+    pw, ph = 1280, 760
+    root, layer = g.nid(), g.nid()
+    g.cells = [
+        '        <mxCell id="0"/>\n',
+        f'        <mxCell id="{root}" parent="0"/>\n',
+        f'        <mxCell id="{layer}" parent="{root}"/>\n',
+    ]
+
+    g.c(
+        layer,
+        "<b>DataMaster</b> · arquitetura online (tempo real · antifraude)",
+        16,
+        12,
+        pw - 32,
+        28,
+        "text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;"
+        "fontFamily=Segoe UI;fontSize=14;fontStyle=1;fontColor=#323130;",
+        "title",
+    )
+
+    # --- CLIENT ---
+    client = g.c(
+        layer,
+        "<b>Clientes / Canais</b><br><font style=\"font-size:10px;color:#555\">Console :3333 · Dashboard :8501<br>Swagger · curl · mobile/web</font>",
+        24,
+        200,
+        120,
+        100,
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#107C10;strokeWidth=2;"
+        "fontFamily=Segoe UI;fontSize=11;align=center;verticalAlign=middle;",
+        "client",
+    )
+
+    # Proxy line
+    g.c(
+        layer,
+        "<b>Proxy</b><br><font style=\"font-size:9px;color:#888\">Internet · DMZ</font>",
+        156,
+        180,
+        24,
+        140,
+        "text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;"
+        "fontFamily=Segoe UI;fontSize=10;fontColor=#605E5C;rotation=-90;",
+        "proxy_lbl",
+    )
+    g.c(
+        layer,
+        "",
+        168,
+        160,
+        4,
+        180,
+        "line;strokeWidth=2;strokeColor=#605E5C;dashed=1;dashPattern=8 6;",
+        "proxy_line",
+    )
+
+    # --- PRIVATE NETWORK ---
+    pn = g.c(
+        layer,
+        "",
+        188,
+        72,
+        880,
+        560,
+        "rounded=0;fillColor=#FAFAFA;strokeColor=#605E5C;strokeWidth=2;dashed=1;dashPattern=10 6;",
+        "private_net",
+    )
+    g.c(
+        pn,
+        "<b>— Private Network —</b>",
+        300,
+        8,
+        280,
+        20,
+        "text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Segoe UI;fontSize=11;fontStyle=1;",
+        "pn_lbl",
+    )
+
+    # Load Balancer (faded)
+    lb = g.c(
+        pn,
+        "<b>Load Balancer</b><br><font style=\"font-size:9px\">Azure LB · ALB · NGINX</font>"
+        "<br><br><font style=\"font-size:9px;color:#888\"><i>Não implementado</i></font>",
+        36,
+        200,
+        120,
+        88,
+        FADED,
+        "lb",
+    )
+
+    # API Gateway (faded)
+    gw = g.c(
+        pn,
+        "<b>API Gateway</b><br><font style=\"font-size:9px\">APIM · AWS API GW<br>Kong · Azure Front Door</font>"
+        "<br><font style=\"font-size:9px;color:#888\"><i>Não implementado</i></font>",
+        176,
+        200,
+        130,
+        88,
+        FADED,
+        "gw",
+    )
+
+    # Callout — importância API Gateway
+    g.c(
+        pn,
+        "<b>⚠ Por que API Gateway em produção?</b><br><font style=\"font-size:9px\">"
+        "• Autenticação OAuth/JWT · rate limit · WAF<br>"
+        "• Roteamento versionado (/v1/analyze)<br>"
+        "• Throttling por parceiro · quota<br>"
+        "• Observabilidade centralizada · correlation-id<br>"
+        "• Desacopla canal do microserviço interno</font>",
+        160,
+        72,
+        260,
+        108,
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4CE;strokeColor=#D4A017;strokeWidth=2;"
+        "fontFamily=Segoe UI;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;",
+        "gw_callout",
+    )
+
+    # Demo path label
+    g.c(
+        pn,
+        "<b>Caminho da demo</b> (HTTP direto)",
+        320,
+        168,
+        160,
+        24,
+        "text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Segoe UI;fontSize=10;fontStyle=1;fontColor=#107C10;",
+        "demo_lbl",
+    )
+
+    # API Java — implementado
+    api = g.c(
+        pn,
+        "<b>API Java</b><br><font style=\"font-size:10px;color:#555\">Spring Boot · :8080<br>POST /analyze · /batch</font>",
+        340,
+        200,
+        140,
+        88,
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#107C10;strokeWidth=3;"
+        "fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;",
+        "api",
+    )
+
+    # Microservices cluster
+    ms = g.c(
+        pn,
+        "",
+        500,
+        120,
+        360,
+        400,
+        "rounded=0;fillColor=none;strokeColor=#0078D4;strokeWidth=1;dashed=1;dashPattern=4 4;",
+        "ms_zone",
+    )
+    g.c(
+        ms,
+        "<b>Microserviços (monólito modular na demo)</b>",
+        60,
+        4,
+        240,
+        18,
+        "text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Segoe UI;fontSize=10;fontStyle=1;",
+        "ms_lbl",
+    )
+
+    ms1 = g.c(
+        ms,
+        "<b>Scoring</b><br><font style=\"font-size:9px\">fraud_score<br>60% / 75% policy</font>",
+        24,
+        36,
+        140,
+        64,
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0078D4;strokeWidth=2;"
+        "fontFamily=Segoe UI;fontSize=10;align=center;",
+        "ms_score",
+    )
+    ms2 = g.c(
+        ms,
+        "<b>Perfil</b><br><font style=\"font-size:9px\">anomaly_boost<br>MongoDB lookup</font>",
+        196,
+        36,
+        140,
+        64,
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0078D4;strokeWidth=2;"
+        "fontFamily=Segoe UI;fontSize=10;align=center;",
+        "ms_profile",
+    )
+    ms3 = g.c(
+        ms,
+        "<b>LGPD</b><br><font style=\"font-size:9px\">CPF · cartão<br>mascaramento</font>",
+        24,
+        120,
+        140,
+        64,
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0078D4;strokeWidth=2;"
+        "fontFamily=Segoe UI;fontSize=10;align=center;",
+        "ms_lgpd",
+    )
+    ms4 = g.c(
+        ms,
+        "<b>Alertas</b><br><font style=\"font-size:9px\">RabbitMQ<br>email-worker</font>",
+        196,
+        120,
+        140,
+        64,
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0078D4;strokeWidth=2;"
+        "fontFamily=Segoe UI;fontSize=10;align=center;",
+        "ms_alert",
+    )
+    route = g.c(
+        ms,
+        "<b>Internal<br>Routing</b>",
+        130,
+        220,
+        100,
+        56,
+        "shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;"
+        "fillColor=#E8F4FC;strokeColor=#0078D4;strokeWidth=2;fontFamily=Segoe UI;fontSize=10;align=center;",
+        "ms_route",
+    )
+    g.e(ms, route, ms1, "", dashed=True)
+    g.e(ms, route, ms2, "", dashed=True)
+    g.e(ms, route, ms3, "", dashed=True)
+    g.e(ms, route, ms4, "", dashed=True)
+
+    # Supporting — MongoDB
+    mongo = g.c(
+        pn,
+        "<b>MongoDB</b><br><font style=\"font-size:9px\">user_profiles<br>← batch</font>",
+        520,
+        36,
+        110,
+        56,
+        f"shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;fillColor={STORE};"
+        f"strokeColor={STORE_BORDER};strokeWidth=2;whiteSpace=wrap;html=1;fontFamily=Segoe UI;fontSize=10;align=center;",
+        "mongo",
+    )
+
+    # Cache Redis
+    cache = g.c(
+        pn,
+        "<b>Redis</b><br><font style=\"font-size:9px\">cache · sessão<br>(infra pronta)</font>",
+        360,
+        36,
+        100,
+        56,
+        "shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#FDE7E9;strokeColor=#D13438;"
+        "strokeWidth=2;whiteSpace=wrap;html=1;fontFamily=Segoe UI;fontSize=10;align=center;",
+        "redis",
+    )
+
+    # Logging / observability
+    log = g.c(
+        pn,
+        "<b>Observabilidade</b><br><font style=\"font-size:9px\">Prometheus · Grafana<br>/health · métricas</font>",
+        36,
+        420,
+        150,
+        64,
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#605E5C;strokeWidth=1;"
+        "fontFamily=Segoe UI;fontSize=10;align=center;",
+        "obs",
+    )
+
+    # Dashboard analyst
+    dash = g.c(
+        pn,
+        "<b>Dashboard</b><br><font style=\"font-size:9px\">Streamlit :8501<br>liberar · IA DeepSeek</font>",
+        220,
+        420,
+        140,
+        64,
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F59E0B;strokeWidth=2;"
+        "fontFamily=Segoe UI;fontSize=10;align=center;",
+        "dash",
+    )
+
+    # --- RELATED SERVICES (outside) ---
+    rel = g.c(
+        layer,
+        "<b>Related Services</b><br><font style=\"font-size:9px;color:#555\">DeepSeek API<br>Azure Container Apps<br>Event Hubs / Kafka (narrativa)</font>",
+        1100,
+        240,
+        140,
+        100,
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F4FC;strokeColor=#0078D4;strokeWidth=2;"
+        "fontFamily=Segoe UI;fontSize=11;align=center;verticalAlign=middle;",
+        "related",
+    )
+
+    # --- EDGES ---
+    # Faded path client -> LB -> GW (não usado)
+    g.e_style(
+        layer,
+        client,
+        lb,
+        "produção",
+        f"{FADED_EDGE}endArrow=blockThin;endFill=1;fontSize=9;fontColor=#A19F9D;",
+    )
+    g.e_style(pn, lb, gw, "", f"{FADED_EDGE}endArrow=blockThin;endFill=1;")
+
+    # Demo path — bold green
+    g.e_style(
+        layer,
+        client,
+        api,
+        "demo · HTTP direto",
+        f"{DEMO_EDGE}fontSize=10;fontColor={LOCAL};",
+        point_xy=(300, 250),
+    )
+
+    g.e(pn, api, ms, "roteamento interno")
+    g.e(pn, mongo, ms2, "consulta", dashed=True)
+    g.e(pn, api, cache, "", dashed=True)
+    g.e(pn, api, log, "telemetria", dashed=True)
+    g.e(pn, ms4, log, "", dashed=True)
+    g.e(pn, dash, api, "GET/POST", dashed=True)
+    g.e(layer, api, rel, "DeepSeek · cloud", dashed=True)
+
+    g.c(
+        layer,
+        "<b>Na banca:</b> canal chama API :8080 direto · LB e API Gateway são <i>roadmap produção</i> (Terraform apresentacao / APIM) · "
+        "destaque verbal: gateway = segurança, quota e contrato único para parceiros",
+        24,
+        ph - 48,
+        pw - 48,
+        36,
+        "rounded=1;whiteSpace=wrap;html=1;fillColor=#F3F2F1;strokeColor=#C8C6C4;fontFamily=Segoe UI;fontSize=9;align=left;spacingLeft=8;",
+    )
+
+    return g.wrap_diagram("02-Online-Gateway", pw, ph)
 
 
 def build_docker() -> str:
@@ -430,7 +1059,15 @@ def build_map() -> str:
 
 
 def mxfile_body() -> str:
-    parts = [build_overview(), build_batch(), build_online(), build_map(), build_docker()]
+    parts = [
+        build_overview(),
+        build_batch(),
+        build_batch_medallion(),
+        build_online(),
+        build_online_gateway(),
+        build_map(),
+        build_docker(),
+    ]
     return "\n".join(parts)
 
 
@@ -451,15 +1088,19 @@ def main() -> None:
     write_file(COMBINED, body)
     write_file(OUT_DIR / "datamaster-00-visao-geral.drawio", build_overview())
     write_file(OUT_DIR / "datamaster-01-batch.drawio", build_batch())
+    write_file(OUT_DIR / "datamaster-01-batch-medallion.drawio", build_batch_medallion())
     write_file(OUT_DIR / "datamaster-02-online.drawio", build_online())
+    write_file(OUT_DIR / "datamaster-02-online-gateway.drawio", build_online_gateway())
     write_file(OUT_DIR / "datamaster-03-mapa.drawio", build_map())
     write_file(OUT_DIR / "datamaster-04-docker-compose.drawio", build_docker())
 
-    print(f"✅ Combinado (5 abas): {COMBINED}")
+    print(f"✅ Combinado (7 abas): {COMBINED}")
     print(f"✅ Separados em {OUT_DIR}/")
     print("   - datamaster-00-visao-geral.drawio")
     print("   - datamaster-01-batch.drawio")
-    print("   - datamaster-02-online.drawio  ← Canal → API (sem Kafka no meio)")
+    print("   - datamaster-01-batch-medallion.drawio  ← estilo Azure (Ingest·Store·Process·Serve)")
+    print("   - datamaster-02-online.drawio  ← Canal → API (fluxo horizontal)")
+    print("   - datamaster-02-online-gateway.drawio  ← LB/GW apagados · importância APIM")
     print("   - datamaster-03-mapa.drawio")
     print("   - datamaster-04-docker-compose.drawio  ← containers e conexões")
 

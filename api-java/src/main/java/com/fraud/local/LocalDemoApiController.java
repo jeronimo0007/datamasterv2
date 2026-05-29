@@ -40,6 +40,7 @@ public class LocalDemoApiController {
     private final UserProfileAnomalyService profileAnomaly;
     private final DeepSeekChatService chatService;
     private final TransactionHistoryService transactionHistory;
+    private final DemoIdentityGenerator demoIdentity;
 
     @Autowired(required = false)
     private FraudEmailNotificationPublisher fraudEmailPublisher;
@@ -70,10 +71,11 @@ public class LocalDemoApiController {
         long start = System.nanoTime();
         try {
             ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+            String paymentMethod = demoIdentity.normalizePaymentMethod(body.paymentMethod());
             Map<String, Object> txData = new LinkedHashMap<>();
             txData.put("amount", body.amount());
             txData.put("merchant_category", body.merchantCategory());
-            txData.put("payment_method", body.paymentMethod());
+            txData.put("payment_method", paymentMethod);
             txData.put(
                     "hour",
                     body.hour() != null ? body.hour() : now.getHour());
@@ -105,29 +107,37 @@ public class LocalDemoApiController {
             result.put("user_profile", profileContext);
             double processingMs = (System.nanoTime() - start) / 1_000_000.0;
 
+            String holderDocument =
+                    body.holderDocument() != null && !body.holderDocument().isBlank()
+                            ? body.holderDocument().trim()
+                            : demoIdentity.generateCpf();
+            String cardNumber =
+                    body.cardNumber() != null && !body.cardNumber().isBlank()
+                            ? body.cardNumber().trim()
+                            : demoIdentity.generateCardNumber();
+            String cardHolderName =
+                    body.cardHolderName() != null && !body.cardHolderName().isBlank()
+                            ? body.cardHolderName().trim()
+                            : demoIdentity.generateHolderName();
+
             String txId =
                     body.transactionId() != null ? body.transactionId() : UUID.randomUUID().toString();
             Map<String, Object> record = new LinkedHashMap<>();
             record.put("transaction_id", txId);
             record.put("profile_user_id", profileUserId);
-            if (body.holderDocument() != null && !body.holderDocument().isBlank()) {
-                record.put("holder_document", body.holderDocument().trim());
-            }
-            if (body.cardNumber() != null && !body.cardNumber().isBlank()) {
-                record.put("card_number", body.cardNumber().trim());
-            }
-            if (body.cardHolderName() != null && !body.cardHolderName().isBlank()) {
-                record.put("card_holder_name", body.cardHolderName().trim());
-            }
+            record.put("holder_document", holderDocument);
+            record.put("card_number", cardNumber);
+            record.put("card_holder_name", cardHolderName);
             record.put("amount", body.amount());
             record.put("merchant_category", body.merchantCategory());
-            record.put("payment_method", body.paymentMethod());
+            record.put("payment_method", paymentMethod);
             record.put("user_country", body.userCountry());
             record.put("merchant_country", body.merchantCountry());
             record.put("fraud_score", result.get("fraud_score"));
             record.put("is_fraud", result.get("is_fraud"));
             record.put("risk_level", result.get("risk_level"));
             record.put("recommended_action", result.get("recommended_action"));
+            record.put("review_status", result.get("review_status"));
             record.put("processing_time_ms", Math.round(processingMs * 100.0) / 100.0);
             record.put("timestamp", now.toInstant().toString());
             record.put("anomaly_reasons", profileContext.get("anomaly_reasons"));
@@ -158,9 +168,9 @@ public class LocalDemoApiController {
                                     .recommendedAction(String.valueOf(result.get("recommended_action")))
                                     .amount(body.amount())
                                     .merchantCategory(body.merchantCategory())
-                                    .paymentMethod(body.paymentMethod())
-                                    .holderDocument(body.holderDocument())
-                                    .cardHolderName(body.cardHolderName())
+                                    .paymentMethod(paymentMethod)
+                                    .holderDocument(holderDocument)
+                                    .cardHolderName(cardHolderName)
                                     .detectedAt(now.toInstant())
                                     .build());
                 }
@@ -455,10 +465,23 @@ public class LocalDemoApiController {
                         .map(t -> ((Number) t.get("fraud_score")).doubleValue())
                         .toList();
         Map<String, Integer> scoreDistribution = Map.of(
-                "low_0_30", (int) scores.stream().filter(s -> s < 0.3).count(),
-                "medium_30_50", (int) scores.stream().filter(s -> s >= 0.3 && s < 0.5).count(),
-                "high_50_80", (int) scores.stream().filter(s -> s >= 0.5 && s < 0.8).count(),
-                "critical_80_100", (int) scores.stream().filter(s -> s >= 0.8).count());
+                "approved_below_60",
+                (int) scores.stream().filter(s -> s < LocalFraudScoringService.THRESHOLD_AUTO_RELEASE_MAX).count(),
+                "review_60_75",
+                (int)
+                        scores.stream()
+                                .filter(
+                                        s ->
+                                                s >= LocalFraudScoringService.THRESHOLD_AUTO_RELEASE_MAX
+                                                        && s
+                                                                <= LocalFraudScoringService
+                                                                        .THRESHOLD_BLOCK_MIN)
+                                .count(),
+                "blocked_above_75",
+                (int)
+                        scores.stream()
+                                .filter(s -> s > LocalFraudScoringService.THRESHOLD_BLOCK_MIN)
+                                .count());
 
         Map<String, Object> metrics = state.systemMetrics();
         Map<String, Object> kpis = new LinkedHashMap<>();
@@ -550,7 +573,7 @@ public class LocalDemoApiController {
                 merchantCountry = "BR";
             }
             if (paymentMethod == null || paymentMethod.isBlank()) {
-                paymentMethod = "PIX";
+                paymentMethod = "CREDIT_CARD";
             }
         }
     }

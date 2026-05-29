@@ -221,7 +221,9 @@ curl -s -X POST http://localhost:8080/api/v1/transactions/analyze \
     "merchant_category": "Alimentacao",
     "user_country": "BR",
     "merchant_country": "BR",
-    "payment_method": "PIX",
+    "payment_method": "CREDIT_CARD",
+    "holder_document": "123.456.789-09",
+    "card_number": "4111 1111 1111 1111",
     "hour": 14,
     "is_weekend": 0,
     "is_international": 0
@@ -487,7 +489,7 @@ docker compose logs dashboard --tail 40
 ## Azure (fora do escopo local)
 
 - Infra na nuvem: `infrastructure/terraform/environments/dev` (modo econômico: `enable_analytics_stack = false`)
-- API mínima na banca: `infrastructure/terraform/banca-minimo`
+- Azure na banca (stack completa): `infrastructure/terraform/apresentacao` · pré-banca: `bash scripts/pre-banca-paralelo.sh`
 - Tutorial completo: [../cloud/TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md](../cloud/TUTORIAL_AZURE_TERRAFORM_E_GITHUB_ACTIONS.md)
 
 ---

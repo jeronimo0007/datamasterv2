@@ -111,6 +111,9 @@ for t in data[:n]:
         'is_international': 1 if t['user_country'] != t['merchant_country'] else 0,
         'transaction_id': t['transaction_id'],
         'user_id': t['user_id'],
+        'holder_document': t.get('holder_document'),
+        'card_number': t.get('card_number'),
+        'card_holder_name': t.get('card_holder_name'),
     })
 r = requests.post(f'{api}/api/v1/transactions/batch', json=batch, timeout=120)
 r.raise_for_status()

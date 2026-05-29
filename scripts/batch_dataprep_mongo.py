@@ -41,7 +41,7 @@ def build_profile(user_id: str, rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     amounts = [float(r.get("amount") or 0) for r in rows]
     hours = [parse_hour(str(r.get("timestamp") or "")) for r in rows]
     categories = [str(r.get("merchant_category") or "Outros") for r in rows]
-    payments = [str(r.get("payment_method") or "PIX") for r in rows]
+    payments = [str(r.get("payment_method") or "CREDIT_CARD") for r in rows]
     intl = sum(
         1
         for r in rows

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-05-29T17:49:52.000Z" agent="DataMaster" version="22.1.0" type="device" pages="1">
+  <diagram id="64384c4c-d7b4-4355-aa76-03494408e514" name="01-Batch-Medallion-Azure">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="680" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="2" parent="1"/>
+        <mxCell id="3" value="&lt;b&gt;DataMaster&lt;/b&gt; · processamento batch (local · Azure · AWS)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontFamily=Segoe UI;fontSize=14;fontStyle=1;fontColor=#323130;" vertex="1" parent="2">
+          <mxGeometry x="16" y="12" width="1168" height="32" as="geometry"/>
+        </mxCell>
+        <mxCell id="4" value="" style="rounded=0;fillColor=none;strokeColor=#605E5C;strokeWidth=2;dashed=1;dashPattern=10 6;" vertex="1" parent="2">
+          <mxGeometry x="12" y="8" width="1176" height="664" as="geometry"/>
+        </mxCell>
+        <mxCell id="5" value="" style="rounded=0;fillColor=#FAFAFA;strokeColor=#C8C6C4;strokeWidth=1;" vertex="1" parent="2">
+          <mxGeometry x="24" y="52" width="180" height="420" as="geometry"/>
+        </mxCell>
+        <mxCell id="6" value="&lt;b&gt;Ingest&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#323130;" vertex="1" parent="5">
+          <mxGeometry x="8" y="6" width="164" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="7" value="&lt;div style=&quot;background:#107C10;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;1&lt;/div&gt;&lt;br&gt;&lt;b&gt;Fonte histórica&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Core · APIs
+arquivos&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#F3F2F1;strokeColor=#A19F9D;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="5">
+          <mxGeometry x="22" y="36" width="136" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="8" value="&lt;b&gt;Orquestração&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;ADF · Glue
+Console :3333
+generate_data.py&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0078D4;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="5">
+          <mxGeometry x="22" y="128" width="136" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="9" value="&lt;b&gt;data/transactions.json&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;landing · export batch&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF4CE;strokeColor=#D4A017;strokeWidth=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="5">
+          <mxGeometry x="22" y="228" width="136" height="56" as="geometry"/>
+        </mxCell>
+        <mxCell id="10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="5" source="7" target="8">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="5" source="8" target="9">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="12" value="" style="rounded=0;fillColor=#FAFAFA;strokeColor=#C8C6C4;strokeWidth=1;" vertex="1" parent="2">
+          <mxGeometry x="220" y="52" width="540" height="288" as="geometry"/>
+        </mxCell>
+        <mxCell id="13" value="&lt;b&gt;Store&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#323130;" vertex="1" parent="12">
+          <mxGeometry x="8" y="6" width="524" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="14" value="&lt;b&gt;Data Lake Storage&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;ADLS Gen2 · S3 · data/lake/ · MinIO&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;color:#0078D4&quot;&gt;Delta Lake / Parquet · Medallion Architecture&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1DFDD;strokeColor=#8A8886;strokeWidth=1;fontFamily=Segoe UI;fontSize=11;align=center;verticalAlign=middle;" vertex="1" parent="12">
+          <mxGeometry x="16" y="28" width="508" height="52" as="geometry"/>
+        </mxCell>
+        <mxCell id="15" value="&lt;div style=&quot;background:#107C10;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;2&lt;/div&gt;&lt;br&gt;&lt;b&gt;Bronze&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;bruto · JSON&lt;/font&gt;" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E1DFDD;strokeColor=#8A8886;strokeWidth=2;whiteSpace=wrap;html=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="12">
+          <mxGeometry x="36" y="96" width="130" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="16" value="&lt;div style=&quot;background:#107C10;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;3&lt;/div&gt;&lt;br&gt;&lt;b&gt;Silver&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;limpo · DQ&lt;/font&gt;" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E1DFDD;strokeColor=#8A8886;strokeWidth=2;whiteSpace=wrap;html=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="12">
+          <mxGeometry x="196" y="96" width="130" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="17" value="&lt;div style=&quot;background:#107C10;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;4&lt;/div&gt;&lt;br&gt;&lt;b&gt;Gold&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;features ML&lt;/font&gt;" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E1DFDD;strokeColor=#8A8886;strokeWidth=2;whiteSpace=wrap;html=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="12">
+          <mxGeometry x="356" y="96" width="130" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="18" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="12" source="15" target="16">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="19" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="12" source="16" target="17">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="20" value="" style="rounded=0;fillColor=#FAFAFA;strokeColor=#C8C6C4;strokeWidth=1;" vertex="1" parent="2">
+          <mxGeometry x="220" y="352" width="540" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="21" value="&lt;b&gt;Process&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#323130;" vertex="1" parent="20">
+          <mxGeometry x="8" y="6" width="524" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="22" value="&lt;b&gt;Apache Spark&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Databricks · EMR · Glue
+spark_local_pipeline.py&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF3621;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="20">
+          <mxGeometry x="20" y="32" width="220" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="23" value="&lt;div style=&quot;background:#107C10;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;4&lt;/div&gt;&lt;br&gt;&lt;b&gt;Dataprep perfis&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;batch_dataprep_mongo.py
+média · P95 · user_id&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8764B8;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="20">
+          <mxGeometry x="280" y="32" width="240" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="24" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 6;" edge="1" parent="2" source="22" target="15">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="25" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 6;" edge="1" parent="2" source="22" target="16">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="26" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 6;" edge="1" parent="2" source="22" target="17">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="27" value="" style="rounded=0;fillColor=#FAFAFA;strokeColor=#C8C6C4;strokeWidth=1;" vertex="1" parent="2">
+          <mxGeometry x="780" y="52" width="396" height="420" as="geometry"/>
+        </mxCell>
+        <mxCell id="28" value="&lt;b&gt;Serve&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#323130;" vertex="1" parent="27">
+          <mxGeometry x="8" y="6" width="380" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="29" value="&lt;div style=&quot;background:#107C10;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;5&lt;/div&gt;&lt;br&gt;&lt;b&gt;MongoDB&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;user_profiles
+Cosmos DB · DocumentDB&lt;/font&gt;" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;fillColor=#E1DFDD;strokeColor=#8A8886;strokeWidth=2;whiteSpace=wrap;html=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="27">
+          <mxGeometry x="118" y="36" width="160" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="30" value="&lt;b&gt;API Java&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;POST /analyze · profile boost
+:8080 · Container Apps / EKS&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0078D4;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="27">
+          <mxGeometry x="118" y="136" width="160" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="31" value="&lt;b&gt;Dashboard&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Streamlit :8501 · Power BI
+filtro · liberar · IA&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#F59E0B;strokeWidth=2;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="27">
+          <mxGeometry x="118" y="228" width="160" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="32" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="27" source="29" target="30">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="33" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="27" source="30" target="31">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="34" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="2" source="9" target="15">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="35" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;" edge="1" parent="2" source="23" target="29">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="36" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#323130;strokeWidth=2;endArrow=blockThin;endFill=1;fontFamily=Segoe UI;fontSize=11;fontColor=#323130;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 6;" edge="1" parent="2" source="17" target="29">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="37" value="" style="rounded=0;fillColor=#FAFAFA;strokeColor=#C8C6C4;strokeWidth=1;" vertex="1" parent="2">
+          <mxGeometry x="24" y="488" width="1152" height="120" as="geometry"/>
+        </mxCell>
+        <mxCell id="38" value="&lt;b&gt;Monitor and govern&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Segoe UI;fontSize=11;fontStyle=1;fontColor=#323130;" vertex="1" parent="37">
+          <mxGeometry x="8" y="6" width="1136" height="18" as="geometry"/>
+        </mxCell>
+        <mxCell id="39" value="&lt;div style=&quot;background:#107C10;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:11px;font-weight:bold;display:inline-block;margin-bottom:4px&quot;&gt;6&lt;/div&gt;&lt;br&gt;&lt;b&gt;Data Quality&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;dq_latest.json
+Great Expectations&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8A8886;strokeWidth=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="37">
+          <mxGeometry x="16" y="28" width="132" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="40" value="&lt;b&gt;Monitor&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Prometheus · Grafana
+Azure Monitor · CW&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8A8886;strokeWidth=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="37">
+          <mxGeometry x="164" y="28" width="132" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="41" value="&lt;b&gt;Key Vault&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Secrets Manager
+KMS · strings lake&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8A8886;strokeWidth=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="37">
+          <mxGeometry x="312" y="28" width="132" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="42" value="&lt;b&gt;Purview&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;linhagem · catálogo
+Lake Formation · Glue&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8A8886;strokeWidth=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="37">
+          <mxGeometry x="460" y="28" width="132" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="43" value="&lt;b&gt;DevOps&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;CI/CD · GitHub Actions
+Terraform apply&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8A8886;strokeWidth=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="37">
+          <mxGeometry x="608" y="28" width="132" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="44" value="&lt;b&gt;Entra ID&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;RBAC · IAM
+managed identity&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8A8886;strokeWidth=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="37">
+          <mxGeometry x="756" y="28" width="132" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="45" value="&lt;b&gt;FinOps&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#555&quot;&gt;Cost Management
+custo por camada&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8A8886;strokeWidth=1;fontFamily=Segoe UI;fontSize=12;align=center;verticalAlign=middle;spacing=6;" vertex="1" parent="37">
+          <mxGeometry x="904" y="28" width="132" height="72" as="geometry"/>
+        </mxCell>
+        <mxCell id="46" value="Demo: bash scripts/run_demo.sh · portal :8880 · slide 7 banca.html" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontFamily=Segoe UI;fontSize=9;fontColor=#605E5C;" vertex="1" parent="2">
+          <mxGeometry x="24" y="644" width="1152" height="24" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+
+</mxfile>

@@ -38,7 +38,7 @@ public class UserProfileAnomalyService {
         String category =
                 normalizeCategory(String.valueOf(tx.getOrDefault("merchant_category", "Outros")));
         String payment =
-                String.valueOf(tx.getOrDefault("payment_method", "PIX")).toUpperCase(Locale.ROOT);
+                String.valueOf(tx.getOrDefault("payment_method", "CREDIT_CARD")).toUpperCase(Locale.ROOT);
         int hour = toInt(tx.get("hour"), 12);
 
         double threshold = profile.getAvgAmount() + sigmaMult * Math.max(profile.getStdAmount(), 1.0);

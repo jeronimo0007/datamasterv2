@@ -16,6 +16,18 @@ Documentação organizada **por categoria**. Slides e cola verbal da banca ficam
 | [contribuicao/](contribuicao/) | Como contribuir |
 | [examples/](examples/) | Workflows CI de referência |
 
+## Diagramas (PNG)
+
+![Batch Medallion](arquitetura/datamaster-01-batch-medallion.png)
+
+![Online gateway](arquitetura/datamaster-02-online-gateway.png)
+
+![Visão geral](arquitetura/datamaster-00-visao-geral.png)
+
+![Mapa nuvem](arquitetura/datamaster-03-mapa.png)
+
+Ver também [readme.md](../readme.md) na raiz do repositório.
+
 ## Começar rápido
 
 | Objetivo | Documento |

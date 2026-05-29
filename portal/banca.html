@@ -471,6 +471,36 @@
       fill: #fcd34d;
       opacity: 0.9;
     }
+    /* Batch Medallion — estilo Azure (fundo claro no slide escuro) */
+    .batch-medallion-viz {
+      padding: 0.35rem 0.5rem !important;
+      margin-bottom: 0.65rem !important;
+      background: #fafafa !important;
+      border-color: rgba(200, 198, 196, 0.65) !important;
+    }
+    .batch-medallion-viz img,
+    .batch-medallion-viz object,
+    .arch-diagram-viz img {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: min(440px, 54vh);
+    }
+    .arch-diagram-viz {
+      padding: 0.35rem 0.5rem !important;
+      margin-bottom: 0.65rem !important;
+      background: #fafafa !important;
+      border-color: rgba(200, 198, 196, 0.65) !important;
+    }
+    .batch-medallion-viz .batch-medallion-cap {
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #605e5c;
+      margin: 0 0 0.25rem;
+      text-align: center;
+      font-weight: 600;
+    }
     /* Roteiro: 8 tópicos em movimento — slide 2 */
     .agenda-topics-viz {
       width: min(920px, 100%);
@@ -625,7 +655,7 @@
         <div class="logo-row"><i class="bi bi-bank2"></i> Plataforma de dados · Azure / AWS · Banca</div>
         <p class="eyebrow">Apresentação</p>
         <h1 class="slide-title">Sistema de detecção de <em>fraudes bancárias</em></h1>
-        <p class="lead">Pipeline completo na narrativa Azure (+ equivalentes AWS); <strong style="color:var(--accent-2);">demonstração ao vivo</strong> com <strong>API Java Spring</strong> (:8080), <strong>Streamlit</strong>, <strong>Docker Compose</strong> espelhando o mesmo desenho — provisionado na Azure via <code>infrastructure/terraform/apresentacao</code>.</p>
+        <p class="lead">Pipeline completo em <strong style="color:var(--accent-2);">três frentes</strong>: <strong>demo ao vivo</strong> no Docker local (stack inteira) · <strong>VPS homelab</strong> (Kubernetes, mesma stack) · <strong>Azure</strong> (<code>terraform/apresentacao</code>, mesmo desenho). <strong>AWS</strong> entra como <strong>mapa multicloud</strong> (equivalências), sem deploy ao vivo na banca.</p>
         <div class="closing-flow" id="closing-flow" aria-label="Pipeline completo em movimento — da fonte ao alerta">
           <p class="closing-flow__cap">Visão do fluxo · do dado bruto ao alerta</p>
           <svg viewBox="0 0 920 210" xmlns="http://www.w3.org/2000/svg" role="img">
@@ -671,6 +701,44 @@
             <circle id="closing-particle-2" class="particle particle--slow" r="4" cx="116" cy="100"/>
             <circle id="closing-particle-3" class="particle" r="3.5" cx="116" cy="100" opacity="0.85"/>
           </svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1b Três ambientes -->
+    <section class="slide slide--accent" data-slide="1b" aria-label="Três ambientes">
+      <div class="slide__inner" style="max-width:min(980px,100%);">
+        <p class="eyebrow">Estratégia da apresentação</p>
+        <h2 class="slide-heading">Um desenho · três lugares</h2>
+        <div class="two-col" style="gap:0.75rem;">
+          <div class="card-panel" style="margin:0;border-color:rgba(34,211,238,0.35);">
+            <strong style="color:var(--accent);font-size:0.82rem;">① Local — demo ao vivo</strong>
+            <ul class="clean" style="margin-top:0.45rem;font-size:0.82rem;">
+              <li><code>docker compose up -d --build</code> — API, dashboard, console, Spark, Kafka, <strong>RabbitMQ</strong>, Mongo, Grafana…</li>
+              <li>Portal <a href="http://localhost:8880" target="_blank" rel="noopener" style="color:var(--accent);">:8880</a> · trilha T1–T12 no slide de demo</li>
+              <li><strong>É o que a banca vê funcionando</strong> na mesa</li>
+            </ul>
+          </div>
+          <div class="card-panel" style="margin:0;border-color:rgba(252,211,77,0.35);">
+            <strong style="color:var(--accent-2);font-size:0.82rem;">② VPS — stack completa (k3s)</strong>
+            <ul class="clean" style="margin-top:0.45rem;font-size:0.82rem;">
+              <li>Branch <code>vps</code> → GitHub Actions ou <code>bash scripts/deploy-kubernetes-server.sh</code></li>
+              <li>Mesmos blocos: API, portal, dashboard, Spark, Kafka, RabbitMQ, email-worker, observabilidade</li>
+              <li>Mostrar NodePorts / <code>kubectl get pods -n datamaster</code> (provisionamento em andamento ou pronto)</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card-panel" style="margin-top:0.75rem;border-color:rgba(167,139,250,0.35);">
+          <strong style="font-size:0.82rem;">③ Azure — stack de apresentação (Terraform)</strong>
+          <ul class="clean" style="margin-top:0.45rem;font-size:0.82rem;">
+            <li><code>cd infrastructure/terraform/apresentacao && terraform apply</code> — ADLS Medallion, Event Hubs, Cosmos, Postgres, Key Vault, Monitor, Container Apps (API)</li>
+            <li>Stack analítica: <strong>Databricks + Synapse + Azure ML</strong> (<code>enable_analytics_stack = true</code> por padrão no Terraform)</li>
+            <li>Disparar <strong>no início</strong> da apresentação; mostrar portal Azure / outputs / API FQDN enquanto roda a demo local</li>
+          </ul>
+        </div>
+        <div class="diagram" style="margin-top:0.65rem;font-size:0.78rem;">
+          <strong>AWS:</strong> não subo na hora — uso o slide de <strong>mapa multicloud</strong> (Kinesis, S3, SageMaker…) para provar que o desenho não é preso a um vendor.
+          · Doc: <code>docs/deploy/</code> · <code>bash scripts/pre-banca-paralelo.sh</code>
         </div>
       </div>
     </section>
@@ -757,7 +825,7 @@
             <div class="grid-stats" style="margin-top:0;">
               <div class="stat"><b>R$ 2,5 bi</b><span>fraudes digitais 2023</span></div>
               <div class="stat"><b>+165%</b><span>tentativas (3 anos)</span></div>
-              <div class="stat"><b>PIX</b><span>volume e ataques em alta</span></div>
+              <div class="stat"><b>Cartão</b><span>CNP e fraude em alta</span></div>
               <div class="stat"><b>&lt; 2 s</b><span>meta de decisão</span></div>
             </div>
             <p class="quote" style="margin-bottom:0;">Objetivo: plataforma de dados confiável — não só um modelo — com rastreio, segurança e custo previsível.</p>
@@ -875,6 +943,21 @@ flowchart TB
                 <td>Batch + online numa página; narrativa Lambda</td>
               </tr>
               <tr>
+                <td><code>datamaster-01-batch-medallion.drawio</code></td>
+                <td>Slide 7 · batch Medallion</td>
+                <td>Ingest · Store · Process · Serve (estilo Azure — editável)</td>
+              </tr>
+              <tr>
+                <td><code>datamaster-01-batch-medallion.png</code></td>
+                <td>Slide 7 · README</td>
+                <td>Batch Medallion (imagem para projetor)</td>
+              </tr>
+              <tr>
+                <td><code>datamaster-02-online-gateway.png</code></td>
+                <td>Slide 6b · README</td>
+                <td>Online · LB/GW apagados · importância APIM</td>
+              </tr>
+              <tr>
                 <td><code>datamaster-01-batch.drawio</code></td>
                 <td>Batch Mongo + lake</td>
                 <td>JSON → dataprep → <code>user_profiles</code> · Spark Medallion</td>
@@ -882,7 +965,12 @@ flowchart TB
               <tr>
                 <td><code>datamaster-02-online.drawio</code></td>
                 <td>Demo ao vivo</td>
-                <td>Console :3333 → API :8080 → Mongo (sem Kafka no caminho crítico)</td>
+                <td>Console :3333 → API :8080 → Mongo (fluxo horizontal)</td>
+              </tr>
+              <tr>
+                <td><code>datamaster-02-online-gateway.drawio</code></td>
+                <td><strong>Banca online</strong></td>
+                <td>LB + API Gateway apagados · caminho demo · callout APIM</td>
               </tr>
               <tr>
                 <td><code>datamaster-03-mapa.drawio</code></td>
@@ -964,11 +1052,67 @@ flowchart TB
       </div>
     </section>
 
-    <!-- 6 Tópico 3 Armazenamento -->
+    <!-- 6b Arquitetura online · microserviços -->
+    <section class="slide slide--accent" data-slide="6b" aria-label="Arquitetura online gateway">
+      <div class="slide__inner" style="max-width:min(1080px,100%);">
+        <p class="topic-num"><span class="mark">✅</span> Camada online · tempo real</p>
+        <h2 class="slide-heading">Microserviços · LB / API Gateway · caminho da demo</h2>
+        <p class="sub" style="margin:-0.35rem 0 0.55rem;font-size:0.84rem;color:var(--muted);">
+          Desenho estilo referência microserviços. Na demo, canal chama a <strong>API :8080 direto</strong>; Load Balancer e API Gateway ficam <strong>apagados</strong> (roadmap produção).
+        </p>
+        <div class="card-panel arch-diagram-viz">
+          <p class="batch-medallion-cap">Private Network · microserviços · caminho demo em verde</p>
+          <img src="datamaster-02-online-gateway.png" width="1280" height="760" alt="Arquitetura online: clientes, API Gateway não implementado, API Java, MongoDB, RabbitMQ e dashboard"/>
+        </div>
+        <div class="two-col" style="gap:0.65rem;margin-top:0.65rem;">
+          <ul class="clean card-panel" style="margin:0;font-size:0.82rem;">
+            <li><strong>Demo real:</strong> <code>POST /api/v1/transactions/analyze</code> — sem passar por APIM/LB.</li>
+            <li><strong>Produção Azure:</strong> Front Door / APIM na frente do Container Apps (Terraform <code>apresentacao/</code>).</li>
+            <li><strong>Produção AWS:</strong> ALB + API Gateway + ECS/EKS.</li>
+          </ul>
+          <ul class="clean card-panel" style="margin:0;font-size:0.82rem;">
+            <li><strong>Fala banca:</strong> «Gateway não está na mesa, mas é <em>crítico</em> — contrato único, quota por parceiro, segurança na borda.»</li>
+            <li><strong>Regenerar:</strong> <code>python3 scripts/generate_architecture_drawio.py</code></li>
+            <li>Aba combinada: <code>datamaster-azure-aws-local.drawio</code> → <strong>02-Online-Gateway</strong></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 Tópico 3 · Processamento batch (Medallion) -->
     <section class="slide slide--accent" data-slide="7">
+      <div class="slide__inner" style="max-width:min(1080px,100%);">
+        <p class="topic-num"><span class="mark">✅</span> Etapa 3 · Processamento batch</p>
+        <h2 class="slide-heading">Lake Medallion · Ingest → Process → Serve</h2>
+        <p class="sub" style="margin:-0.35rem 0 0.55rem;font-size:0.84rem;color:var(--muted);">
+          Mesmo desenho de referência Azure (Data Factory + ADLS + Databricks + serving), mapeado para a demo DataMaster e equivalências AWS.
+        </p>
+        <div class="card-panel batch-medallion-viz">
+          <p class="batch-medallion-cap">Ingest · Store · Process · Serve · Monitor and govern</p>
+          <img src="datamaster-01-batch-medallion.png" width="1200" height="680" alt="Diagrama batch Medallion: ingestão, lake Bronze Silver Gold, Spark, MongoDB, API e dashboard"/>
+        </div>
+        <div class="two-col" style="gap:0.65rem;">
+          <ul class="clean card-panel" style="margin:0;font-size:0.82rem;">
+            <li><strong>① Ingest:</strong> histórico simulado → <code>generate_data.py</code> / console :3333 (ADF · Glue na nuvem).</li>
+            <li><strong>②–③ Store + Process:</strong> Spark <code>spark_local_pipeline.py</code> — Bronze (JSON) → Silver (DQ) → Gold (features ML) em <code>data/lake/</code>.</li>
+            <li><strong>④ Perfis:</strong> <code>batch_dataprep_mongo.py</code> agrega por <code>user_id</code> → MongoDB <code>user_profiles</code> (Cosmos na Azure).</li>
+            <li><strong>⑤ Serve:</strong> API :8080 consulta perfil no <code>/analyze</code>; dashboard :8501 consome scores e fila de revisão.</li>
+          </ul>
+          <ul class="clean card-panel" style="margin:0;font-size:0.82rem;">
+            <li><strong>⑥ Governança:</strong> <code>data/lake/reports/dq_latest.json</code>, Prometheus/Grafana, Key Vault, Purview (Terraform <code>apresentacao/</code>).</li>
+            <li><strong>Lambda:</strong> este slide = camada <em>batch</em>; streaming + API = camada <em>speed</em> (slide ingestão).</li>
+            <li><strong>Artefato:</strong> <code>docs/arquitetura/datamaster-01-batch-medallion.drawio</code> · PNG: <code>datamaster-01-batch-medallion.png</code>.</li>
+            <li><strong>Demo:</strong> <code>bash scripts/run_demo.sh</code> ou botão <em>Executar fluxo completo</em> no portal :8880.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6b Tópico 3 · Armazenamento (detalhe) -->
+    <section class="slide slide--accent" data-slide="7c">
       <div class="slide__inner">
-        <p class="topic-num"><span class="mark">✅</span> Etapa 3 · Armazenamento</p>
-        <h2 class="slide-heading">Lake (Medalhão), warehouse e operacional</h2>
+        <p class="topic-num"><span class="mark">✅</span> Etapa 3 · Armazenamento (detalhe)</p>
+        <h2 class="slide-heading">Camadas do lake, warehouse e operacional</h2>
         <div class="card-panel" style="margin-bottom:0.85rem;">
           <div class="diagram" style="font-size:0.8rem;">BRONZE  landing   — JSON/CSV/Parquet bruto · schema-on-read · custo baixo
     SILVER  refinado  — limpeza, dedup, DQ (notebook: clean + enrich)
@@ -1166,7 +1310,7 @@ print(m.mask_cpf('123.456.789-00'))
           <li><strong>Auto-scaling:</strong> TU/partições <strong>Event Hubs</strong> <strong>(Kinesis shards / MSK)</strong>, workers <strong>Databricks</strong> <strong>(EMR)</strong>, RU/s <strong>Cosmos DB</strong> <strong>(DynamoDB WCU/RCU)</strong>, pools <strong>Synapse</strong> <strong>(Redshift)</strong>.</li>
           <li><strong>Particionamento:</strong> lake <strong>ADLS/S3</strong>; shuffle no Spark; partition key em <strong>Cosmos DB</strong> <strong>(DynamoDB)</strong> sem hotspot.</li>
           <li><strong>Escalonamento horizontal:</strong> API em <strong>AKS / Container Apps</strong> <strong>(EKS / ECS / Fargate)</strong>; novos consumidores / consumer groups.</li>
-          <li><strong>Capacidade-alvo:</strong> <strong>10M+ transações/dia</strong> com margem para picos (Black Friday, PIX em massa) — validação por teste de carga e custo (FinOps).</li>
+          <li><strong>Capacidade-alvo:</strong> <strong>10M+ transações/dia</strong> com margem para picos (Black Friday, e-commerce em massa) — validação por teste de carga e custo (FinOps).</li>
         </ul>
         <div class="pill-row">
           <span class="pill">SLO + alertas</span>
@@ -1176,7 +1320,7 @@ print(m.mask_cpf('123.456.789-00'))
         <div class="demo-box">
           <span class="demo-label">Demo ao vivo · carga na API (throughput ponta-a-ponta da mesa)</span>
           <ul>
-            <li><code>curl -s -X POST http://localhost:8080/api/v1/transactions/batch -H "Content-Type: application/json" -d '[{"amount":150,"merchant_category":"Alimentacao","user_country":"BR","merchant_country":"BR","payment_method":"PIX","hour":14,"is_weekend":0,"is_international":0},{"amount":45000,"merchant_category":"Eletronicos","user_country":"BR","merchant_country":"US","payment_method":"CREDIT_CARD","hour":3,"is_weekend":1,"is_international":1}]' | python3 -m json.tool</code></li>
+            <li><code>curl -s -X POST http://localhost:8080/api/v1/transactions/batch -H "Content-Type: application/json" -d '[{"amount":150,"merchant_category":"Alimentacao","user_country":"BR","merchant_country":"BR","payment_method":"CREDIT_CARD","holder_document":"123.456.789-09","card_number":"4111 1111 1111 1111","hour":14,"is_weekend":0,"is_international":0},{"amount":45000,"merchant_category":"Eletronicos","user_country":"BR","merchant_country":"US","payment_method":"CREDIT_CARD","holder_document":"987.654.321-00","card_number":"5555 5555 5555 4444","hour":3,"is_weekend":1,"is_international":1}]' | python3 -m json.tool</code></li>
             <li><code>curl -s http://localhost:8080/api/v1/model/metrics | python3 -m json.tool</code></li>
             <li><code>docker compose ps</code> — cite portas e serviços (escaláveis com mais réplicas em orquestrador).</li>
           </ul>
@@ -1188,10 +1332,18 @@ print(m.mask_cpf('123.456.789-00'))
     <section class="slide slide--accent" data-slide="13">
       <div class="slide__inner">
         <p class="eyebrow">Demonstração ao vivo</p>
-        <h2 class="slide-heading">Trilha de demonstração · escolha <span class="badge-time">1 modo</span></h2>
-        <p class="stack-note" style="margin-bottom:0.85rem;"><strong>Na banca use Docker Compose</strong> — espelha o diagrama Azure. Na nuvem: <code>cd infrastructure/terraform/apresentacao && terraform apply</code> (mesmos blocos: Event Hubs, ADLS Medallion, API em Container Apps, Monitor).</p>
+        <h2 class="slide-heading">Trilha de demonstração · <span class="badge-time">local ao vivo + VPS + Azure</span></h2>
+        <p class="stack-note" style="margin-bottom:0.85rem;"><strong>Antes de começar (T0-pré):</strong> VPS + Azure em paralelo. <strong>Na mesa:</strong> (1) tour de <strong>todos os componentes</strong> — <code>docs/operacao/ROTEIRO_TOUR_COMPONENTES.md</code> · <code>bash scripts/status-stack.sh</code> — (2) demo de fraude T1–T7.</p>
         <div class="card-panel" style="margin:0;">
-          <strong style="color:var(--accent-2); font-size:0.8rem;">Demo local (Compose)</strong>
+          <strong style="color:var(--accent-2); font-size:0.8rem;">T0-pré — subir VPS + Azure (paralelo, ~15–40 min)</strong>
+          <ul class="clean" style="margin-top:0.5rem;font-size:0.82rem;">
+            <li>VPS: <code>bash scripts/deploy-kubernetes-server.sh</code> no homelab <em>ou</em> push branch <code>vps</code> (Actions)</li>
+            <li>Azure: <code>cd infrastructure/terraform/apresentacao && terraform apply</code></li>
+            <li>Cola: <code>bash scripts/pre-banca-paralelo.sh</code></li>
+          </ul>
+        </div>
+        <div class="card-panel" style="margin-top:0.65rem;">
+          <strong style="color:var(--accent); font-size:0.8rem;">Demo local (Compose) — ao vivo na mesa</strong>
           <ul class="clean" style="margin-top:0.5rem;font-size:0.84rem;">
             <li><code>docker compose up -d --build</code> · portal <a href="http://localhost:8880" target="_blank" rel="noopener" style="color:var(--accent);">:8880</a></li>
             <li><a href="http://localhost:8080/health" target="_blank" rel="noopener" style="color:var(--accent);">/health</a> · <a href="http://localhost:8080/swagger-ui.html" target="_blank" rel="noopener" style="color:var(--accent);">Swagger</a> · <a href="http://localhost:8501" target="_blank" rel="noopener" style="color:var(--accent);">Streamlit</a></li>
@@ -1203,7 +1355,7 @@ print(m.mask_cpf('123.456.789-00'))
           <div class="card-panel" style="margin:0;">
             <strong style="color:var(--accent-2); font-size:0.8rem;">Checklist T0–T7 (ordem sugerida)</strong>
             <ul class="clean" style="margin-top:0.5rem;font-size:0.84rem;">
-              <li><strong>T0</strong> — <code>docker compose up -d --build</code> (local) ou <code>terraform apply</code> em <code>infrastructure/terraform/apresentacao</code></li>
+              <li><strong>T0</strong> — <code>docker compose up -d --build</code> (local — obrigatório na mesa)</li>
               <li><strong>T1</strong> — <a href="http://localhost:8080/health" target="_blank" rel="noopener" style="color:var(--accent);">/health</a></li>
               <li><strong>T2</strong> — <a href="http://localhost:8080/swagger-ui.html" target="_blank" rel="noopener" style="color:var(--accent);">Swagger</a></li>
               <li><strong>T3</strong> — <strong>Batch dataprep</strong> → Mongo (<code>/batch/profile-stats</code> &gt; 0)</li>
@@ -1242,6 +1394,7 @@ curl -s -X POST http://localhost:8080/api/v1/transactions/analyze \
             <thead><tr><th>Função</th><th>Azure (equivalente AWS)</th></tr></thead>
             <tbody>
               <tr><td>Streaming ingestão</td><td>Event Hubs (Kinesis Data Streams / MSK)</td></tr>
+              <tr><td>Alerta assíncrono (e-mail)</td><td>Service Bus + Function (SQS + Lambda) — local: RabbitMQ + worker</td></tr>
               <tr><td>Lake objeto</td><td>ADLS Gen2 (S3)</td></tr>
               <tr><td>Governança / catálogo</td><td>Purview (Lake Formation + Glue Catalog)</td></tr>
               <tr><td>Orquestração ETL</td><td>Data Factory (Glue Workflow / Step Functions)</td></tr>

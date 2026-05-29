@@ -74,7 +74,7 @@ def from_api_body(body: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "amount": float(body["amount"]),
         "merchant_category": str(body.get("merchant_category", "Outros")),
-        "payment_method": str(body.get("payment_method", "PIX")),
+        "payment_method": str(body.get("payment_method", "CREDIT_CARD")),
         "hour": int(hour),
         "is_weekend": int(is_weekend),
         "is_international": int(is_international),
@@ -104,7 +104,7 @@ def from_simulator_record(row: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "amount": float(row.get("amount", 0)),
         "merchant_category": merchant_category,
-        "payment_method": str(row.get("payment_method", "PIX")),
+        "payment_method": str(row.get("payment_method", "CREDIT_CARD")),
         "hour": _parse_hour_from_timestamp(ts),
         "is_weekend": _is_weekend_from_timestamp(ts),
         "is_international": int(user_country != merchant_country),
@@ -140,7 +140,7 @@ def from_csv_row(row: Dict[str, str]) -> Dict[str, Any]:
     return {
         "amount": float(row.get("vlr_transacao") or row.get("amount", 0)),
         "merchant_category": str(row.get("categoria") or row.get("merchant_category", "Outros")),
-        "payment_method": str(row.get("meio_pagamento") or row.get("payment_method", "PIX")),
+        "payment_method": str(row.get("meio_pagamento") or row.get("payment_method", "CREDIT_CARD")),
         "hour": int(row.get("hora", 12)),
         "is_weekend": int(row.get("fim_semana", 0)),
         "is_international": int(row.get("internacional", 0)),
@@ -208,7 +208,7 @@ if __name__ == "__main__":
         "merchant_category": "Alimentacao",
         "user_country": "BR",
         "merchant_country": "BR",
-        "payment_method": "PIX",
+        "payment_method": "CREDIT_CARD",
         "hour": 14,
         "is_weekend": 0,
         "is_international": 0,

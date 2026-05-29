@@ -1,6 +1,8 @@
 # Terraform — stack de apresentação (Azure)
 
-Provisiona o **mesmo desenho** dos slides e do Docker Compose local:
+Use na banca **em paralelo** à demo local (Compose) e ao deploy VPS (k3s). Disparar com `bash scripts/pre-banca-paralelo.sh` (~15–40 min antes).
+
+Provisiona o **mesmo desenho** dos slides e do Docker Compose / Kubernetes local:
 
 | Slide / local | Azure (este módulo) |
 |---------------|---------------------|
@@ -11,7 +13,7 @@ Provisiona o **mesmo desenho** dos slides e do Docker Compose local:
 | PostgreSQL | Flexible Server |
 | Key Vault | `azurerm_key_vault` |
 | Monitor + App Insights | Log Analytics + Application Insights |
-| Databricks / Synapse / AML | `enable_analytics_stack = true` (opcional, caro) |
+| Databricks / Synapse / AML | `enable_analytics_stack = true` (**padrão** na apresentação) |
 
 Mapa completo local ↔ nuvem: [../../MAPA_LOCAL_AZURE.md](../../MAPA_LOCAL_AZURE.md).
 
@@ -23,7 +25,7 @@ Mapa completo local ↔ nuvem: [../../MAPA_LOCAL_AZURE.md](../../MAPA_LOCAL_AZUR
 | **Purview** | Governança — `config/governanca.yaml` + narrativa |
 | **Power BI** | BI — local: **Streamlit** :8501 |
 
-Com `enable_analytics_stack = true` entram **Databricks, Synapse e Azure ML** (par do slide de processamento/ML).
+Por padrão (`enable_analytics_stack = true`) entram **Databricks, Synapse e Azure ML** (par do slide de processamento/ML). Para desligar: `enable_analytics_stack = false` no `terraform.tfvars`.
 
 ## Pré-requisitos
 
@@ -68,16 +70,11 @@ FQDN=$(terraform output -raw container_app_api_fqdn)
 curl -s "https://${FQDN}/health"
 ```
 
-## Stack analítica completa (slide com Databricks)
+## Stack analítica (Databricks + Synapse + AML)
 
-No `terraform.tfvars`:
+Já vem **ativa** no `terraform.tfvars.example`. Requer registro dos providers:
 
-```hcl
-enable_analytics_stack           = true
-analytics_high_cost_acknowledged = true
-```
-
-Requer registro: `Microsoft.Synapse`, `Microsoft.Databricks`, `Microsoft.MachineLearningServices`.
+`Microsoft.Synapse`, `Microsoft.Databricks`, `Microsoft.MachineLearningServices`.
 
 ## Destruir
 

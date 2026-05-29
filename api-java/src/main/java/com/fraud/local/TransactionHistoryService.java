@@ -15,11 +15,30 @@ public class TransactionHistoryService {
 
     private final TransactionHistoryRepository repository;
     private final LgpdMaskingService masking;
+    private final DemoIdentityGenerator identity;
 
     public TransactionHistoryService(
-            TransactionHistoryRepository repository, LgpdMaskingService masking) {
+            TransactionHistoryRepository repository,
+            LgpdMaskingService masking,
+            DemoIdentityGenerator identity) {
         this.repository = repository;
         this.masking = masking;
+        this.identity = identity;
+    }
+
+    /** Preenche CPF/cartao ficticios em registros antigos (demo). */
+    public void ensureIdentityFields(Map<String, Object> record) {
+        if (stringVal(record.get("holder_document")).isBlank()) {
+            record.put("holder_document", identity.generateCpf());
+        }
+        if (stringVal(record.get("card_number")).isBlank()) {
+            record.put("card_number", identity.generateCardNumber());
+        }
+        if (stringVal(record.get("card_holder_name")).isBlank()) {
+            record.put("card_holder_name", identity.generateHolderName());
+        }
+        Object pm = record.get("payment_method");
+        record.put("payment_method", identity.normalizePaymentMethod(pm == null ? null : String.valueOf(pm)));
     }
 
     /** Persiste transação analisada para histórico local (Cosmos em produção). */
@@ -38,6 +57,7 @@ public class TransactionHistoryService {
 
     /** Visão pública da lista — PII mascarado (LGPD). */
     public Map<String, Object> toPublicView(Map<String, Object> record) {
+        ensureIdentityFields(record);
         Map<String, Object> out = new LinkedHashMap<>();
         out.put("transaction_id", record.get("transaction_id"));
         out.put("amount", record.get("amount"));
@@ -57,15 +77,8 @@ public class TransactionHistoryService {
         out.put("cosmos_sync_status", record.get("cosmos_sync_status"));
         out.put("history_stored", true);
 
-        String document = stringVal(record.get("holder_document"));
-        if (!document.isBlank()) {
-            out.put("holder_document", masking.maskCpf(document));
-        }
-
-        String card = stringVal(record.get("card_number"));
-        if (!card.isBlank()) {
-            out.put("card_last4", masking.cardLast4Display(card));
-        }
+        out.put("holder_document", masking.maskCpf(stringVal(record.get("holder_document"))));
+        out.put("card_last4", masking.cardLast4Display(stringVal(record.get("card_number"))));
 
         return out;
     }

@@ -1,11 +1,28 @@
 # Checklist — testar antes da apresentação
 
-Use com **`portal/banca.html`** (slides) e **`portal/roteiro.html`** (cola verbal).  
-Ambiente alvo da demo: **Docker Compose local** (não dependa do Terraform na hora da banca).
+Use com **`portal/banca.html`** (slides) e **`portal/roteiro.html`** (cola verbal).
+
+**Mostrar todos os componentes (RabbitMQ, Kafka, Grafana…):** [ROTEIRO_TOUR_COMPONENTES.md](ROTEIRO_TOUR_COMPONENTES.md) · `bash scripts/status-stack.sh`
+
+**Estratégia:** demo **ao vivo = Docker local (stack completa)** · em paralelo **VPS (k3s)** + **Azure (`terraform/apresentacao`)** · **AWS = só mapa** multicloud (sem apply).
 
 ---
 
-## 0. Pré-voo (5 min)
+## 0. T0-pré — disparar VPS + Azure (30–60 min antes)
+
+```bash
+bash scripts/pre-banca-paralelo.sh   # cola dos comandos
+```
+
+| Frente | Ação | Conferir |
+|--------|------|----------|
+| **VPS** | `git push origin vps` ou `deploy-kubernetes-server.sh` no servidor | `kubectl get pods -n datamaster` · portal `:30880` |
+| **Azure** | `cd infrastructure/terraform/apresentacao && terraform apply` | outputs: RG, FQDN API, ADLS, Event Hubs |
+| **AWS** | Não aplicar | Slide mapa multicloud na banca |
+
+---
+
+## 1. Pré-voo local (5 min)
 
 ```bash
 cp .env.example .env
@@ -23,7 +40,7 @@ docker compose ps   # tudo healthy ou Up (api pode levar ~60s no 1º build)
 
 ---
 
-## 1. Trilha obrigatória (slides T0–T7)
+## 2. Trilha obrigatória (slides T0–T7)
 
 | # | Teste | Comando / ação | OK? |
 |---|--------|----------------|-----|
@@ -49,7 +66,7 @@ Fraude explícita (T4c / fila): amount alto, categoria atípica, `user_id` sem p
 
 ---
 
-## 2. Opcional (T8–T12, se sobrar tempo)
+## 3. Opcional (T8–T12, se sobrar tempo)
 
 | # | Teste | Ação | OK? |
 |---|--------|------|-----|
@@ -64,35 +81,35 @@ Fraude explícita (T4c / fila): amount alto, categoria atípica, `user_id` sem p
 
 ---
 
-## 3. O que falar se perguntarem da nuvem
+## 4. O que falar se perguntarem da nuvem
 
 | Peça na mesa (Compose/K8s) | Azure `terraform/apresentacao` | AWS `terraform/aws` |
 |----------------------------|-------------------------------|---------------------|
 | Kafka | Event Hubs | Kinesis / MSK (**não no TF aws atual**) |
 | RabbitMQ + email-worker | Service Bus + Function (**não no TF**) | SQS + Lambda (**não no TF**) |
 | Mongo `user_profiles` | Cosmos (**SQL API no TF**, não Mongo API) | DocumentDB (**não no TF**) |
-| Spark / Jupyter | Databricks (**opcional** `enable_analytics_stack`) | EMR (**não no TF**) |
+| Spark / Jupyter | **Databricks** + Synapse (`enable_analytics_stack = true` padrão) | EMR (**não no TF aws**) |
 | Streamlit | Power BI / Fabric (narrativa) | QuickSight (narrativa) |
 | Prometheus/Grafana | Monitor + App Insights | CloudWatch (**não no TF**) |
 | API :8080 | Container Apps + ACR | ECS/EKS (**não no TF**) |
 | Lake / MinIO | ADLS bronze/silver/gold | S3 bucket (**só isso no TF aws**) |
 | Postgres, Redis | Postgres Flexible (**sim**) · Redis (**não**) | RDS (**não no TF**) |
 
-**Frase honesta (slide “recorte”):** o Compose é o laboratório completo; o Terraform Azure sobe o **esqueleto de plataforma** (lake, streaming, API, Cosmos, Postgres, Monitor); o Terraform AWS hoje é **mínimo (S3)** — o par AWS você cita na tabela do slide 14.
+**Frase na banca:** “Local eu opero tudo ao vivo; no VPS e na Azure o **mesmo desenho** está provisionado — AWS eu mostro só o **mapa de equivalência**.”
+
+Detalhe técnico (se perguntarem): Azure TF não inclui RabbitMQ/Streamlit — local e VPS sim; na Azure o par é Service Bus + Power BI na narrativa.
 
 ---
 
-## 4. VPS (se for mostrar homelab)
+## 5. Mostrar VPS/Azure durante a demo
 
-Não é a trilha da banca no projetor — use só se a banca pedir.
-
-- Doc: [../deploy/DEPLOY_K8S.md](../deploy/DEPLOY_K8S.md)
-- Portal: `http://<IP-VPS>:30880`
-- Mesma trilha T1–T7 com NodePorts
+- Aba: GitHub Actions (workflow `Deploy → VPS`)
+- Terminal: `kubectl get pods -n datamaster -w`
+- Azure Portal: resource group `rg-fraud-apresentacao-*` · Container App · ADLS
 
 ---
 
-## 5. Plano B (se algo cair)
+## 6. Plano B (se algo cair)
 
 1. Só **API + Swagger** + um `POST /analyze`
 2. Narrar batch/Mongo/Kafka/Rabbit como **arquitetura** (draw.io slide 4b)

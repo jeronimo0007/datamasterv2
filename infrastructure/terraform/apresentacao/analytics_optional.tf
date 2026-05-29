@@ -1,4 +1,4 @@
-# Databricks, Synapse, Azure ML — opcional (mesmos blocos do slide quando enable_analytics_stack = true)
+# Databricks, Synapse, Azure ML — ativo por padrão (enable_analytics_stack = true)
 
 resource "random_id" "analytics_suffix" {
   count       = var.enable_analytics_stack ? 1 : 0

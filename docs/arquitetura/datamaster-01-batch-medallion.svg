@@ -1,0 +1,204 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 620" role="img" aria-label="DataMaster processamento batch Medallion">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#323130"/>
+    </marker>
+    <marker id="arrow-cyan" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#22d3ee"/>
+    </marker>
+    <linearGradient id="lakeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E1DFDD"/>
+      <stop offset="100%" stop-color="#F3F2F1"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#000" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <!-- Outer boundary -->
+  <rect x="8" y="8" width="1084" height="604" rx="4" fill="none" stroke="#605E5C" stroke-width="2" stroke-dasharray="10 6"/>
+  <text x="24" y="32" font-family="Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="#323130">DataMaster</text>
+  <text x="130" y="32" font-family="Segoe UI, system-ui, sans-serif" font-size="13" fill="#605E5C">· processamento batch (local · Azure · AWS)</text>
+
+  <!-- ===== INGEST ===== -->
+  <rect x="20" y="48" width="168" height="420" rx="2" fill="#FAFAFA" stroke="#C8C6C4" stroke-width="1"/>
+  <text x="104" y="68" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" fill="#323130">Ingest</text>
+
+  <!-- On-prem source -->
+  <ellipse cx="104" cy="118" rx="52" ry="28" fill="#F3F2F1" stroke="#8A8886" stroke-width="1.5"/>
+  <rect x="78" y="108" width="52" height="8" rx="1" fill="#0078D4" opacity="0.85"/>
+  <rect x="78" y="118" width="52" height="8" rx="1" fill="#0078D4" opacity="0.65"/>
+  <rect x="78" y="128" width="52" height="8" rx="1" fill="#0078D4" opacity="0.45"/>
+  <text x="104" y="158" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="10" font-weight="600" fill="#323130">Fonte histórica</text>
+  <text x="104" y="172" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8.5" fill="#605E5C">Core · APIs · arquivos</text>
+
+  <!-- Step 1 -->
+  <circle cx="104" cy="198" r="11" fill="#107C10"/>
+  <text x="104" y="202" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" fill="#fff">1</text>
+
+  <path d="M 104 186 L 104 186" stroke="#323130" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="104" y1="186" x2="104" y2="218" stroke="#323130" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ADF / Console -->
+  <rect x="36" y="228" width="136" height="72" rx="4" fill="#fff" stroke="#0078D4" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="48" y="240" width="28" height="28" rx="4" fill="#0078D4"/>
+  <text x="62" y="258" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="14" font-weight="700" fill="#fff">!</text>
+  <text x="118" y="252" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="9.5" font-weight="600" fill="#323130">Orquestração</text>
+  <text x="118" y="266" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">ADF · Glue · Console :3333</text>
+  <text x="118" y="280" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">generate_data.py</text>
+
+  <!-- JSON landing -->
+  <rect x="36" y="318" width="136" height="52" rx="4" fill="#FFF4CE" stroke="#D4A017" stroke-width="1"/>
+  <text x="104" y="340" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="9" font-weight="600" fill="#323130">data/transactions.json</text>
+  <text x="104" y="354" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">landing · export batch</text>
+
+  <line x1="104" y1="300" x2="104" y2="318" stroke="#323130" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== STORE ===== -->
+  <rect x="200" y="48" width="520" height="280" rx="2" fill="#FAFAFA" stroke="#C8C6C4" stroke-width="1"/>
+  <text x="460" y="68" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" fill="#323130">Store</text>
+
+  <rect x="220" y="78" width="480" height="56" rx="4" fill="url(#lakeGrad)" stroke="#8A8886" stroke-width="1"/>
+  <text x="460" y="100" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" fill="#323130">Data Lake Storage</text>
+  <text x="460" y="118" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="9" fill="#605E5C">ADLS Gen2 · S3 · data/lake/ · MinIO</text>
+  <text x="460" y="130" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8.5" fill="#0078D4">Delta Lake / Parquet · Medallion Architecture</text>
+
+  <!-- Medallion layers -->
+  <g font-family="Segoe UI, system-ui, sans-serif">
+    <!-- Bronze -->
+    <path d="M 248 198 L 248 168 L 318 168 L 318 198 L 303 198 L 283 210 L 263 198 Z" fill="#E1DFDD" stroke="#8A8886" stroke-width="1.5"/>
+    <text x="283" y="182" text-anchor="middle" font-size="9" font-weight="700" fill="#323130">Bronze</text>
+    <text x="283" y="194" text-anchor="middle" font-size="7.5" fill="#605E5C">bruto · JSON</text>
+
+    <!-- Silver -->
+    <path d="M 388 198 L 388 168 L 458 168 L 458 198 L 443 198 L 423 210 L 403 198 Z" fill="#E1DFDD" stroke="#8A8886" stroke-width="1.5"/>
+    <text x="423" y="182" text-anchor="middle" font-size="9" font-weight="700" fill="#323130">Silver</text>
+    <text x="423" y="194" text-anchor="middle" font-size="7.5" fill="#605E5C">limpo · DQ</text>
+
+    <!-- Gold -->
+    <path d="M 528 198 L 528 168 L 598 168 L 598 198 L 583 198 L 563 210 L 543 198 Z" fill="#E1DFDD" stroke="#8A8886" stroke-width="1.5"/>
+    <text x="563" y="182" text-anchor="middle" font-size="9" font-weight="700" fill="#323130">Gold</text>
+    <text x="563" y="194" text-anchor="middle" font-size="7.5" fill="#605E5C">features ML</text>
+  </g>
+
+  <!-- Step 2 -->
+  <circle cx="353" cy="228" r="11" fill="#107C10"/>
+  <text x="353" y="232" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" fill="#fff">2</text>
+  <!-- Step 3 -->
+  <circle cx="493" cy="228" r="11" fill="#107C10"/>
+  <text x="493" y="232" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" fill="#fff">3</text>
+
+  <line x1="318" y1="184" x2="388" y2="184" stroke="#323130" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="458" y1="184" x2="528" y2="184" stroke="#323130" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Arrow from ingest to bronze -->
+  <path d="M 172 340 C 210 340, 210 184, 248 184" fill="none" stroke="#323130" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ===== PROCESS ===== -->
+  <rect x="200" y="340" width="520" height="128" rx="2" fill="#FAFAFA" stroke="#C8C6C4" stroke-width="1"/>
+  <text x="460" y="360" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" fill="#323130">Process</text>
+
+  <!-- Spark -->
+  <rect x="228" y="372" width="200" height="76" rx="4" fill="#fff" stroke="#FF3621" stroke-width="1.5" filter="url(#shadow)"/>
+  <circle cx="258" cy="410" r="18" fill="#FF3621"/>
+  <text x="258" y="415" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="16" font-weight="700" fill="#fff">¡</text>
+  <text x="340" y="400" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="10" font-weight="600" fill="#323130">Apache Spark</text>
+  <text x="340" y="416" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">Databricks · EMR · Glue</text>
+  <text x="340" y="430" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">spark_local_pipeline.py</text>
+
+  <!-- Dataprep perfis -->
+  <rect x="452" y="372" width="248" height="76" rx="4" fill="#fff" stroke="#8764B8" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="576" y="398" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="10" font-weight="600" fill="#323130">Dataprep perfis</text>
+  <text x="576" y="414" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">batch_dataprep_mongo.py</text>
+  <text x="576" y="428" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">média · P95 · categorias · user_id</text>
+
+  <!-- Spark ” layers -->
+  <line x1="328" y1="372" x2="283" y2="210" stroke="#323130" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="383" y1="372" x2="423" y2="210" stroke="#323130" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+  <line x1="428" y1="372" x2="563" y2="210" stroke="#323130" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+
+  <!-- Step 4 -->
+  <circle cx="576" cy="356" r="11" fill="#107C10"/>
+  <text x="576" y="360" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" fill="#fff">4</text>
+
+  <!-- ===== SERVE ===== -->
+  <rect x="732" y="48" width="360" height="420" rx="2" fill="#FAFAFA" stroke="#C8C6C4" stroke-width="1"/>
+  <text x="912" y="68" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" fill="#323130">Serve</text>
+
+  <!-- MongoDB -->
+  <path d="M 812 118 L 812 88 L 882 88 L 882 118 L 867 118 L 847 130 L 827 118 Z" fill="#E1DFDD" stroke="#8A8886" stroke-width="1.5"/>
+  <text x="847" y="102" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="9" font-weight="700" fill="#323130">MongoDB</text>
+  <text x="847" y="114" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="7.5" fill="#605E5C">user_profiles</text>
+  <text x="847" y="148" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">Cosmos DB · DocumentDB</text>
+
+  <!-- Step 5 -->
+  <circle cx="912" cy="178" r="11" fill="#107C10"/>
+  <text x="912" y="182" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" fill="#fff">5</text>
+
+  <!-- API -->
+  <rect x="768" y="200" width="160" height="64" rx="4" fill="#fff" stroke="#0078D4" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="848" y="228" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="10" font-weight="600" fill="#323130">API Java</text>
+  <text x="848" y="244" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">POST /analyze · profile boost</text>
+  <text x="848" y="256" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">:8080 · Container Apps / EKS</text>
+
+  <!-- Dashboard -->
+  <rect x="768" y="288" width="160" height="64" rx="4" fill="#fff" stroke="#F59E0B" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="848" y="316" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="10" font-weight="600" fill="#323130">Dashboard</text>
+  <text x="848" y="332" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">Streamlit :8501 · Power BI</text>
+  <text x="848" y="344" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">filtro · liberar · IA</text>
+
+  <line x1="700" y1="410" x2="847" y2="130" stroke="#323130" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="847" y1="130" x2="848" y2="200" stroke="#323130" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="848" y1="264" x2="848" y2="288" stroke="#323130" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Gold to serve -->
+  <path d="M 598 184 C 660 184, 660 120, 812 120" fill="none" stroke="#323130" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+
+  <!-- ===== MONITOR AND GOVERN ===== -->
+  <rect x="20" y="480" width="1072" height="120" rx="2" fill="#F3F2F1" stroke="#C8C6C4" stroke-width="1"/>
+  <text x="40" y="502" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" fill="#323130">Monitor and govern</text>
+
+  <!-- Step 6 -->
+  <circle cx="108" cy="502" r="11" fill="#107C10"/>
+  <text x="108" y="506" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" font-weight="700" fill="#fff">6</text>
+
+  <g font-family="Segoe UI, system-ui, sans-serif" font-size="8.5" fill="#323130">
+    <rect x="140" y="518" width="118" height="68" rx="4" fill="#fff" stroke="#8A8886" stroke-width="1"/>
+    <text x="199" y="538" text-anchor="middle" font-weight="600">Data Quality</text>
+    <text x="199" y="552" text-anchor="middle" fill="#605E5C">dq_latest.json</text>
+    <text x="199" y="566" text-anchor="middle" fill="#605E5C">Great Expectations</text>
+
+    <rect x="272" y="518" width="118" height="68" rx="4" fill="#fff" stroke="#8A8886" stroke-width="1"/>
+    <text x="331" y="538" text-anchor="middle" font-weight="600">Monitor</text>
+    <text x="331" y="552" text-anchor="middle" fill="#605E5C">Prometheus · Grafana</text>
+    <text x="331" y="566" text-anchor="middle" fill="#605E5C">Azure Monitor · CW</text>
+
+    <rect x="404" y="518" width="118" height="68" rx="4" fill="#fff" stroke="#8A8886" stroke-width="1"/>
+    <text x="463" y="538" text-anchor="middle" font-weight="600">Key Vault</text>
+    <text x="463" y="552" text-anchor="middle" fill="#605E5C">Secrets Manager</text>
+    <text x="463" y="566" text-anchor="middle" fill="#605E5C">KMS · strings lake</text>
+
+    <rect x="536" y="518" width="118" height="68" rx="4" fill="#fff" stroke="#8A8886" stroke-width="1"/>
+    <text x="595" y="538" text-anchor="middle" font-weight="600">Purview</text>
+    <text x="595" y="552" text-anchor="middle" fill="#605E5C">linhagem · catálogo</text>
+    <text x="595" y="566" text-anchor="middle" fill="#605E5C">Lake Formation · Glue</text>
+
+    <rect x="668" y="518" width="118" height="68" rx="4" fill="#fff" stroke="#8A8886" stroke-width="1"/>
+    <text x="727" y="538" text-anchor="middle" font-weight="600">DevOps</text>
+    <text x="727" y="552" text-anchor="middle" fill="#605E5C">CI/CD · GitHub Actions</text>
+    <text x="727" y="566" text-anchor="middle" fill="#605E5C">Terraform apply</text>
+
+    <rect x="800" y="518" width="118" height="68" rx="4" fill="#fff" stroke="#8A8886" stroke-width="1"/>
+    <text x="859" y="538" text-anchor="middle" font-weight="600">Entra ID</text>
+    <text x="859" y="552" text-anchor="middle" fill="#605E5C">RBAC · IAM</text>
+    <text x="859" y="566" text-anchor="middle" fill="#605E5C">managed identity</text>
+
+    <rect x="932" y="518" width="118" height="68" rx="4" fill="#fff" stroke="#8A8886" stroke-width="1"/>
+    <text x="991" y="538" text-anchor="middle" font-weight="600">FinOps</text>
+    <text x="991" y="552" text-anchor="middle" fill="#605E5C">Cost Management</text>
+    <text x="991" y="566" text-anchor="middle" fill="#605E5C">custo por camada</text>
+  </g>
+
+  <!-- Legend -->
+  <text x="24" y="612" font-family="Segoe UI, system-ui, sans-serif" font-size="8" fill="#605E5C">Demo local: bash scripts/run_demo.sh · portal :8880 · docs/arquitetura/datamaster-01-batch-medallion.svg</text>
+</svg>

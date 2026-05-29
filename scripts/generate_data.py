@@ -3,10 +3,15 @@
 Script para gerar dados de transações simuladas para testes
 """
 import json
+import sys
 import uuid
 import random
 from datetime import datetime, timedelta
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+from src.utils.fake_br_identity import enrich_transaction_identity
 
 
 def generate_transaction(transaction_id: str = None, fraud_rate: float = 0.05) -> dict:
@@ -28,7 +33,7 @@ def generate_transaction(transaction_id: str = None, fraud_rate: float = 0.05) -
         minutes=random.randint(0, 59)
     )
     
-    return {
+    tx = {
         'transaction_id': transaction_id,
         'user_id': f"user_{random.randint(1000, 9999)}",
         'amount': round(amount, 2),
@@ -46,12 +51,13 @@ def generate_transaction(transaction_id: str = None, fraud_rate: float = 0.05) -
         'user_country': 'BR',
         'merchant_country': random.choice(['BR', 'US', 'GB', 'FR']),
         'payment_method': random.choice([
-            'CREDIT_CARD', 'DEBIT_CARD', 'PIX', 'BOLETO'
+            'CREDIT_CARD', 'CREDIT_CARD', 'DEBIT_CARD', 'DEBIT_CARD'
         ]),
         'device_id': str(uuid.uuid4()),
         'ip_address': f"{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}.{random.randint(1, 255)}",
         'is_fraud': is_fraud
     }
+    return enrich_transaction_identity(tx)
 
 
 def generate_batch(

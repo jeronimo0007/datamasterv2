@@ -292,27 +292,29 @@ class FraudDetectionModel:
 
         score = max(score, min(1.0, heuristic_floor))
 
-        # Determinar risco (faixas para narrativa operacional)
-        if score >= 0.8:
-            risk_level = "CRITICAL"
-            action = "BLOCK"
-        elif score >= 0.5:
+        # Politica operacional: <60% libera; 60-75% revisao; >75% bloqueio
+        if score < 0.60:
+            risk_level = "MEDIUM" if score >= 0.3 else "LOW"
+            action = "APPROVE"
+            review_status = "RELEASED"
+            is_fraud = False
+        elif score <= 0.75:
             risk_level = "HIGH"
             action = "REVIEW"
-        elif score >= 0.3:
-            risk_level = "MEDIUM"
-            action = "MONITOR"
+            review_status = "OPEN"
+            is_fraud = True
         else:
-            risk_level = "LOW"
-            action = "APPROVE"
+            risk_level = "CRITICAL"
+            action = "BLOCK"
+            review_status = "OPEN"
+            is_fraud = True
 
-        # "Fraude" para KPI / alertas: limiar mais alto que HIGH, evita taxa irreal na banca.
-        fraud_threshold = 0.70
         return {
             "fraud_score": round(score, 4),
-            "is_fraud": score >= fraud_threshold,
+            "is_fraud": is_fraud,
             "risk_level": risk_level,
             "recommended_action": action,
+            "review_status": review_status,
             "model_version": "1.0.0",
             "prediction_timestamp": datetime.utcnow().isoformat(),
             "features_used": self.feature_names,
@@ -443,7 +445,7 @@ if __name__ == "__main__":
     test_normal = {
         "amount": 150.0,
         "merchant_category": "Alimentacao",
-        "payment_method": "PIX",
+        "payment_method": "CREDIT_CARD",
         "hour": 14,
         "is_weekend": 0,
         "is_international": 0,

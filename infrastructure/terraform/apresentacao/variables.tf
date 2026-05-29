@@ -41,14 +41,15 @@ variable "db_admin_password" {
 }
 
 variable "enable_analytics_stack" {
-  description = "Databricks + Synapse + Azure ML (custo alto). false = stack alinhada à demo sem DBW/Synapse."
+  description = "Databricks + Synapse + Azure ML — stack completa de apresentação (ativo por padrão)."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "analytics_high_cost_acknowledged" {
-  type    = bool
-  default = false
+  description = "Confirma aceite de custo da stack analítica (obrigatório quando enable_analytics_stack = true)."
+  type        = bool
+  default     = true
 }
 
 variable "synapse_sql_admin_login" {

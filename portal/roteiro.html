@@ -243,7 +243,8 @@
         <div class="card">
           <ul class="fala">
             <li>“Boa tarde — eu me apresento em uma ou duas frases no contexto de <strong>risco / motores / dados</strong>…” (sem ler currículo inteiro).</li>
-            <li>“Eu vou fazer uma <strong>demo ao vivo</strong> — API, painel, alguns comandos. O desenho no slide é o <strong>alvo na nuvem</strong>; o repositório é um <strong>corte que imita o mesmo padrão</strong>, não o datacenter inteiro.”</li>
+            <li>“Eu vou fazer a <strong>demo ao vivo na minha máquina</strong> — stack <strong>completa</strong> no Docker. Em paralelo eu <strong>disparei o VPS</strong> (Kubernetes, mesma stack) e o <strong>Terraform na Azure</strong> — não é só slide, é provisionamento real.”</li>
+            <li>“A <strong>AWS</strong> eu não subo na hora; eu mostro o <strong>mapa de equivalência</strong> multicloud — o desenho não é preso a um vendor.”</li>
             <li>“Podem me interromper à vontade por <strong>dado, modelo, operação, segurança ou custo</strong> — eu prefiro assim.”</li>
           </ul>
         </div>
@@ -256,9 +257,24 @@
         <h2>Problema → requisito</h2>
         <div class="card">
           <ul class="fala">
-            <li>“Fraude hoje vem em <strong>volume e velocidade</strong>, principalmente com PIX; quem opera precisa decidir <strong>rápido</strong> e ainda assim ser <strong>auditável</strong>.”</li>
+            <li>“Fraude hoje vem em <strong>volume e velocidade</strong>, principalmente em <strong>cartão</strong> (CNP, chargeback); quem opera precisa decidir <strong>rápido</strong> e ainda assim ser <strong>auditável</strong>.”</li>
             <li>“Então eu traduzi isso em requisito: <strong>latência</strong>, <strong>escala</strong>, <strong>SLA</strong>, <strong>LGPD</strong> e um trade-off honesto entre <strong>pagar caro em recall</strong> e <strong>não afogar o time em falso positivo</strong>.”</li>
             <li>“Por isso eu não começo a história no notebook — eu começo na <strong>origem do dado</strong> e no <strong>que chega na API</strong> como contrato.”</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" aria-label="Três ambientes">
+      <div class="slide__inner slide__inner--wide">
+        <p class="eyebrow">Slide «Um desenho · três lugares» (após a capa)</p>
+        <h2>Como eu explico local + VPS + Azure</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“O <strong>mesmo desenho</strong> roda em três frentes: <strong>local</strong> eu opero ao vivo; no <strong>VPS</strong> está a stack completa em k3s; na <strong>Azure</strong> o Terraform da pasta <code>apresentacao</code> sobe lake, Event Hubs, Cosmos, Postgres, Monitor e API em Container Apps.”</li>
+            <li>“Antes da banca eu rodei <code>scripts/pre-banca-paralelo.sh</code> — ou disparei manualmente o deploy do VPS e o <code>terraform apply</code>. Durante a apresentação eu mostro o progresso: GitHub Actions, <code>kubectl get pods</code>, portal Azure.”</li>
+            <li>“Na mesa o avaliador vê <strong>tudo funcionando</strong> no Docker — API, Streamlit, RabbitMQ, Grafana, batch Mongo, Spark. Isso não substitui o VPS/Azure; <strong>complementa</strong>.”</li>
+            <li>“<strong>AWS</strong>: só o mapa — Kinesis, S3, SageMaker — para mostrar multicloud sem gastar tempo de apply ao vivo.”</li>
           </ul>
         </div>
       </div>
@@ -311,7 +327,7 @@
             <li><strong>Meio:</strong> “O <strong>Databricks</strong> processa; o <strong>ADLS</strong> segura Bronze, Silver e Gold; <strong>Synapse ou Fabric</strong> é onde o analítico pesado conversa com o negócio; <strong>Purview</strong> é onde eu não deixo o virar pântano.”</li>
             <li><strong>ML e saída:</strong> “<strong>Azure ML</strong> é o ciclo do modelo; a <strong>API em Container Apps ou AKS</strong> é o contrato com canal e motor; se eu precisar de baixa latência operacional, eu cito <strong>Cosmos DB</strong>.”</li>
             <li><strong>Transversal:</strong> “Segredo no <strong>Key Vault</strong>, identidade no <strong>Entra ID</strong>, <strong>Monitor e App Insights</strong> como promessa de SLO — não só log bonito.”</li>
-            <li><strong>Fechar:</strong> “Na demo eu mostro <strong>só um recorte</strong> — API Java, Kafka, notebook — mas eu obedeco a <strong>essa lógica aqui</strong>.”</li>
+            <li><strong>Fechar:</strong> “Na mesa eu opero a <strong>stack completa</strong> no Docker; no VPS e na Azure o mesmo desenho está <strong>subindo ou já no ar</strong> — eu mostro as três frentes.”</li>
           </ul>
           <p class="frase" style="margin-top:0.85rem;margin-bottom:0;">Se alguém insistir em AWS, eu digo: “é o mesmo desenho — eu troco Factory por Glue, Hub por Kinesis, dados no S3 — sem mudar a narrativa.”</p>
         </div>
@@ -379,13 +395,31 @@
       </div>
     </section>
 
+    <section class="slide" aria-label="Tour componentes">
+      <div class="slide__inner slide__inner--wide">
+        <p class="eyebrow">Antes da demo de fraude — 12–15 min</p>
+        <h2>Tour: “sei onde está cada peça”</h2>
+        <div class="card">
+          <ul class="fala">
+            <li>“Eu abro o terminal: <code>docker compose ps</code> ou <code>bash scripts/status-stack.sh</code> — mostro que <strong>tudo está Up</strong>.”</li>
+            <li>“Passo em <strong>quatro blocos</strong>: (1) portal, API, dashboard, console — (2) Mongo, Postgres, MinIO, Spark, Jupyter — (3) Kafka, RabbitMQ, email-worker — (4) Redis, Prometheus, Grafana.”</li>
+            <li>“Em cada um eu digo: <strong>container</strong>, <strong>porta</strong>, <strong>papel</strong> e <strong>par na Azure</strong> — não é lista decorativa, é arquitetura.”</li>
+            <li>“Kafka: <code>docker exec kafka kafka-topics --list</code>. Rabbit: UI :15672. Grafana: pasta <strong>DataMaster</strong>. Redis: <code>PING</code>.”</li>
+            <li>“Cola completa: <code>docs/operacao/ROTEIRO_TOUR_COMPONENTES.md</code> — checklist no final com 15 caixinhas.”</li>
+          </ul>
+          <p class="frase">“Depois desse tour eu faço o fluxo de negócio — analyze, fraude, LGPD.”</p>
+        </div>
+      </div>
+    </section>
+
     <section class="slide" aria-label="Demo">
       <div class="slide__inner">
-        <p class="eyebrow">Na hora da demo</p>
+        <p class="eyebrow">Slide trilha T0-pré + T0–T12</p>
         <h2>O que eu faço na mesa</h2>
         <div class="card">
           <ul class="fala">
-            <li>“Eu subo com <strong>Docker Compose</strong> — API Java na <strong>:8080</strong> — e deixo a URL coerente no Streamlit.”</li>
+            <li>“<strong>T0-pré</strong> (já feito antes): push <code>vps</code> ou deploy no homelab + <code>terraform apply</code> em <code>apresentacao/</code>. Abro Actions ou Azure Portal em aba se quiser mostrar.”</li>
+            <li>“<strong>T0</strong>: <code>docker compose up -d --build</code> — API Java na <strong>:8080</strong> — stack completa local.”</li>
             <li>“Eu mostro <strong>/health</strong>, <strong>Swagger</strong>, depois <code>bash scripts/run_demo.sh</code> ou o botão <strong>fluxo completo</strong> no portal e confirmo <code>profile-stats</code>.”</li>
             <li>“Eu mando <strong>analyze</strong> com <code>user_id</code>, mostro <strong>anomaly_reasons</strong>, filtro fraudes no Streamlit, <strong>libero</strong> com <strong>opinião da IA</strong> e, se tiver chave, o <strong>chat DeepSeek</strong>.”</li>
             <li>“Antes de encerrar ou se perguntarem LGPD: aba <strong>LGPD / mascaramento</strong> no :8501 — mascaramento ao vivo na API.”</li>
@@ -439,9 +473,9 @@
         <h2>Eu deixo explícito</h2>
         <div class="card">
           <ul class="fala">
-            <li>“O Compose na minha máquina é um <strong>recorte</strong> — API, dashboard, Kafka, às vezes métrica; não é fingir que eu tenho o datacenter inteiro.”</li>
-            <li>“Event Hub, ADLS, Databricks, Purview — isso é o <strong>alvo</strong>; na mesa eu falo qual peça local está <strong>representando</strong> qual peça da nuvem.”</li>
-            <li>“O Streamlit substitui o Power BI na hora da demo, mas a ideia é a mesma: <strong>consumo</strong> com responsabilidade de SLA.”</li>
+            <li>“O Docker local não é ‘só um protótipo’ — é a <strong>stack completa</strong> da demo: API, painel, filas, lake batch, observabilidade.”</li>
+            <li>“Em paralelo eu mostro <strong>VPS com k3s</strong> e <strong>Azure com Terraform</strong> — o mesmo desenho, outro runtime. A AWS eu cito no <strong>mapa</strong>, sem apply ao vivo.”</li>
+            <li>“Streamlit na mesa equivale ao consumo tipo Power BI; RabbitMQ equivale a Service Bus/SQS no desenho de alerta.”</li>
           </ul>
         </div>
       </div>
